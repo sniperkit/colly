@@ -1,15 +1,23 @@
 package: github.com/sniperkit/colly
 import:
 - package: github.com/BurntSushi/toml
+- package: github.com/DataDog/zstd
 - package: github.com/PuerkitoBio/goquery
+- package: github.com/agrison/mxj
 - package: github.com/antchfx/htmlquery
 - package: github.com/antchfx/xmlquery
+- package: github.com/bndr/gotabulate
 - package: github.com/go-redis/redis
 - package: github.com/gobwas/glob
 - package: github.com/jawher/mow.cli
+- package: github.com/jmoiron/sqlx
+- package: github.com/json-iterator/go
 - package: github.com/kennygrant/sanitize
+- package: github.com/mattn/go-sqlite3
 - package: github.com/saintfish/chardet
+- package: github.com/tealeg/xlsx
 - package: github.com/temoto/robotstxt
+- package: github.com/thrift-iterator/go
 - package: golang.org/x/net
   subpackages:
   - html
@@ -19,4 +27,7 @@ import:
   - urlfetch
 - package: gopkg.in/yaml.v2
 testImport:
-- package: github.com/jinzhu/configor
+- package: github.com/jimsmart/collysqlite
+- package: github.com/onsi/ginkgo
+- package: github.com/onsi/gomega
+- package: gopkg.in/check.v1

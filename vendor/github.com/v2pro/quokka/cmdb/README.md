@@ -1,0 +1,1 @@
+CMDB provides physical nodes and connectivity information.

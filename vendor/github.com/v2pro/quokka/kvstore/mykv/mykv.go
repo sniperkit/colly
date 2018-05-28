@@ -1,0 +1,4 @@
+package mykv
+
+func UseMySQLAsKVStore() {
+}
