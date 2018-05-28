@@ -1,1 +1,0 @@
-Process registry describes all running processes, including desired state and perceived state.

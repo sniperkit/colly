@@ -1,1 +1,0 @@
-store binary file on local disk, designed for synchronization

@@ -1,4 +1,0 @@
-package mykv
-
-func UseMySQLAsKVStore() {
-}

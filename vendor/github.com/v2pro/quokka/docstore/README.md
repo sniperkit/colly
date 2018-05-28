@@ -1,1 +1,0 @@
-storage of small data
