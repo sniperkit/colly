@@ -13,16 +13,23 @@ func main() {
 
 	// Create a Collector specifically for Shopify
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.golanglibs.com"),
+		colly.AllowedDomains("golanglibs.com"),
 	)
 
+	/*
+		// Create a callback on the XPath query searching for the URLs
+		c.OnXML("//urlset/url/loc", func(e *colly.XMLElement) {
+			knownUrls = append(knownUrls, e.Text)
+		})
+	*/
+
 	// Create a callback on the XPath query searching for the URLs
-	c.OnXML("//urlset/url/loc", func(e *colly.XMLElement) {
+	c.OnTXT("//urlset/url/loc", func(e *colly.XMLElement) {
 		knownUrls = append(knownUrls, e.Text)
 	})
 
 	// Start the collector
-	c.Visit("https://www.golanglibs.com/sitemap.xml")
+	c.Visit("https://golanglibs.com/sitemap.txt")
 
 	fmt.Println("All known URLs:")
 	for _, url := range knownUrls {

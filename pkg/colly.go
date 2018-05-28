@@ -748,6 +748,21 @@ func (c *Collector) OnHTML(goquerySelector string, f HTMLCallback) {
 	c.lock.Unlock()
 }
 
+// OnCSV registers a function. Function will be executed on every HTML
+// element matched by the GoQuery Selector parameter.
+// GoQuery Selector is a selector used by https://github.com/PuerkitoBio/goquery
+func (c *Collector) OnCSV(columnSelector string, f CSVCallback) {
+	c.lock.Lock()
+	if c.csvCallbacks == nil {
+		c.csvCallbacks = make([]*csvCallbackContainer, 0, 4)
+	}
+	c.csvCallbacks = append(c.csvCallbacks, &csvCallbackContainer{
+		Selector: columnSelector,
+		Function: f,
+	})
+	c.lock.Unlock()
+}
+
 // OnXML registers a function. Function will be executed on every XML
 // element matched by the xpath Query parameter.
 // xpath Query is used by https://github.com/antchfx/xmlquery
