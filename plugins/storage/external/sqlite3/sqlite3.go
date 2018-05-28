@@ -1,17 +1,14 @@
 package sqlite3
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
-
-	"database/sql"
-
 	"net/url"
+	"strings"
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
-
-	"strings"
 )
 
 // Storage implements a SQLite3 storage backend for Colly

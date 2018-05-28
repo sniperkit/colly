@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -9,9 +8,15 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	// "encoding/json"
 
 	"github.com/BurntSushi/toml"
+	"github.com/json-iterator/go"
 	yaml "gopkg.in/yaml.v2"
+)
+
+var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 // UnmatchedTomlKeysError errors are returned by the Load function when

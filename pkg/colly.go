@@ -23,7 +23,6 @@ package colly
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"hash/fnv"
@@ -41,6 +40,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	// "encoding/json"
+
+	"github.com/json-iterator/go"
 
 	"golang.org/x/net/html"
 	"google.golang.org/appengine"
@@ -161,7 +163,10 @@ type cookieJarSerializer struct {
 	lock  *sync.RWMutex
 }
 
-var collectorCounter uint32
+var (
+	collectorCounter uint32
+	json             = jsoniter.ConfigCompatibleWithStandardLibrary
+)
 
 var (
 	// ErrForbiddenDomain is the error thrown if visiting

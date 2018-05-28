@@ -16,13 +16,13 @@ package colly
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync/atomic"
+	// "encoding/json"
 )
 
 // Request is the representation of a HTTP request made by a Collector

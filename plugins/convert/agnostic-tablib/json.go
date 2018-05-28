@@ -1,8 +1,14 @@
 package tablib
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	// "sync"
+
+	"github.com/json-iterator/go"
+)
+
+var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 // LoadJSON loads a dataset from a YAML source.

@@ -2,16 +2,16 @@ package config_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
-
-	"gopkg.in/yaml.v2"
+	// "encoding/json"
 
 	"github.com/BurntSushi/toml"
-	"github.com/jinzhu/configor"
+	"github.com/json-iterator/go"
+	"github.com/sniperkit/colly/plugins/config"
+	"gopkg.in/yaml.v2"
 )
 
 type Anonymous struct {
