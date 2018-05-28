@@ -30,4 +30,8 @@ testImport:
 - package: github.com/jimsmart/collysqlite
 - package: github.com/onsi/ginkgo
 - package: github.com/onsi/gomega
+- package: github.com/patrikeh/go-topics
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
 - package: gopkg.in/check.v1
