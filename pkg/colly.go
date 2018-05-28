@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+	Check:
+	- https://github.com/gocolly/colly/pull/148/files
+*/
+
 // Package colly implements a HTTP scraping framework
 package colly
 
