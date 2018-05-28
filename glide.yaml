@@ -4,6 +4,7 @@ import:
 - package: github.com/PuerkitoBio/goquery
 - package: github.com/antchfx/htmlquery
 - package: github.com/antchfx/xmlquery
+- package: github.com/go-redis/redis
 - package: github.com/gobwas/glob
 - package: github.com/jawher/mow.cli
 - package: github.com/kennygrant/sanitize

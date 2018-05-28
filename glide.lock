@@ -1,5 +1,5 @@
-hash: f080d286d22cd6a2447401732a09663420d0dec20aed3e1e13bc6c595be8194b
-updated: 2018-05-28T18:56:32.822627+02:00
+hash: ffe0e818962afed2913e4da2fddea44b71572be90c27bc60fcb07bb7fe8166ce
+updated: 2018-05-28T19:11:04.905327+02:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 349dd0209470eabd9514242c688c403c0926d266
@@ -11,6 +11,16 @@ imports:
   version: 077bca4d2caaf391ee780136adae00f59153dcd2
 - name: github.com/BurntSushi/toml
   version: a368813c5e648fee92e5f6c30e3944ff9d5e8895
+- name: github.com/go-redis/redis
+  version: 0f9028adf0837cf93c9705817493e5f6997cf026
+  subpackages:
+  - internal
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+  - internal/proto
+  - internal/singleflight
+  - internal/util
 - name: github.com/gobwas/glob
   version: f00a7392b43971b2fdb562418faab1f18da2067a
   subpackages:
