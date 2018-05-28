@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	// "sync"
 )
 
 const defaultBufferCap = 16 * 1024

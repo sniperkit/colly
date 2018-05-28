@@ -17,7 +17,7 @@ package colly
 import (
 	"strings"
 
-	"github.com/agrison/go-tablib"
+	"github.com/sniperkit/colly/plugins/convert/agnostic-tablib"
 )
 
 /*
@@ -40,8 +40,8 @@ import (
 	- TSV (Sets)
 */
 
-// TabularElement is the representation of a XML tag.
-type TabularElement struct {
+// TabElement is the representation of a XML tag.
+type TabElement struct {
 	// Name is the name of the tag
 	Name       string
 	Text       string
@@ -51,15 +51,15 @@ type TabularElement struct {
 	// Response is the Response object of the element's HTML document
 	Response *Response
 	// DOM is the DOM object of the page. DOM is relative
-	// to the current TabularElement and is either a html.Node or xmlquery.Node
-	// based on how the TabularElement was created.
+	// to the current TabElement and is either a html.Node or xmlquery.Node
+	// based on how the TabElement was created.
 	DOM    interface{}
 	isHTML bool
 }
 
-// NewTabularElementFromHTMLNode creates a TabularElement from a html.Node.
-func NewTabularElementFromPlainNode(resp *Response, s *html.Node) *TabularElement {
-	return &TabularElement{
+// NewTabElementFromHTMLNode creates a TabElement from a html.Node.
+func NewTabElementFromPlainNode(resp *Response, s *html.Node) *TabElement {
+	return &TabElement{
 		Name:       s.Data,
 		Request:    resp.Request,
 		Response:   resp,
@@ -73,7 +73,7 @@ func NewTabularElementFromPlainNode(resp *Response, s *html.Node) *TabularElemen
 /*
 // Attr returns the selected attribute of a HTMLElement or empty string
 // if no attribute found
-func (h *TabularElement) Attr(k string) string {
+func (h *TabElement) Attr(k string) string {
 	if h.isHTML {
 		for _, a := range h.attributes.([]html.Attribute) {
 			if a.Key == k {

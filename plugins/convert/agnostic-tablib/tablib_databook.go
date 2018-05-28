@@ -1,5 +1,7 @@
 package tablib
 
+// import "sync"
+
 // Sheet represents a sheet in a Databook, holding a title (if any) and a dataset.
 type Sheet struct {
 	title   string

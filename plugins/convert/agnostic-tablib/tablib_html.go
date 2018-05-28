@@ -1,5 +1,7 @@
 package tablib
 
+// import "sync"
+
 // HTML returns the HTML representation of the Dataset as an Exportable.
 func (d *Dataset) HTML() *Exportable {
 	back := d.Records()

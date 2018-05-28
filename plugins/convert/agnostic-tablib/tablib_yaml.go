@@ -1,6 +1,10 @@
 package tablib
 
-import "gopkg.in/yaml.v2"
+import (
+	// "sync"
+
+	"gopkg.in/yaml.v2"
+)
 
 // LoadYAML loads a dataset from a YAML source.
 func LoadYAML(yamlContent []byte) (*Dataset, error) {

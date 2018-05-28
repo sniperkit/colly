@@ -3,6 +3,7 @@ package tablib
 import (
 	"bytes"
 	"encoding/csv"
+	// "sync"
 )
 
 // CSV returns a CSV representation of the Dataset an Exportable.

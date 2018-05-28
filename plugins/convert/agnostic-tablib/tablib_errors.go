@@ -1,6 +1,8 @@
 package tablib
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	// ErrInvalidDimensions is returned when trying to append/insert too much

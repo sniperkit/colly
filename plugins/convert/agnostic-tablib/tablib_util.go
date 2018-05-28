@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	// "sync"
 )
 
 // internalLoadFromDict creates a Dataset from an array of map representing columns.

@@ -1,10 +1,12 @@
 package tablib
 
 import (
-	"github.com/bndr/gotabulate"
 	"regexp"
 	"strings"
 	"unicode/utf8"
+	// "sync"
+
+	"github.com/bndr/gotabulate"
 )
 
 var (

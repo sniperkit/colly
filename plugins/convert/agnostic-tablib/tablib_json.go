@@ -2,6 +2,7 @@ package tablib
 
 import (
 	"encoding/json"
+	// "sync"
 )
 
 // LoadJSON loads a dataset from a YAML source.

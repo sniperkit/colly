@@ -1,6 +1,8 @@
 package tablib
 
 import (
+	// "sync"
+
 	"github.com/tealeg/xlsx"
 )
 
