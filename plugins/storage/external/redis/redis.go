@@ -42,6 +42,12 @@ func (s *Storage) Init() error {
 	return err
 }
 
+//Close the db
+func (s *Storage) Close() error {
+	err := s.Client.Close()
+	return err
+}
+
 // Clear removes all entries from the storage
 func (s *Storage) Clear() error {
 	s.mu.Lock()

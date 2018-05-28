@@ -6,7 +6,7 @@ import (
 	"github.com/sniperkit/colly/pkg"
 	"github.com/sniperkit/colly/pkg/helper"
 	"github.com/sniperkit/colly/pkg/queue"
-	"github.com/sniperkit/colly/plugins/storage/sqlite3"
+	"github.com/sniperkit/colly/plugins/storage/external/sqlite3"
 )
 
 func main() {
@@ -29,8 +29,8 @@ func main() {
 		panic(err)
 	}
 
-	extensions.RandomUserAgent(c)
-	extensions.Referrer(c)
+	helper.RandomUserAgent(c)
+	helper.Referrer(c)
 
 	q, _ := queue.New(8, storage)
 	q.AddURL("http://www.example.com")
