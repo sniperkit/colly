@@ -114,6 +114,7 @@ type Collector struct {
 	store             storage.Storage
 	debugger          debug.Debugger
 	robotsMap         map[string]*robotstxt.RobotsData
+	tabCallbacks      []*tabCallbackContainer
 	htmlCallbacks     []*htmlCallbackContainer
 	xmlCallbacks      []*xmlCallbackContainer
 	requestCallbacks  []RequestCallback
@@ -136,6 +137,9 @@ type ResponseCallback func(*Response)
 // HTMLCallback is a type alias for OnHTML callback functions
 type HTMLCallback func(*HTMLElement)
 
+// TABCallback is a type alias for OnTAB callback functions
+type TABCallback func(*TABElement)
+
 // XMLCallback is a type alias for OnXML callback functions
 type XMLCallback func(*XMLElement)
 
@@ -156,6 +160,11 @@ type htmlCallbackContainer struct {
 type xmlCallbackContainer struct {
 	Query    string
 	Function XMLCallback
+}
+
+type tabCallbackContainer struct {
+	Selector string
+	Function TABCallback
 }
 
 type cookieJarSerializer struct {
@@ -753,16 +762,14 @@ func (c *Collector) OnHTML(goquerySelector string, f HTMLCallback) {
 	c.lock.Unlock()
 }
 
-// OnCSV registers a function. Function will be executed on every HTML
-// element matched by the GoQuery Selector parameter.
-// GoQuery Selector is a selector used by https://github.com/PuerkitoBio/goquery
-func (c *Collector) OnCSV(columnSelector string, f CSVCallback) {
+// TabElement registers a function. Function will be executed on any type of dataset
+func (c *Collector) OnTAB(tabSelector string, f TABCallback) {
 	c.lock.Lock()
-	if c.csvCallbacks == nil {
-		c.csvCallbacks = make([]*csvCallbackContainer, 0, 4)
+	if c.tabCallbacks == nil {
+		c.tabCallbacks = make([]*tabCallbackContainer, 0, 4)
 	}
-	c.csvCallbacks = append(c.csvCallbacks, &csvCallbackContainer{
-		Selector: columnSelector,
+	c.tabCallbacks = append(c.tabCallbacks, &tabCallbackContainer{
+		Selector: tabSelector,
 		Function: f,
 	})
 	c.lock.Unlock()

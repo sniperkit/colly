@@ -12,14 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package colly
-
-import (
-	"strings"
-
-	"github.com/sniperkit/colly/plugins/convert/agnostic-tablib"
-)
-
 /*
 	Export formats supported:
 	- JSON (Sets + Books)
@@ -40,8 +32,16 @@ import (
 	- TSV (Sets)
 */
 
-// TabElement is the representation of a XML tag.
-type TabElement struct {
+package colly
+
+/*
+import (
+	"github.com/sniperkit/colly/plugins/convert/agnostic-tablib"
+)
+*/
+
+// TABElement is the representation of a XML tag.
+type TABElement struct {
 	// Name is the name of the tag
 	Name       string
 	Text       string
@@ -57,6 +57,8 @@ type TabElement struct {
 	isHTML bool
 }
 
+/*
+
 // NewTabElementFromHTMLNode creates a TabElement from a html.Node.
 func NewTabElementFromPlainNode(resp *Response, s *html.Node) *TabElement {
 	return &TabElement{
@@ -70,7 +72,6 @@ func NewTabElementFromPlainNode(resp *Response, s *html.Node) *TabElement {
 	}
 }
 
-/*
 // Attr returns the selected attribute of a HTMLElement or empty string
 // if no attribute found
 func (h *TabElement) Attr(k string) string {

@@ -16,15 +16,8 @@ func main() {
 		colly.AllowedDomains("golanglibs.com"),
 	)
 
-	/*
-		// Create a callback on the XPath query searching for the URLs
-		c.OnXML("//urlset/url/loc", func(e *colly.XMLElement) {
-			knownUrls = append(knownUrls, e.Text)
-		})
-	*/
-
 	// Create a callback on the XPath query searching for the URLs
-	c.OnTXT("//urlset/url/loc", func(e *colly.XMLElement) {
+	c.OnTAB("//urlset/url/loc", func(e *colly.TABElement) {
 		knownUrls = append(knownUrls, e.Text)
 	})
 
