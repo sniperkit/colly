@@ -1,6 +1,6 @@
 # collysqlite
 
-collysqlite is a [Go](https://golang.org) package providing an experimental work-in-progress prototype of an SQLite cache for [Colly](https://github.com/gocolly/colly).
+collysqlite is a [Go](https://golang.org) package providing an experimental work-in-progress prototype of an SQLite cache for [Colly](https://github.com/sniperkit/colly/pkg).
 
 ## Installation
 ```bash

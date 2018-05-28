@@ -14,7 +14,7 @@
 
 /*
 	Check:
-	- https://github.com/gocolly/colly/pull/148/files
+	- https://github.com/sniperkit/colly/pkg/pull/148/files
 */
 
 // Package colly implements a HTTP scraping framework

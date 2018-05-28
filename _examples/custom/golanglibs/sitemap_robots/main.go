@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/gocolly/colly"
+	// "github.com/sniperkit/colly/pkg"
 )
 
 func main() {

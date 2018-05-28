@@ -1,6 +1,6 @@
 # collyzstandard
 
-collyzstandard is a [Go](https://golang.org) package providing an experimental work-in-progress prototype of a cache compressor for [Colly](https://github.com/gocolly/colly).
+collyzstandard is a [Go](https://golang.org) package providing an experimental work-in-progress prototype of a cache compressor for [Colly](https://github.com/sniperkit/colly/pkg).
 
 ## Installation
 ```bash
