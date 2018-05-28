@@ -1,1 +1,1 @@
-txt2xml.go
+package sitemap_convert_txt
