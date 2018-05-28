@@ -1,0 +1,7 @@
+colly:
+  allowed_domains:
+  - www.golanglibs.com
+  sitemap:
+    url: https://www.golanglibs.com/sitemap.xml
+    auto_detect: true
+    node: '//urlset/url/loc'
