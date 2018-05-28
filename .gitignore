@@ -45,6 +45,9 @@ lib-cov
 *.pid
 *.gz
 
+coverage.out
+TODO
+
 pids
 logs
 results
