@@ -8,7 +8,6 @@ import (
 	"path"
 	"reflect"
 	"strings"
-	// "encoding/json"
 
 	"github.com/BurntSushi/toml"
 	yaml "gopkg.in/yaml.v2"

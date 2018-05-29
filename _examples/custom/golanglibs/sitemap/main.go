@@ -5,8 +5,9 @@ import (
 
 	"github.com/sniperkit/colly/pkg"
 	cfg "github.com/sniperkit/colly/pkg/config"
+
 	sm "github.com/sniperkit/colly/plugins/sitemap"
-	// smc "github.com/sniperkit/colly/plugins/sitemap/convert"
+	pp "github.com/sniperkit/xutil/plugin/debug/pp"
 )
 
 var (
@@ -17,7 +18,12 @@ var (
 	urls        []string = []string{} // Array containing all the known URLs in a sitemap
 )
 
+func init() {
+	sm.CreateDirs(defaultStorageDirs)
+}
+
 func main() {
+	var err error
 
 	if collyConfig != nil {
 		collyConfig = &cfg.CollectorConfig{}
@@ -33,19 +39,21 @@ func main() {
 
 	}
 
-	var err error
 	sitemap, err = sm.NewWithConfig(
 		&sm.Sitemap{
 			Location:      defaultSitemapURL,
 			DryMode:       true,
 			ExportEntries: true,
-			CacheDir:      "",
-			ExportDir:     "",
+			EnsureDirs:    true,
+			CacheDir:      "./shared/storage/cache/sitemaps",
+			ExportDir:     "./shared/storage/export/sitemaps",
 		},
 	)
 	if err != nil {
 		log.Fatalln("error: ", err)
 	}
+
+	pp.Println("sitemap: ", sitemap)
 
 	// Create a callback on the Column name to get all URLs to scrape
 	scraper.OnTAB(defaultSitenapXML_XPath, func(e *colly.TABElement) {

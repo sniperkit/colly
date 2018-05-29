@@ -48,6 +48,9 @@ type CollectorConfig struct {
 	// When it's not defined, caching is disabled.
 	CacheDir string `default:'./shared/storage/http/raw'`
 
+	// ExportDir
+	ExportDir string `default:'./shared/storage/export'`
+
 	// ForceDir specifies that the program will try to create missing storage directories.
 	ForceDir bool `default:'true'`
 
@@ -92,6 +95,4 @@ type CollectorConfig struct {
 
 	// VerboseMode
 	VerboseMode bool `default:'false'`
-
-	// `required:"true"`
 }

@@ -8,3 +8,10 @@ const (
 	defaultSitenapTXT_ColumnName string = "urls"
 	defaultSitenapXML_XPath      string = "//urlset/url/loc"
 )
+
+var (
+	defaultStorageDirs []string = []string{
+		"./shared/storage/cache/sitemaps",
+		"./shared/storage/export/sitemaps",
+	}
+)

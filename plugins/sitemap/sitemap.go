@@ -6,11 +6,12 @@ import (
 
 type Sitemap struct {
 	Location      string `default:''`
-	CacheDir      string `default:''`
-	ExportDir     string `default:''`
+	CacheDir      string `default:'./shared/storage/cache/sitemaps'`
+	ExportDir     string `default:'./shared/storage/export/sitemaps'`
 	IsCache       bool   `default:'true'`
 	ExportEntries bool   `default:'false'`
 	DryMode       bool   `default:'false'`
+	EnsureDirs    bool   `default:'true'`
 	entries       []string
 	converted     map[string]string
 	prefixPath    string
