@@ -5,12 +5,13 @@ import (
 
 	"github.com/sniperkit/colly/pkg"
 	cfg "github.com/sniperkit/colly/pkg/config"
-	// "github.com/sniperkit/go-tablib"
-	// "github.com/sniperkit/xutil/plugin/debug/pp"
+	sm "github.com/sniperkit/colly/plugins/sitemap"
+	// smc "github.com/sniperkit/colly/plugins/sitemap/convert"
 )
 
 var (
 	// logger  *logger.Logger
+	sitemap     *sm.Sitemap
 	scraper     *colly.Collector
 	collyConfig *cfg.CollectorConfig
 	urls        []string = []string{} // Array containing all the known URLs in a sitemap
@@ -30,6 +31,20 @@ func main() {
 			colly.AllowedDomains(defaultAllowedDomains),
 		)
 
+	}
+
+	var err error
+	sitemap, err = sm.NewWithConfig(
+		&sm.Sitemap{
+			Location:      defaultSitemapURL,
+			DryMode:       true,
+			ExportEntries: true,
+			CacheDir:      "",
+			ExportDir:     "",
+		},
+	)
+	if err != nil {
+		log.Fatalln("error: ", err)
 	}
 
 	// Create a callback on the Column name to get all URLs to scrape
