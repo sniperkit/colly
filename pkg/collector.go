@@ -35,14 +35,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
-	// "encoding/json"
-
-	"github.com/json-iterator/go"
 
 	"golang.org/x/net/html"
 	"google.golang.org/appengine"
@@ -51,66 +47,31 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/antchfx/htmlquery"
 	"github.com/antchfx/xmlquery"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/kennygrant/sanitize"
 	"github.com/temoto/robotstxt"
 
+	cfg "github.com/sniperkit/colly/pkg/config"
 	"github.com/sniperkit/colly/pkg/debug"
 	"github.com/sniperkit/colly/pkg/storage"
 )
 
+var (
+	collectorCounter uint32
+	collectorConfig  *cfg.CollectorConfig
+	json             = jsoniter.ConfigCompatibleWithStandardLibrary
+)
+
 // Collector provides the scraper instance for a scraping job
 type Collector struct {
-	// UserAgent is the User-Agent string used by HTTP requests
-	UserAgent string
-	// MaxDepth limits the recursion depth of visited URLs.
-	// Set it to 0 for infinite recursion (default).
-	MaxDepth int
-	// AllowedDomains is a domain whitelist.
-	// Leave it blank to allow any domains to be visited
-	AllowedDomains []string
-	// DisallowedDomains is a domain blacklist.
-	DisallowedDomains []string
-	// DisallowedURLFilters is a list of regular expressions which restricts
-	// visiting URLs. If any of the rules matches to a URL the
-	// request will be stopped. DisallowedURLFilters will
-	// be evaluated before URLFilters
-	// Leave it blank to allow any URLs to be visited
-	DisallowedURLFilters []*regexp.Regexp
-	// URLFilters is a list of regular expressions which restricts
-	// visiting URLs. If any of the rules matches to a URL the
-	// request won't be stopped. DisallowedURLFilters will
-	// be evaluated before URLFilters
 
-	// Leave it blank to allow any URLs to be visited
-	URLFilters []*regexp.Regexp
+	// Collector's settings
+	cfg.CollectorConfig
 
-	// AllowURLRevisit allows multiple downloads of the same URL
-	AllowURLRevisit bool
-	// MaxBodySize is the limit of the retrieved response body in bytes.
-	// 0 means unlimited.
-	// The default value for MaxBodySize is 10MB (10 * 1024 * 1024 bytes).
-	MaxBodySize int
-	// CacheDir specifies a location where GET requests are cached as files.
-	// When it's not defined, caching is disabled.
-	CacheDir string
-	// IgnoreRobotsTxt allows the Collector to ignore any restrictions set by
-	// the target host's robots.txt file.  See http://www.robotstxt.org/ for more
-	// information.
-	IgnoreRobotsTxt bool
-	// Async turns on asynchronous network communication. Use Collector.Wait() to
-	// be sure all requests have been finished.
-	Async bool
-	// ParseHTTPErrorResponse allows parsing HTTP responses with non 2xx status codes.
-	// By default, Colly parses only successful HTTP responses. Set ParseHTTPErrorResponse
-	// to true to enable it.
-	ParseHTTPErrorResponse bool
-	// ID is the unique identifier of a collector
-	ID uint32
-	// DetectCharset can enable character encoding detection for non-utf8 response bodies
-	// without explicit charset declaration. This feature uses https://github.com/saintfish/chardet
-	DetectCharset bool
 	// RedirectHandler allows control on how a redirect will be managed
-	RedirectHandler   func(req *http.Request, via []*http.Request) error
+	RedirectHandler func(req *http.Request, via []*http.Request) error
+
+	// not exported attributes
 	store             storage.Storage
 	debugger          debug.Debugger
 	robotsMap         map[string]*robotstxt.RobotsData
@@ -128,252 +89,7 @@ type Collector struct {
 	lock              *sync.RWMutex
 }
 
-// RequestCallback is a type alias for OnRequest callback functions
-type RequestCallback func(*Request)
-
-// ResponseCallback is a type alias for OnResponse callback functions
-type ResponseCallback func(*Response)
-
-// HTMLCallback is a type alias for OnHTML callback functions
-type HTMLCallback func(*HTMLElement)
-
-// TABCallback is a type alias for OnTAB callback functions
-type TABCallback func(*TABElement)
-
-// XMLCallback is a type alias for OnXML callback functions
-type XMLCallback func(*XMLElement)
-
-// ErrorCallback is a type alias for OnError callback functions
-type ErrorCallback func(*Response, error)
-
-// ScrapedCallback is a type alias for OnScraped callback functions
-type ScrapedCallback func(*Response)
-
-// ProxyFunc is a type alias for proxy setter functions.
-type ProxyFunc func(*http.Request) (*url.URL, error)
-
-type htmlCallbackContainer struct {
-	Selector string
-	Function HTMLCallback
-}
-
-type xmlCallbackContainer struct {
-	Query    string
-	Function XMLCallback
-}
-
-type tabCallbackContainer struct {
-	Selector string
-	Function TABCallback
-}
-
-type cookieJarSerializer struct {
-	store storage.Storage
-	lock  *sync.RWMutex
-}
-
-var (
-	collectorCounter uint32
-	json             = jsoniter.ConfigCompatibleWithStandardLibrary
-)
-
-var (
-	// ErrForbiddenDomain is the error thrown if visiting
-	// a domain which is not allowed in AllowedDomains
-	ErrForbiddenDomain = errors.New("Forbidden domain")
-	// ErrMissingURL is the error type for missing URL errors
-	ErrMissingURL = errors.New("Missing URL")
-	// ErrMaxDepth is the error type for exceeding max depth
-	ErrMaxDepth = errors.New("Max depth limit reached")
-	// ErrForbiddenURL is the error thrown if visiting
-	// a URL which is not allowed by URLFilters
-	ErrForbiddenURL = errors.New("ForbiddenURL")
-
-	// ErrNoURLFiltersMatch is the error thrown if visiting
-	// a URL which is not allowed by URLFilters
-	ErrNoURLFiltersMatch = errors.New("No URLFilters match")
-	// ErrAlreadyVisited is the error type for already visited URLs
-	ErrAlreadyVisited = errors.New("URL already visited")
-	// ErrRobotsTxtBlocked is the error type for robots.txt errors
-	ErrRobotsTxtBlocked = errors.New("URL blocked by robots.txt")
-	// ErrNoCookieJar is the error type for missing cookie jar
-	ErrNoCookieJar = errors.New("Cookie jar is not available")
-	// ErrNoPattern is the error type for LimitRules without patterns
-	ErrNoPattern = errors.New("No pattern defined in LimitRule")
-)
-
-var envMap = map[string]func(*Collector, string){
-	"ALLOWED_DOMAINS": func(c *Collector, val string) {
-		c.AllowedDomains = strings.Split(val, ",")
-	},
-	"CACHE_DIR": func(c *Collector, val string) {
-		c.CacheDir = val
-	},
-	"DETECT_CHARSET": func(c *Collector, val string) {
-		c.DetectCharset = isYesString(val)
-	},
-	"DISABLE_COOKIES": func(c *Collector, _ string) {
-		c.backend.Client.Jar = nil
-	},
-	"DISALLOWED_DOMAINS": func(c *Collector, val string) {
-		c.DisallowedDomains = strings.Split(val, ",")
-	},
-	"IGNORE_ROBOTSTXT": func(c *Collector, val string) {
-		c.IgnoreRobotsTxt = isYesString(val)
-	},
-	"FOLLOW_REDIRECTS": func(c *Collector, val string) {
-		if !isYesString(val) {
-			c.RedirectHandler = func(req *http.Request, via []*http.Request) error {
-				return http.ErrUseLastResponse
-			}
-		}
-	},
-	"MAX_BODY_SIZE": func(c *Collector, val string) {
-		size, err := strconv.Atoi(val)
-		if err == nil {
-			c.MaxBodySize = size
-		}
-	},
-	"MAX_DEPTH": func(c *Collector, val string) {
-		maxDepth, err := strconv.Atoi(val)
-		if err != nil {
-			c.MaxDepth = maxDepth
-		}
-	},
-	"PARSE_HTTP_ERROR_RESPONSE": func(c *Collector, val string) {
-		c.ParseHTTPErrorResponse = isYesString(val)
-	},
-	"USER_AGENT": func(c *Collector, val string) {
-		c.UserAgent = val
-	},
-}
-
-// NewCollector creates a new Collector instance with default configuration
-func NewCollector(options ...func(*Collector)) *Collector {
-	c := &Collector{}
-	c.Init()
-
-	for _, f := range options {
-		f(c)
-	}
-
-	c.parseSettingsFromEnv()
-
-	return c
-}
-
-// UserAgent sets the user agent used by the Collector.
-func UserAgent(ua string) func(*Collector) {
-	return func(c *Collector) {
-		c.UserAgent = ua
-	}
-}
-
-// MaxDepth limits the recursion depth of visited URLs.
-func MaxDepth(depth int) func(*Collector) {
-	return func(c *Collector) {
-		c.MaxDepth = depth
-	}
-}
-
-// AllowedDomains sets the domain whitelist used by the Collector.
-func AllowedDomains(domains ...string) func(*Collector) {
-	return func(c *Collector) {
-		c.AllowedDomains = domains
-	}
-}
-
-// ParseHTTPErrorResponse allows parsing responses with HTTP errors
-func ParseHTTPErrorResponse() func(*Collector) {
-	return func(c *Collector) {
-		c.ParseHTTPErrorResponse = true
-	}
-}
-
-// DisallowedDomains sets the domain blacklist used by the Collector.
-func DisallowedDomains(domains ...string) func(*Collector) {
-	return func(c *Collector) {
-		c.DisallowedDomains = domains
-	}
-}
-
-// DisallowedURLFilters sets the list of regular expressions which restricts
-// visiting URLs. If any of the rules matches to a URL the request will be stopped.
-func DisallowedURLFilters(filters ...*regexp.Regexp) func(*Collector) {
-	return func(c *Collector) {
-		c.DisallowedURLFilters = filters
-	}
-}
-
-// URLFilters sets the list of regular expressions which restricts
-// visiting URLs. If any of the rules matches to a URL the request won't be stopped.
-func URLFilters(filters ...*regexp.Regexp) func(*Collector) {
-	return func(c *Collector) {
-		c.URLFilters = filters
-	}
-}
-
-// AllowURLRevisit instructs the Collector to allow multiple downloads of the same URL
-func AllowURLRevisit() func(*Collector) {
-	return func(c *Collector) {
-		c.AllowURLRevisit = true
-	}
-}
-
-// MaxBodySize sets the limit of the retrieved response body in bytes.
-func MaxBodySize(sizeInBytes int) func(*Collector) {
-	return func(c *Collector) {
-		c.MaxBodySize = sizeInBytes
-	}
-}
-
-// CacheDir specifies the location where GET requests are cached as files.
-func CacheDir(path string) func(*Collector) {
-	return func(c *Collector) {
-		c.CacheDir = path
-	}
-}
-
-// IgnoreRobotsTxt instructs the Collector to ignore any restrictions
-// set by the target host's robots.txt file.
-func IgnoreRobotsTxt() func(*Collector) {
-	return func(c *Collector) {
-		c.IgnoreRobotsTxt = true
-	}
-}
-
-// ID sets the unique identifier of the Collector.
-func ID(id uint32) func(*Collector) {
-	return func(c *Collector) {
-		c.ID = id
-	}
-}
-
-// Async turns on asynchronous network requests.
-func Async(a bool) func(*Collector) {
-	return func(c *Collector) {
-		c.Async = a
-	}
-}
-
-// DetectCharset enables character encoding detection for non-utf8 response bodies
-// without explicit charset declaration. This feature uses https://github.com/saintfish/chardet
-func DetectCharset() func(*Collector) {
-	return func(c *Collector) {
-		c.DetectCharset = true
-	}
-}
-
-// Debugger sets the debugger used by the Collector.
-func Debugger(d debug.Debugger) func(*Collector) {
-	return func(c *Collector) {
-		d.Init()
-		c.debugger = d
-	}
-}
-
-// Init initializes the Collector's private variables and sets default
-// configuration for the Collector
+// Init initializes the Collector's private variables and sets default configuration for the Collector
 func (c *Collector) Init() {
 	c.UserAgent = "colly - https://github.com/sniperkit/colly/pkg"
 	c.MaxDepth = 0
@@ -806,6 +522,22 @@ func (c *Collector) OnHTMLDetach(goquerySelector string) {
 	c.lock.Unlock()
 }
 
+// OnHTMLDetach deregister a function. Function will not be execute after detached
+func (c *Collector) OnTABDetach(tabSelector string) {
+	c.lock.Lock()
+	deleteIdx := -1
+	for i, cc := range c.tabCallbacks {
+		if cc.Selector == tabSelector {
+			deleteIdx = i
+			break
+		}
+	}
+	if deleteIdx != -1 {
+		c.tabCallbacks = append(c.tabCallbacks[:deleteIdx], c.tabCallbacks[deleteIdx+1:]...)
+	}
+	c.lock.Unlock()
+}
+
 // OnXMLDetach deregister a function. Function will not be execute after detached
 func (c *Collector) OnXMLDetach(xpathQuery string) {
 	c.lock.Lock()
@@ -1106,36 +838,61 @@ func (c *Collector) Cookies(URL string) []*http.Cookie {
 // Clone creates an exact copy of a Collector without callbacks.
 // HTTP backend, robots.txt cache and cookie jar are shared
 // between collectors.
-func (c *Collector) Clone() *Collector {
-	return &Collector{
-		AllowedDomains:         c.AllowedDomains,
-		AllowURLRevisit:        c.AllowURLRevisit,
-		CacheDir:               c.CacheDir,
-		DetectCharset:          c.DetectCharset,
-		DisallowedDomains:      c.DisallowedDomains,
-		ID:                     atomic.AddUint32(&collectorCounter, 1),
-		IgnoreRobotsTxt:        c.IgnoreRobotsTxt,
-		MaxBodySize:            c.MaxBodySize,
-		MaxDepth:               c.MaxDepth,
-		DisallowedURLFilters:   c.DisallowedURLFilters,
-		URLFilters:             c.URLFilters,
-		ParseHTTPErrorResponse: c.ParseHTTPErrorResponse,
-		UserAgent:              c.UserAgent,
-		store:                  c.store,
-		backend:                c.backend,
-		debugger:               c.debugger,
-		Async:                  c.Async,
-		RedirectHandler:        c.RedirectHandler,
-		errorCallbacks:         make([]ErrorCallback, 0, 8),
-		htmlCallbacks:          make([]*htmlCallbackContainer, 0, 8),
-		xmlCallbacks:           make([]*xmlCallbackContainer, 0, 8),
-		scrapedCallbacks:       make([]ScrapedCallback, 0, 8),
-		lock:                   c.lock,
-		requestCallbacks:       make([]RequestCallback, 0, 8),
-		responseCallbacks:      make([]ResponseCallback, 0, 8),
-		robotsMap:              c.robotsMap,
-		wg:                     c.wg,
-	}
+func (c *Collector) Clone() (clone *Collector) {
+
+	clone = &Collector{}
+	clone.AllowedDomains = c.AllowedDomains
+	clone.AllowURLRevisit = c.AllowURLRevisit
+	clone.CacheDir = c.CacheDir
+	clone.DetectCharset = c.DetectCharset
+	clone.DisallowedDomains = c.DisallowedDomains
+	clone.ID = atomic.AddUint32(&collectorCounter, 1)
+	clone.IgnoreRobotsTxt = c.IgnoreRobotsTxt
+	clone.MaxBodySize = c.MaxBodySize
+	clone.MaxDepth = c.MaxDepth
+	clone.DisallowedURLFilters = c.DisallowedURLFilters
+	clone.URLFilters = c.URLFilters
+	clone.ParseHTTPErrorResponse = c.ParseHTTPErrorResponse
+	clone.UserAgent = c.UserAgent
+	clone.Async = c.Async
+	clone.DetectTabular = c.DetectTabular
+
+	clone.store = c.store
+	clone.backend = c.backend
+	clone.debugger = c.debugger
+	clone.RedirectHandler = c.RedirectHandler
+	clone.errorCallbacks = make([]ErrorCallback, 0, 8)
+
+	clone.htmlCallbacks = make([]*htmlCallbackContainer, 0, 8)
+	clone.xmlCallbacks = make([]*xmlCallbackContainer, 0, 8)
+	clone.tabCallbacks = make([]*tabCallbackContainer, 0, 8)
+	clone.scrapedCallbacks = make([]ScrapedCallback, 0, 8)
+
+	clone.lock = c.lock
+	clone.requestCallbacks = make([]RequestCallback, 0, 8)
+	clone.responseCallbacks = make([]ResponseCallback, 0, 8)
+	clone.robotsMap = c.robotsMap
+	clone.wg = c.wg
+	return
+
+	/*
+		return &Collector{
+			store:             c.store,
+			backend:           c.backend,
+			debugger:          c.debugger,
+			Async:             c.Async,
+			RedirectHandler:   c.RedirectHandler,
+			errorCallbacks:    make([]ErrorCallback, 0, 8),
+			htmlCallbacks:     make([]*htmlCallbackContainer, 0, 8),
+			xmlCallbacks:      make([]*xmlCallbackContainer, 0, 8),
+			scrapedCallbacks:  make([]ScrapedCallback, 0, 8),
+			lock:              c.lock,
+			requestCallbacks:  make([]RequestCallback, 0, 8),
+			responseCallbacks: make([]ResponseCallback, 0, 8),
+			robotsMap:         c.robotsMap,
+			wg:                c.wg,
+		}
+	*/
 }
 
 func (c *Collector) checkRedirectFunc() func(req *http.Request, via []*http.Request) error {

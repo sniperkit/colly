@@ -11,24 +11,14 @@ import (
 	// "encoding/json"
 
 	"github.com/BurntSushi/toml"
-	"github.com/json-iterator/go"
 	yaml "gopkg.in/yaml.v2"
-)
-
-var (
-	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 // UnmatchedTomlKeysError errors are returned by the Load function when
 // ErrorOnUnmatchedKeys is set to true and there are unmatched keys in the input
-// toml config file. The string returned by Error() contains the names of the
-// missing keys.
+// toml config file. The string returned by Error() contains the names of the missing keys.
 type UnmatchedTomlKeysError struct {
 	Keys []toml.Key
-}
-
-func (e *UnmatchedTomlKeysError) Error() string {
-	return fmt.Sprintf("There are keys in the config file that do not match any field in the given struct: %v", e.Keys)
 }
 
 func (configor *Configor) getENVPrefix(config interface{}) string {
@@ -36,7 +26,7 @@ func (configor *Configor) getENVPrefix(config interface{}) string {
 		if prefix := os.Getenv("CONFIGOR_ENV_PREFIX"); prefix != "" {
 			return prefix
 		}
-		return "Configor"
+		return DefaultEnvPrefix
 	}
 	return configor.Config.ENVPrefix
 }

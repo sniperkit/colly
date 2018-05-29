@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -58,6 +59,9 @@ type LimitRule struct {
 	compiledRegexp *regexp.Regexp
 	compiledGlob   glob.Glob
 }
+
+// ProxyFunc is a type alias for proxy setter functions.
+type ProxyFunc func(*http.Request) (*url.URL, error)
 
 // Init initializes the private members of LimitRule
 func (r *LimitRule) Init() error {

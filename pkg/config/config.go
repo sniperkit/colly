@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"regexp"
 )
 
 type Configor struct {
@@ -38,8 +37,6 @@ func New(config *Config) *Configor {
 
 	return &Configor{Config: config}
 }
-
-var testRegexp = regexp.MustCompile("_test|(\\.test$)")
 
 // GetEnvironment get environment
 func (configor *Configor) GetEnvironment() string {
