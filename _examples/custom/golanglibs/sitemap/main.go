@@ -9,7 +9,7 @@ import (
 	// "mvdan.cc/xurls"
 
 	"github.com/sniperkit/colly/pkg"
-	"github.com/sniperkit/colly/pkg/debug"
+	// "github.com/sniperkit/colly/pkg/debug"
 	"github.com/sniperkit/colly/pkg/queue"
 
 	sm "github.com/sniperkit/colly/addons/sitemap"
@@ -76,20 +76,13 @@ func main() {
 			colly.IgnoreRobotsTxt(),
 			// colly.AllowURLRevisit(),
 			// Cache responses to prevent multiple download of pages even if the collector is restarted
-			colly.Debugger(&debug.LogDebugger{}),
+			// colly.Debugger(&debug.LogDebugger{}),
 			colly.CacheDir(defaultStorageCacheDir),
 			// colly.Async(true),
 			// MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
 			// colly.MaxDepth(2),
 		)
 	}
-
-	log.Println("scraper.UserAgent=", scraper.UserAgent)
-	log.Println("scraper.AllowedDomains=", scraper.AllowedDomains)
-	log.Println("scraper.DisallowedURLFilters=", scraper.DisallowedURLFilters)
-	log.Println("scraper.URLFilters=", scraper.URLFilters)
-	log.Println("scraper.IgnoreRobotsTxt=", scraper.IgnoreRobotsTxt)
-	log.Println("scraper.CacheDir=", scraper.CacheDir)
 
 	/*
 		writer, err := SafeCsvWriter("data.csv")
@@ -120,13 +113,14 @@ func main() {
 	*/
 
 	// Find and visit next page links
-	scraper.OnHTML(`li.page-item a[href]`, func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		// e.Request.Visit(link)
-		e.Request.Visit(e.Request.AbsoluteURL(link))
-		log.Println("`li.page-item a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
-
-	})
+	/*
+		scraper.OnHTML(`li.page-item a[href]`, func(e *colly.HTMLElement) {
+			link := e.Attr("href")
+			// e.Request.Visit(link)
+			e.Request.Visit(e.Request.AbsoluteURL(link))
+			// log.Println("`li.page-item a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
+		})
+	*/
 
 	// On every a element which has href attribute call callback
 	scraper.OnHTML("a[href]", func(e *colly.HTMLElement) {
@@ -141,7 +135,7 @@ func main() {
 		*/
 
 		// Print link
-		log.Println("`a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
+		// log.Println("`a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
 		// entries[e.Request.AbsoluteURL(link)] = false // = append(entries, link)
 		cds.Append("links", e.Request.AbsoluteURL(link))
 
@@ -153,7 +147,7 @@ func main() {
 
 	// On every a HTML element which has name attribute call callback
 	scraper.OnHTML(`div.col-md-8`, func(e *colly.HTMLElement) {
-		log.Println("[LIST] link=", e.Request.URL)
+		// log.Println("[LIST] link=", e.Request.URL)
 
 		e.ForEach(".row", func(_ int, el *colly.HTMLElement) {
 			// var stars, desc, name, uri string
@@ -167,26 +161,26 @@ func main() {
 			} else {
 				return
 			}
-
-			log.Println("`div.col-md-8 > .row` PKG=", uri)
-
+			log.Println("[PKG] ", uri)
 		})
 
 	})
 
-	scraper.OnHTML(`a.page-link`, func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		log.Println("[VISIT] link=", link)
-		// start scaping the page under the link found
-		// e.Request.Visit(link)
-		// Visit link found on page
-		// Only those links are visited which are matched by  any of the URLFilter regexps
+	/*
+		scraper.OnHTML(`a.page-link`, func(e *colly.HTMLElement) {
+			link := e.Attr("href")
+			// log.Println("[VISIT] link=", link)
+			// start scaping the page under the link found
+			// e.Request.Visit(link)
+			// Visit link found on page
+			// Only those links are visited which are matched by  any of the URLFilter regexps
 
-		// scraper.Visit(e.Request.AbsoluteURL(link))
-		// entries[e.Request.AbsoluteURL(link)] = false
-		cds.Append("links", e.Request.AbsoluteURL(link))
-		//e.Request.Visit(link)
-	})
+			// scraper.Visit(e.Request.AbsoluteURL(link))
+			// entries[e.Request.AbsoluteURL(link)] = false
+			cds.Append("links", e.Request.AbsoluteURL(link))
+			//e.Request.Visit(link)
+		})
+	*/
 
 	// Before making a request print "Visiting ..."
 	/*
@@ -201,10 +195,12 @@ func main() {
 		})
 	*/
 
-	scraper.OnRequest(func(r *colly.Request) {
-		log.Println("[REQUEST] url=", r.URL.String())
+	/*
+		scraper.OnRequest(func(r *colly.Request) {
+			log.Println("[REQUEST] url=", r.URL.String())
 
-	})
+		})
+	*/
 
 	scraper.OnError(func(r *colly.Response, e error) {
 		log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
@@ -267,11 +263,14 @@ func main() {
 	q.Run(scraper)
 
 	log.Println("All URLs found:")
-	for link, status := range entries {
-		log.Println("\t link=", link, "status=", status)
-	}
 
-	log.Println("Collected", len(entries), "URLs")
+	// data, _ := cds.Get(k)
+	/*
+		for link, status := range entries {
+			log.Println("\t link=", link, "status=", status)
+		}
+	*/
+	// log.Println("Collected", len(entries), "URLs")
 
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
