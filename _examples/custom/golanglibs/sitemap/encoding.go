@@ -69,6 +69,15 @@ func newSafeCsvWriter(fileName string) (*CsvWriter, error) {
 	}, nil
 }
 
+func (w *CsvWriter) Delimiter(delimiter rune) *CsvWriter {
+	w.lock.Lock()
+
+	w.csvWriter.Comma = delimiter
+	// w.csvWriter.Comma = delimiter
+	w.lock.Unlock()
+	return w
+}
+
 func (w *CsvWriter) Write(row []string) {
 	w.lock.Lock()
 	w.csvWriter.Write(row)
@@ -130,7 +139,6 @@ func NewStreamCSV(fp string, st string) (*csvStream, error) {
 		s.columnsNames = append(s.columnsNames, "url")
 	}
 
-	// var reader *csv.Reader
 	if !s.isRemote {
 		if _, err := os.Stat(s.path); os.IsNotExist(err) {
 			return nil, err
@@ -160,9 +168,6 @@ func NewStreamCSV(fp string, st string) (*csvStream, error) {
 		s.reader = csv.NewReader(resp.Body)
 
 	}
-
-	// s.reader.Comma = ';'
-	// pp.Println("StreamCSV=", s)
 
 	s.ready = true
 	return s, nil

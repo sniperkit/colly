@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -78,19 +77,20 @@ func main() {
 			// Cache responses to prevent multiple download of pages even if the collector is restarted
 			// colly.Debugger(&debug.LogDebugger{}),
 			colly.CacheDir(defaultStorageCacheDir),
+			// colly.CacheHTTP(defaultStorageCacheDir),
 			// colly.Async(true),
 			// MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
 			// colly.MaxDepth(2),
 		)
 	}
 
-	writer, err := SafeCsvWriter("export.csv")
+	writer, err := newSafeCsvWriter("export.csv")
 	if err != nil {
 		log.Fatal("Failed to make data file")
 	}
 	defer writer.Flush()
 
-	writer.Write([]string{"url", "package_uri", "name", "stars", "desc", "tags"})
+	writer.Delimiter('|').Write([]string{"url", "package_uri", "name", "description", "stars", "tags"})
 
 	/*
 		scraper.Limit(&colly.LimitRule{
@@ -139,6 +139,9 @@ func main() {
 			})
 			tagsStr = strings.Join(tags, ",")
 			log.Infof("[PKG] uri='%s', pkg='%s', name='%s', stars='%s', desc='%s', tags='%s'\n", url, pkg, name, stars, desc, tagsStr)
+			writer.Write([]string{url, pkg, name, desc, stars, tagsStr})
+
+			// Similar PKGs ?!
 
 		})
 
@@ -191,19 +194,20 @@ func main() {
 
 	// Async
 	// scraper.Wait()
-	links, err := linksFromCSV(sitemapURL)
-	check(err)
 
-	for _, link := range links {
-		q.AddURL(link)
-	}
+	/*
+		links, err := linksFromCSV(sitemapURL)
+		check(err)
+
+		for _, link := range links {
+			q.AddURL(link)
+		}
+	*/
 
 	// Consume URLs
 	q.Run(scraper)
 
 	/*
-
-
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
 
