@@ -104,6 +104,30 @@ func (r *Request) AbsoluteURL(u string) string {
 	return absURL.String()
 }
 
+// RelativeURL returns with the resolved absolute URL of an URL chunk.
+// RelativeURL returns empty string if the URL chunk is a fragment or
+// could not be parsed
+func (r *Request) RelativeURL(u string) string {
+	if strings.HasPrefix(u, "#") {
+		return ""
+	}
+	var base *url.URL
+	if r.baseURL != nil {
+		base = r.baseURL
+	} else {
+		base = r.URL
+	}
+	absURL, err := base.Parse(u)
+	if err != nil {
+		return ""
+	}
+	absURL.Fragment = ""
+	if absURL.Scheme == "//" {
+		absURL.Scheme = r.URL.Scheme
+	}
+	return absURL.String()
+}
+
 // Visit continues Collector's collecting job by creating a
 // request and preserves the Context of the previous request.
 // Visit also calls the previously provided callbacks

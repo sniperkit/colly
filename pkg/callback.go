@@ -10,7 +10,10 @@ type ResponseCallback func(*Response)
 type HTMLCallback func(*HTMLElement)
 
 // TABCallback is a type alias for OnTAB callback functions
-type TABCallback func(*TABElement)
+type RAWCallback func(*RAWElement)
+
+// BINCallback is a type alias for OnTAB callback functions
+// type BINCallback func(*BINElement)
 
 // XMLCallback is a type alias for OnXML callback functions
 type XMLCallback func(*XMLElement)
@@ -31,7 +34,7 @@ type xmlCallbackContainer struct {
 	Function XMLCallback
 }
 
-type tabCallbackContainer struct {
+type rawCallbackContainer struct {
 	Selector string
-	Function TABCallback
+	Function RAWCallback
 }

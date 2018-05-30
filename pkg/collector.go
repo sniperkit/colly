@@ -75,7 +75,7 @@ type Collector struct {
 	store             storage.Storage
 	debugger          debug.Debugger
 	robotsMap         map[string]*robotstxt.RobotsData
-	tabCallbacks      []*tabCallbackContainer
+	rawCallbacks      []*rawCallbackContainer
 	htmlCallbacks     []*htmlCallbackContainer
 	xmlCallbacks      []*xmlCallbackContainer
 	requestCallbacks  []RequestCallback
@@ -105,6 +105,7 @@ func (c *Collector) Init() {
 	c.robotsMap = make(map[string]*robotstxt.RobotsData)
 	c.IgnoreRobotsTxt = true
 	c.ID = atomic.AddUint32(&collectorCounter, 1)
+	c.AllowURLRevisit = false
 }
 
 // Appengine will replace the Collector's backend http.Client
@@ -478,14 +479,14 @@ func (c *Collector) OnHTML(goquerySelector string, f HTMLCallback) {
 	c.lock.Unlock()
 }
 
-// TabElement registers a function. Function will be executed on any type of dataset
-func (c *Collector) OnTAB(tabSelector string, f TABCallback) {
+// TXTElement registers a function. Function will be executed on any type of dataset
+func (c *Collector) OnRAW(rawSelector string, f RAWCallback) {
 	c.lock.Lock()
-	if c.tabCallbacks == nil {
-		c.tabCallbacks = make([]*tabCallbackContainer, 0, 4)
+	if c.rawCallbacks == nil {
+		c.rawCallbacks = make([]*rawCallbackContainer, 0, 4)
 	}
-	c.tabCallbacks = append(c.tabCallbacks, &tabCallbackContainer{
-		Selector: tabSelector,
+	c.rawCallbacks = append(c.rawCallbacks, &rawCallbackContainer{
+		Selector: rawSelector,
 		Function: f,
 	})
 	c.lock.Unlock()
@@ -523,17 +524,17 @@ func (c *Collector) OnHTMLDetach(goquerySelector string) {
 }
 
 // OnHTMLDetach deregister a function. Function will not be execute after detached
-func (c *Collector) OnTABDetach(tabSelector string) {
+func (c *Collector) OnRAWDetach(tabSelector string) {
 	c.lock.Lock()
 	deleteIdx := -1
-	for i, cc := range c.tabCallbacks {
+	for i, cc := range c.rawCallbacks {
 		if cc.Selector == tabSelector {
 			deleteIdx = i
 			break
 		}
 	}
 	if deleteIdx != -1 {
-		c.tabCallbacks = append(c.tabCallbacks[:deleteIdx], c.tabCallbacks[deleteIdx+1:]...)
+		c.rawCallbacks = append(c.rawCallbacks[:deleteIdx], c.rawCallbacks[deleteIdx+1:]...)
 	}
 	c.lock.Unlock()
 }
@@ -865,7 +866,7 @@ func (c *Collector) Clone() (clone *Collector) {
 
 	clone.htmlCallbacks = make([]*htmlCallbackContainer, 0, 8)
 	clone.xmlCallbacks = make([]*xmlCallbackContainer, 0, 8)
-	clone.tabCallbacks = make([]*tabCallbackContainer, 0, 8)
+	clone.rawCallbacks = make([]*rawCallbackContainer, 0, 8)
 	clone.scrapedCallbacks = make([]ScrapedCallback, 0, 8)
 
 	clone.lock = c.lock

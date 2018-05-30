@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestTabularContent(t *testing.T) {
+func TestRawContent(t *testing.T) {
 	ctx := NewContext()
 	for i := 0; i < 10; i++ {
 		ctx.Put(strconv.Itoa(i), i)

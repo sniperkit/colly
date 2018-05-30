@@ -50,6 +50,7 @@ func main() {
 		if !strings.HasPrefix(link, "/browse") || strings.Index(link, "=signup") > -1 || strings.Index(link, "=login") > -1 {
 			return
 		}
+
 		// start scaping the page under the link found
 		e.Request.Visit(link)
 	})

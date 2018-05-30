@@ -17,13 +17,10 @@ import (
 func NewCollector(options ...func(*Collector)) *Collector {
 	c := &Collector{}
 	c.Init()
-
 	for _, f := range options {
 		f(c)
 	}
-
 	c.parseSettingsFromEnv()
-
 	return c
 }
 

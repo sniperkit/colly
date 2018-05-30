@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"mime"
 	"net/http"
+	// "sync"
 	"strings"
 
 	"github.com/saintfish/chardet"
@@ -38,11 +39,17 @@ type Response struct {
 	Request *Request
 	// Headers contains the Response's HTTP headers
 	Headers *http.Header
+	// lock *sync.RWMutex
 }
 
 // Save writes response body to disk
 func (r *Response) Save(fileName string) error {
 	return ioutil.WriteFile(fileName, r.Body, 0644)
+}
+
+// GetBody returns response body as byte array
+func (r *Response) GetBody() []byte {
+	return r.Body
 }
 
 // FileName returns the sanitized file name parsed from "Content-Disposition"
