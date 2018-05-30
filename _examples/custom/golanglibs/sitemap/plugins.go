@@ -4,6 +4,11 @@ import (
 	"plugin"
 )
 
+/*
+Refs:
+- https://github.com/altsab/goplug/blob/master/main.go
+*/
+
 var (
 	defaultCollectorPluginFilepath string = "./plugins/bitcq/lib/bitcq.so"
 )
@@ -21,5 +26,5 @@ func loadPlugin(filePath string) {
 
 	search := f.(func(string, string) []byte)
 	results := search("Unfriended", "qwerty")
-	fmt.Println(string(results))
+	log.Println(string(results))
 }
