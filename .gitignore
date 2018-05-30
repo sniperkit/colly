@@ -96,3 +96,8 @@ vendor/
 vendor/*
 vendor/**
 
+shared/storage/cache
+shared/storage/cache/
+shared/storage/cache/*
+shared/storage/cache/**
+
