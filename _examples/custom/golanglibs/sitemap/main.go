@@ -84,25 +84,13 @@ func main() {
 		)
 	}
 
-	/*
-		writer, err := SafeCsvWriter("data.csv")
-		if err != nil {
-			log.Fatal("Failed to make data file")
-		}
-		defer writer.Flush()
+	writer, err := SafeCsvWriter("export.csv")
+	if err != nil {
+		log.Fatal("Failed to make data file")
+	}
+	defer writer.Flush()
 
-		writer.Write([]string{"Date", "Headline"})
-	*/
-
-	// Create another collector to scrape page details
-	// detailCollector = scraper.Clone()
-
-	// Limit the maximum parallelism to 2
-	// This is necessary if the goroutines are dynamically
-	// created to control the limit of simultaneous requests.
-	//
-	// Parallelism can be controlled also by spawning fixed
-	// number of go routines.
+	writer.Write([]string{"url", "package_uri", "name", "stars", "desc", "tags"})
 
 	/*
 		scraper.Limit(&colly.LimitRule{
@@ -112,95 +100,53 @@ func main() {
 		})
 	*/
 
-	// Find and visit next page links
-	/*
-		scraper.OnHTML(`li.page-item a[href]`, func(e *colly.HTMLElement) {
-			link := e.Attr("href")
-			// e.Request.Visit(link)
-			e.Request.Visit(e.Request.AbsoluteURL(link))
-			// log.Println("`li.page-item a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
-		})
-	*/
-
 	// On every a element which has href attribute call callback
 	scraper.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-
-		// log.Println("pattern `a[href]` link:", link)
-		/*
-			if !strings.HasPrefix(link, "/repo/") || !strings.HasPrefix(link, "/category/") || !strings.HasPrefix(link, "/tag/") || !strings.HasPrefix(link, "/similar/") {
-				log.Println("[SKIP] link:", link)
-				return
-			}
-		*/
-
-		// Print link
-		// log.Println("`a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
-		// entries[e.Request.AbsoluteURL(link)] = false // = append(entries, link)
 		cds.Append("links", e.Request.AbsoluteURL(link))
-
-		// Visit link found on page
-		// Only those links are visited which are matched by  any of the URLFilter regexps
 		// scraper.Visit(e.Request.AbsoluteURL(link))
-		// e.Request.Visit(link)
 	})
 
 	// On every a HTML element which has name attribute call callback
 	scraper.OnHTML(`div.col-md-8`, func(e *colly.HTMLElement) {
-		// log.Println("[LIST] link=", e.Request.URL)
 
 		e.ForEach(".row", func(_ int, el *colly.HTMLElement) {
-			// var stars, desc, name, uri string
-			var uri string
-			// name = strings.Replace(el.ChildText("div.description > a[href]"), "\n", " ", -1)
-			// stars = strings.Replace(el.ChildText(".float-right"), "\n", " ", -1)
-			// desc = strings.Replace(el.ChildText(".description"), "\n", " ", -1)
+
+			var url, pkg, name, stars, desc, tagsStr string
+			name = strings.Replace(el.ChildText("div.description > a[href]"), "\n", " ", -1)
+
+			stars = strings.Replace(el.ChildText(".float-right"), "\n", " ", -1)
+			stars = rNumber.FindString(stars)
+
+			desc, _ = el.DOM.Find(".description").Attr("title")
+			desc = strings.Replace(desc, "\n", " ", -1)
+
 			if link, ok := el.DOM.Find("div.description > a").Attr("href"); ok {
-				uri = strings.Replace(link, "\n", " ", -1)
-				uri = strings.Replace(uri, "/repo/", "github.com/", 1)
+				pkg = strings.Replace(link, "\n", " ", -1)
+				url = el.Request.AbsoluteURL(pkg)
+				pkg = strings.Replace(pkg, "/repo/", "github.com/", 1)
 			} else {
 				return
 			}
-			log.Println("[PKG] ", uri)
+
+			var tags []string
+			el.ForEach("span.badge.badge-secondary", func(_ int, et *colly.HTMLElement) {
+				if et.Text != "" {
+					tag := strings.Replace(et.Text, "\n", "", -1)
+					tag = strings.TrimSpace(tag)
+					tags = append(tags, tag)
+				}
+			})
+			tagsStr = strings.Join(tags, ",")
+			log.Infof("[PKG] uri='%s', pkg='%s', name='%s', stars='%s', desc='%s', tags='%s'\n", url, pkg, name, stars, desc, tagsStr)
+
 		})
 
 	})
 
-	/*
-		scraper.OnHTML(`a.page-link`, func(e *colly.HTMLElement) {
-			link := e.Attr("href")
-			// log.Println("[VISIT] link=", link)
-			// start scaping the page under the link found
-			// e.Request.Visit(link)
-			// Visit link found on page
-			// Only those links are visited which are matched by  any of the URLFilter regexps
-
-			// scraper.Visit(e.Request.AbsoluteURL(link))
-			// entries[e.Request.AbsoluteURL(link)] = false
-			cds.Append("links", e.Request.AbsoluteURL(link))
-			//e.Request.Visit(link)
-		})
-	*/
-
-	// Before making a request print "Visiting ..."
-	/*
-		scraper.OnRequest(func(r *colly.Request) {
-			fmt.Println("visiting", r.URL)
-			if r.ID < 15 {
-				r2, err := r.New("GET", fmt.Sprintf("%s?x=%v", url, r.ID), nil)
-				if err == nil {
-					q.AddRequest(r2)
-				}
-			}
-		})
-	*/
-
-	/*
-		scraper.OnRequest(func(r *colly.Request) {
-			log.Println("[REQUEST] url=", r.URL.String())
-
-		})
-	*/
+	scraper.OnRequest(func(r *colly.Request) {
+		log.Infoln("[REQUEST] url=", r.URL.String())
+	})
 
 	scraper.OnError(func(r *colly.Response, e error) {
 		log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
@@ -239,16 +185,9 @@ func main() {
 		})
 	*/
 
-	// scraper.Visit(defaultDomain)
-
 	for i := 1; i <= 11560; i++ {
-		// Add URLs to the queue
-		q.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i))
+		q.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i)) // Add URLs to the queue
 	}
-
-	// Start the collector
-	// scraper.Visit(defaultDomain)
-	// scraper.Visit(sitemapURL)
 
 	// Async
 	// scraper.Wait()
@@ -262,20 +201,14 @@ func main() {
 	// Consume URLs
 	q.Run(scraper)
 
-	log.Println("All URLs found:")
-
-	// data, _ := cds.Get(k)
 	/*
-		for link, status := range entries {
-			log.Println("\t link=", link, "status=", status)
-		}
+
+
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+
+		// Dump json to the standard output
+		enc.Encode(libraries)
 	*/
-	// log.Println("Collected", len(entries), "URLs")
-
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-
-	// Dump json to the standard output
-	enc.Encode(libraries)
 
 }

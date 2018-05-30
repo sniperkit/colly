@@ -48,6 +48,16 @@ func NewHTMLElementFromSelectionNode(resp *Response, s *goquery.Selection, n *ht
 	}
 }
 
+/*
+func (h *HTMLElement) Name() string {
+	return h.Name
+}
+
+func (h *HTMLElement) Text() string {
+	return h.Text
+}
+*/
+
 // Attr returns the selected attribute of a HTMLElement or empty string
 // if no attribute found
 func (h *HTMLElement) Attr(k string) string {

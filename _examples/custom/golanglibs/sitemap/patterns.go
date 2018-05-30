@@ -1,6 +1,11 @@
 package main
 
+import (
+	"regexp"
+)
+
 var (
+	Number               = `[0-9]+`
 	Numeric              = `^(\d+)$`
 	AlphaNumeric         = `^([0-9A-Za-z]+)$`
 	Alpha                = `^([A-Za-z]+)$`
@@ -16,4 +21,14 @@ var (
 
 var (
 	spPattern = `\s+`
+	rNumber   = regexp.MustCompile(Number) // `/user/([0-9]+)/edit$`)
 )
+
+func isMatchingFilterAll(fs []*regexp.Regexp, d []byte) bool {
+	for _, r := range fs {
+		if r.Match(d) {
+			return true
+		}
+	}
+	return false
+}
