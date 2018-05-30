@@ -6,11 +6,11 @@ import (
 
 /*
 Refs:
-- https://github.com/altsab/goplug/blob/master/main.go
+	- https://github.com/altsab/goplug/blob/master/main.go
 */
 
 var (
-	defaultCollectorPluginFilepath string = "./plugins/bitcq/lib/bitcq.so"
+	defaultCollectorPluginFilepath string = "../../../../shared/libs/bitcq/bitcq.so"
 )
 
 func loadPlugin(filePath string) {

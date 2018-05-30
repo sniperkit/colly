@@ -48,7 +48,7 @@ var (
 
 type CsvWriter struct {
 	csvWriter *csv.Writer
-	lock      *sync.RWMutex
+	lock      *sync.Mutex
 	wg        *sync.WaitGroup
 }
 
@@ -60,21 +60,21 @@ func newSafeCsvWriter(fileName string) (*CsvWriter, error) {
 	w := csv.NewWriter(csvFile)
 	return &CsvWriter{
 		csvWriter: w,
-		lock:      &sync.RWMutex{},
+		lock:      &sync.Mutex{},
 		wg:        &sync.WaitGroup{},
 	}, nil
 }
 
 func (w *CsvWriter) Write(row []string) {
-	w.lock.WLock()
+	w.lock.Lock()
 	w.csvWriter.Write(row)
-	w.lock.WUnlock()
+	w.lock.Unlock()
 }
 
 func (w *CsvWriter) Flush() {
-	w.lock.RWLock()
+	w.lock.Lock()
 	w.csvWriter.Flush()
-	w.lock.RWUnlock()
+	w.lock.Unlock()
 }
 
 // streamCsv

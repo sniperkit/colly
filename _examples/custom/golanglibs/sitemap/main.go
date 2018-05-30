@@ -13,8 +13,8 @@ import (
 	"github.com/sniperkit/colly/pkg/debug"
 	"github.com/sniperkit/colly/pkg/queue"
 
+	sm "github.com/sniperkit/colly/addons/sitemap"
 	cfg "github.com/sniperkit/colly/pkg/config"
-	sm "github.com/sniperkit/colly/plugins/sitemap"
 )
 
 var (

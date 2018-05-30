@@ -43,8 +43,8 @@ var (
 	}
 */
 
-func newStatsEngine() {
-	switch config.Stats.Engine.Name {
+func newStatsEngine(backend string) {
+	switch backend {
 	case "datadog":
 		statsEngine = nil
 	case "influxdb":

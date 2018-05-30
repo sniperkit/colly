@@ -1,10 +1,9 @@
 package main
 
-import (
-	"plugin"
-	// "github.com/mantyr/urls"
-	// "github.com/opennota/linkify"
-)
+// import (
+// "github.com/mantyr/urls"
+// "github.com/opennota/linkify"
+//)
 
 var (
 	Numeric              = `^(\d+)$`
