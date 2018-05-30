@@ -6,12 +6,16 @@ import (
 	"os"
 	"reflect"
 	"testing"
-	// "encoding/json"
 
 	"github.com/BurntSushi/toml"
 	"github.com/json-iterator/go"
-	"github.com/sniperkit/colly/addons/config"
+	"github.com/sniperkit/colly/pkg/config"
+	jsoniter "github.com/sniperkit/xutil/plugin/format/json"
 	"gopkg.in/yaml.v2"
+)
+
+var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 type Anonymous struct {
