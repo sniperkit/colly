@@ -3,11 +3,24 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 )
+
+func ensurePathExists(path string) error {
+	i := strings.LastIndexByte(path, '/')
+	if i >= 0 {
+		dir := path[:i]
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func check(e error) {
 	if e != nil {

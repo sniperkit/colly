@@ -24,6 +24,7 @@ type Storage struct {
 	Client *redis.Client
 
 	mu sync.RWMutex // Only used for cookie methods.
+
 }
 
 // Init initializes the redis storage
