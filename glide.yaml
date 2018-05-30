@@ -10,14 +10,30 @@ import:
 - package: github.com/go-redis/redis
 - package: github.com/gobwas/glob
 - package: github.com/jawher/mow.cli
+- package: github.com/jinzhu/gorm
+  subpackages:
+  - dialects/mssql
+  - dialects/mysql
+  - dialects/postgres
+  - dialects/sqlite
 - package: github.com/jmoiron/sqlx
 - package: github.com/json-iterator/go
 - package: github.com/kennygrant/sanitize
 - package: github.com/mattn/go-sqlite3
 - package: github.com/saintfish/chardet
+- package: github.com/sniperkit/xtask
+  subpackages:
+  - plugin/counter
+- package: github.com/sniperkit/xutil
+  subpackages:
+  - plugin/format/json
 - package: github.com/tealeg/xlsx
 - package: github.com/temoto/robotstxt
 - package: github.com/thrift-iterator/go
+  subpackages:
+  - general
+  - protocol
+  - raw
 - package: golang.org/x/net
   subpackages:
   - html

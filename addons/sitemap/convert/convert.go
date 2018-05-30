@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sniperkit/colly/plugins/go-tablib"
-	"github.com/sniperkit/colly/plugins/sitemap"
+	"github.com/sniperkit/colly/addons/go-tablib"
+	"github.com/sniperkit/colly/addons/sitemap"
 )
 
 type convert struct {

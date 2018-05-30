@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"net/http"
 
-	"github.com/sniperkit/colly/plugins/compress/zstandard"
-	"github.com/sniperkit/colly/plugins/storage/external/sqlite3/advanced"
+	"github.com/sniperkit/colly/addons/compress/zstandard"
+	"github.com/sniperkit/colly/addons/storage/external/sqlite3/advanced"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

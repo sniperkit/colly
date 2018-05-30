@@ -10,7 +10,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/json-iterator/go"
-	"github.com/sniperkit/colly/plugins/config"
+	"github.com/sniperkit/colly/addons/config"
 	"gopkg.in/yaml.v2"
 )
 

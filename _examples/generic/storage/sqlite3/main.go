@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
+	"github.com/sniperkit/colly/addons/storage/external/sqlite3"
 	"github.com/sniperkit/colly/pkg"
 	"github.com/sniperkit/colly/pkg/helper"
 	"github.com/sniperkit/colly/pkg/queue"
-	"github.com/sniperkit/colly/plugins/storage/external/sqlite3"
 )
 
 func main() {
