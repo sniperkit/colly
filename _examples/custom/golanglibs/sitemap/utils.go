@@ -3,10 +3,44 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 )
+
+func check(e error) {
+	if e != nil {
+		log.Fatalln(e)
+	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func isRemoteURL(url string) bool {
+	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
+}
+
+func resolvePath(basePath string, relativePath string) string {
+	if isRemoteURL(basePath) || isRemoteURL(relativePath) || filepath.IsAbs(relativePath) {
+		return relativePath
+	}
+	return filepath.Join(filepath.Dir(basePath), relativePath)
+}
+
+func info(v ...interface{}) {
+	if !isVerbose {
+		return
+	}
+	log.Println(v...)
+}
 
 func roundU(val float64) int {
 	if val > 0 {

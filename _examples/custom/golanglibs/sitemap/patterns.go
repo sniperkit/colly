@@ -1,10 +1,5 @@
 package main
 
-// import (
-// "github.com/mantyr/urls"
-// "github.com/opennota/linkify"
-//)
-
 var (
 	Numeric              = `^(\d+)$`
 	AlphaNumeric         = `^([0-9A-Za-z]+)$`
@@ -17,4 +12,8 @@ var (
 	ZeroXHex             = `^0x([a-f0-9]+|[A-F0-9]+)$`
 	IPv4                 = `^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`
 	IPv6                 = `^([0-9A-Fa-f]{0,4}:){2,7}([0-9A-Fa-f]{1,4}$|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4})$`
+)
+
+var (
+	spPattern = `\s+`
 )

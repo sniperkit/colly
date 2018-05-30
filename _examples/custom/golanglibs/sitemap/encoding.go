@@ -1,18 +1,22 @@
 package main
 
 import (
+	// "bufio"
 	"encoding/csv"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
 
 	"github.com/pquerna/ffjson/ffjson"
+
 	// "https://github.com/chonla/dbz/blob/master/db/sqlite.go"
 	// "github.com/cnf/structhash"
 	// "github.com/siddontang/go-mysql-elasticsearch"
 	// "github.com/mandolyte/csv-utils"
+	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
 
 	"github.com/sniperkit/xutil/plugin/format/convert/json2csv"
 	jsoniter "github.com/sniperkit/xutil/plugin/format/json"
@@ -22,6 +26,8 @@ import (
 	Refs:
 	- https://github.com/dfontana/GaggleOfKaggle/blob/master/Scraping/go_scrap.go
 	- https://github.com/Gujarats/csv-reader/blob/master/app.go
+	- https://golang.org/pkg/encoding/csv/#example_Reader
+	- https://github.com/janlay/text-builder/blob/master/text-builder.go
 */
 
 const (
@@ -84,10 +90,9 @@ type csvLine struct {
 }
 
 type csvStream struct {
-	FilePath     string `required:'true'` // Filepath to Local CSV File
+	path         string `required:'true'` // Filepath to Local CSV File
 	splitAt      int    `default:'2500'`
 	buffer       int    `default:'20000'`
-	file         *os.File
 	lock         *sync.Mutex
 	wg           *sync.WaitGroup
 	selectorType string   `default:'name'` // column selector type, availble: by_key, by_name (default: column_name)
@@ -96,31 +101,22 @@ type csvStream struct {
 	paused       bool
 	ready        bool
 	debug        bool
-	reader       *csv.Reader
+	isRemote     bool
+	// file         *os.File
+	reader *csv.Reader
 	*csvLine
 }
 
 func NewStreamCSV(fp string, st string) (*csvStream, error) {
-	if _, err := os.Stat(fp); os.IsNotExist(err) {
-		return nil, errLocalFileStat
-	}
-
-	fi, err := os.Open(fp)
-	if err != nil {
-		// log.Fatal(err)
-		return nil, errLocalFileOpen
-	}
-
-	// defer f.Close()
 
 	s := &csvStream{
-		FilePath: fp,
-		file:     fi,
+		isRemote: isRemoteURL(fp),
+		path:     fp,
 		buffer:   20000,
 		splitAt:  2500,
+		lock:     &sync.Mutex{},
+		wg:       &sync.WaitGroup{},
 	}
-
-	s.reader = csv.NewReader(fi)
 
 	st = strings.ToLower(st)
 	switch st {
@@ -134,16 +130,57 @@ func NewStreamCSV(fp string, st string) (*csvStream, error) {
 		s.columnsNames = append(s.columnsNames, "url")
 	}
 
+	// var reader *csv.Reader
+	if !s.isRemote {
+		if _, err := os.Stat(s.path); os.IsNotExist(err) {
+			return nil, err
+		}
+		log.Infoln("reading file:", s.path)
+		file, err := os.Open(s.path)
+		if err != nil {
+			log.Fatalln("failed to open file, error: ", err)
+			return nil, err
+		}
+		defer file.Close()
+		s.reader = csv.NewReader(file)
+
+	} else {
+		log.Infoln("loading remote:", s.path)
+		resp, err := http.Get(s.path)
+		if err != nil {
+			log.Fatalln("failed to fetch content, error: ", err)
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+			log.Fatalln("failed with status", resp.Status)
+			return nil, errInvalidRemoteStatusCode
+		}
+		s.reader = csv.NewReader(resp.Body)
+
+	}
+
+	// s.reader.Comma = ';'
+	// pp.Println("StreamCSV=", s)
+
 	s.ready = true
 	return s, nil
 }
 
-// func (cs *csvStream) Read(csv *csv.Reader, buffer int) (lines chan *csvLine) {
-func (cs *csvStream) Read() (lines chan *csvLine) {
-	cs.lock.Lock()
-	defer cs.lock.Unlock()
-	lines = make(chan *csvLine, cs.buffer)
+func (cs *csvStream) Wait() {
+	// task.lock.Lock()
+	// defer task.lock.Unlock()
+	cs.wg.Wait()
+}
 
+// func (cs *csvStream) Read(csv *csv.Reader, buffer int) (lines chan *csvLine) {
+func (cs *csvStream) ReadAsync() (lines chan *csvLine) {
+	// cs.lock.Lock()
+	// defer cs.lock.Unlock()
+
+	lines = make(chan *csvLine, cs.buffer)
+	// cs.wg.Add(1)
 	go func() {
 		header, err := cs.reader.Read()
 		if err != nil {
@@ -159,17 +196,88 @@ func (cs *csvStream) Read() (lines chan *csvLine) {
 					header: header,
 					line:   line,
 				}
+				log.Println("header=", header, ", line=", line)
+			}
+			if err == io.EOF {
+				// cs.wg.Done()
+				return
 			}
 			if err != nil {
 				log.Printf("Sent %d lines\n", i)
 				close(lines)
+				// cs.wg.Done()
 				return
 			}
 		}
 	}()
+	cs.wg.Wait()
+	return
+}
+
+/*
+func (cs *csvStream) Scan() (lines chan *csvLine) {
+	// cs.lock.Lock()
+	// defer cs.lock.Unlock()
+
+	var reader io.Reader
+	if !cs.isRemote {
+		if _, err := os.Stat(cs.path); os.IsNotExist(err) {
+			return
+		}
+		log.Infoln("reading file:", cs.path)
+		fi, err := os.Open(cs.path)
+		if err != nil {
+			log.Fatalln("failed to open file, error: ", err)
+			return
+		}
+		defer fi.Close()
+		tabular = csv.NewReader(fi)
+
+	} else {
+		log.Infoln("loading remote:", cs.path)
+		resp, err := http.Get(cs.path)
+		if err != nil {
+			log.Fatalln("failed to fetch content, error: ", err)
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+			log.Fatalln("failed with status", resp.Status)
+			return
+		}
+		reader = csv.NewReader(resp.Body)
+
+	}
+
+	// csv.Comma = ';'
+	pp.Println("StreamCSV=", cs)
+	lines = make(chan *csvLine, cs.buffer)
+	scanner := bufio.NewScanner(reader)
+
+	go func() {
+		for scanner.Scan() {
+			line := scanner.Text()
+			if len(line) > 0 {
+				i++
+				lines <- &csvLine{
+					header: header,
+					line:   line,
+				}
+				log.Println("header=", header, ", line=", line)
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			log.Fatalln("csv scanner error=", err)
+			return
+		}
+
+	}()
 
 	return
 }
+*/
 
 func (cs *csvStream) Pause(status bool) {
 	cs.lock.Lock()
@@ -177,11 +285,13 @@ func (cs *csvStream) Pause(status bool) {
 	cs.lock.Unlock()
 }
 
+/*
 func (cs *csvStream) Close() {
 	cs.lock.Lock()
 	cs.file.Close()
 	cs.lock.Unlock()
 }
+*/
 
 func (cs *csvStream) SplitAt(limit int) *csvStream {
 	cs.lock.Lock()
@@ -269,8 +379,8 @@ func streamCsv(csv *csv.Reader, buffer int) (lines chan *csvLine) {
 	return
 }
 
-func (cl *csvLine) GetByID(idx int) (value string) {
-	return strings.TrimSpace(cl.line[idx])
+func (cl *csvLine) GetByKey(k int) (value string) {
+	return strings.TrimSpace(cl.line[k])
 }
 
 func (cl *csvLine) GetByName(key string) (value string) {

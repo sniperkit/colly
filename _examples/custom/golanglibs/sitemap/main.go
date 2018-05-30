@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	// "plugin"
 	"strings"
 	"time"
 
-	"mvdan.cc/xurls"
+	// "mvdan.cc/xurls"
 
 	"github.com/sniperkit/colly/pkg"
 	"github.com/sniperkit/colly/pkg/debug"
@@ -18,8 +17,10 @@ import (
 )
 
 var (
-	isDebug         bool = false
-	isStrict        bool = true
+	isDebug         bool   = false
+	isStrict        bool   = true
+	isVerbose       bool   = true
+	sitemapURL      string = "https://golanglibs.com/sitemap.txt"
 	startedAt       time.Time
 	sitemap         *sm.Sitemap
 	q               *queue.Queue
@@ -121,7 +122,8 @@ func main() {
 	// Find and visit next page links
 	scraper.OnHTML(`li.page-item a[href]`, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-		e.Request.Visit(link)
+		// e.Request.Visit(link)
+		e.Request.Visit(e.Request.AbsoluteURL(link))
 		log.Println("`li.page-item a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
 
 	})
@@ -140,7 +142,8 @@ func main() {
 
 		// Print link
 		log.Println("`a[href]` URL=", link, ", AbsURL=", e.Request.AbsoluteURL(link))
-		entries[e.Request.AbsoluteURL(link)] = false // = append(entries, link)
+		// entries[e.Request.AbsoluteURL(link)] = false // = append(entries, link)
+		cds.Append("links", e.Request.AbsoluteURL(link))
 
 		// Visit link found on page
 		// Only those links are visited which are matched by  any of the URLFilter regexps
@@ -180,7 +183,8 @@ func main() {
 		// Only those links are visited which are matched by  any of the URLFilter regexps
 
 		// scraper.Visit(e.Request.AbsoluteURL(link))
-		entries[e.Request.AbsoluteURL(link)] = false
+		// entries[e.Request.AbsoluteURL(link)] = false
+		cds.Append("links", e.Request.AbsoluteURL(link))
 		//e.Request.Visit(link)
 	})
 
@@ -206,36 +210,38 @@ func main() {
 		log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
 	})
 
-	// Before making a request print "Visiting ..."
-	scraper.OnResponse(func(r *colly.Response) {
+	/*
+		// Before making a request print "Visiting ..."
+		scraper.OnResponse(func(r *colly.Response) {
 
-		contentType := r.Headers.Get("Content-Type")
-		var urls []string
-		if isStrict {
-			urls = xurls.Relaxed().FindAllString(string(r.GetBody()), -1)
-		} else {
-			urls = xurls.Strict().FindAllString(string(r.GetBody()), -1)
-		}
+			contentType := r.Headers.Get("Content-Type")
+			var urls []string
+			if isStrict {
+				urls = xurls.Relaxed().FindAllString(string(r.GetBody()), -1)
+			} else {
+				urls = xurls.Strict().FindAllString(string(r.GetBody()), -1)
+			}
 
-		for _, url := range urls {
+			for _, url := range urls {
 
-			// url = r.Request.AbsoluteURL(url)
-			// url = r.URL.String()
+				// url = r.Request.AbsoluteURL(url)
+				// url = r.URL.String()
 
-			///?page=2
-			// url = r.Request.URL.String()
-			// if strings.Index(url, "/?page=") > -1 {
+				///?page=2
+				// url = r.Request.URL.String()
+				// if strings.Index(url, "/?page=") > -1 {
 
-			log.Println("[ADD] URL=", url, ", AbsoluteURL=", r.Request.AbsoluteURL(url), ", contentType=", contentType)
-			// Visit link found on page
-			// Only those links are visited which are matched by  any of the URLFilter regexps
-			scraper.Visit(r.Request.AbsoluteURL(url))
-			// e.Request.Visit(link)
-			//entries = append(entries, url)
-			entries[url] = false
+				// log.Println("[ADD] URL=", url, ", AbsoluteURL=", r.Request.AbsoluteURL(url), ", contentType=", contentType)
+				// Visit link found on page
+				// Only those links are visited which are matched by  any of the URLFilter regexps
+				scraper.Visit(r.Request.AbsoluteURL(url))
+				// e.Request.Visit(link)
+				//entries = append(entries, url)
+				entries[url] = false
 
-		}
-	})
+			}
+		})
+	*/
 
 	// scraper.Visit(defaultDomain)
 
@@ -246,10 +252,16 @@ func main() {
 
 	// Start the collector
 	// scraper.Visit(defaultDomain)
-	// scraper.Visit(defaultSitemapURL)
+	// scraper.Visit(sitemapURL)
 
 	// Async
 	// scraper.Wait()
+	links, err := linksFromCSV(sitemapURL)
+	check(err)
+
+	for _, link := range links {
+		q.AddURL(link)
+	}
 
 	// Consume URLs
 	q.Run(scraper)
