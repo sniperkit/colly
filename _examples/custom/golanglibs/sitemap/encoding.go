@@ -35,13 +35,11 @@ var (
 	defaultExportPrefixPath = cachePrefixPath + "./shared/storage/export"
 )
 
-// json reader/writer defaults
-var ()
-
 // csv reader/writer defaults
 var (
+	csvSplitAt             int      = 2500
 	csvReaderBuffer        int      = 20000
-	csvCtreamBuffer        int      = 20000
+	csvStreamBuffer        int      = 20000
 	csvStreamOuputMaxLines int      = 1000
 	csvStreamOuputColumns  []string = []string{"domain", "loc", "created_at", "duration", "duration_time", "finished_at"}
 )
@@ -80,11 +78,165 @@ func (w *CsvWriter) Flush() {
 // streamCsv
 //  Streams a CSV Reader into a returned channel.  Each CSV row is streamed along with the header.
 //  "true" is sent to the `done` channel when the file is finished.
-
 type csvLine struct {
 	header []string
 	line   []string
 }
+
+type csvStream struct {
+	FilePath     string `required:'true'` // Filepath to Local CSV File
+	splitAt      int    `default:'2500'`
+	buffer       int    `default:'20000'`
+	file         *os.File
+	lock         *sync.Mutex
+	wg           *sync.WaitGroup
+	selectorType string   `default:'name'` // column selector type, availble: by_key, by_name (default: column_name)
+	columnsKeys  []int    // default: 0
+	columnsNames []string // default: "url"
+	paused       bool
+	ready        bool
+	debug        bool
+	reader       *csv.Reader
+	*csvLine
+}
+
+func NewStreamCSV(fp string, st string) (*csvStream, error) {
+	if _, err := os.Stat(fp); os.IsNotExist(err) {
+		return nil, errLocalFileStat
+	}
+
+	fi, err := os.Open(fp)
+	if err != nil {
+		// log.Fatal(err)
+		return nil, errLocalFileOpen
+	}
+
+	// defer f.Close()
+
+	s := &csvStream{
+		FilePath: fp,
+		file:     fi,
+		buffer:   20000,
+		splitAt:  2500,
+	}
+
+	s.reader = csv.NewReader(fi)
+
+	st = strings.ToLower(st)
+	switch st {
+	case "by_key":
+		s.selectorType = st
+		s.columnsKeys = append(s.columnsKeys, 0)
+	case "by_name":
+		fallthrough
+	default:
+		s.selectorType = st
+		s.columnsNames = append(s.columnsNames, "url")
+	}
+
+	s.ready = true
+	return s, nil
+}
+
+// func (cs *csvStream) Read(csv *csv.Reader, buffer int) (lines chan *csvLine) {
+func (cs *csvStream) Read() (lines chan *csvLine) {
+	cs.lock.Lock()
+	defer cs.lock.Unlock()
+	lines = make(chan *csvLine, cs.buffer)
+
+	go func() {
+		header, err := cs.reader.Read()
+		if err != nil {
+			close(lines)
+			return
+		}
+		i := 0
+		for {
+			line, err := cs.reader.Read()
+			if len(line) > 0 {
+				i++
+				lines <- &csvLine{
+					header: header,
+					line:   line,
+				}
+			}
+			if err != nil {
+				log.Printf("Sent %d lines\n", i)
+				close(lines)
+				return
+			}
+		}
+	}()
+
+	return
+}
+
+func (cs *csvStream) Pause(status bool) {
+	cs.lock.Lock()
+	cs.paused = status
+	cs.lock.Unlock()
+}
+
+func (cs *csvStream) Close() {
+	cs.lock.Lock()
+	cs.file.Close()
+	cs.lock.Unlock()
+}
+
+func (cs *csvStream) SplitAt(limit int) *csvStream {
+	cs.lock.Lock()
+	if limit <= 0 {
+		limit = csvSplitAt
+	}
+	cs.splitAt = limit
+	cs.lock.Unlock()
+	return cs
+}
+
+func (cs *csvStream) Buffer(buffer int) *csvStream {
+	cs.lock.Lock()
+	cs.buffer = buffer
+	cs.lock.Unlock()
+	return cs
+}
+
+func (cs *csvStream) SetColumnsKeys(keys ...int) *csvStream {
+	cs.lock.Lock()
+	cs.columnsKeys = keys
+	cs.lock.Unlock()
+	return cs
+}
+
+func (cs *csvStream) SetColumnsNames(names ...string) *csvStream {
+	cs.lock.Lock()
+	cs.columnsNames = names
+	cs.lock.Unlock()
+	return cs
+}
+
+/*
+func (cl *csvLine) Get(idx int) (value string) {
+	return strings.TrimSpace(cl.line[idx])
+}
+
+func (cl *csvLine) GetByName(key string) (value string) {
+	x := -1
+	for i, value := range cl.header {
+		if value == key {
+			x = i
+			break
+		}
+	}
+	if x == -1 {
+		return ""
+	}
+	return strings.TrimSpace(cl.line[x])
+}
+*/
+
+//func (cs *csvStream) hasHeader() *csvStream {
+//	return cs
+//}
 
 // Args
 //  csv    - The csv.Reader that will be read from.
@@ -117,7 +269,11 @@ func streamCsv(csv *csv.Reader, buffer int) (lines chan *csvLine) {
 	return
 }
 
-func (cl *csvLine) Get(key string) (value string) {
+func (cl *csvLine) GetByID(idx int) (value string) {
+	return strings.TrimSpace(cl.line[idx])
+}
+
+func (cl *csvLine) GetByName(key string) (value string) {
 	x := -1
 	for i, value := range cl.header {
 		if value == key {
@@ -149,12 +305,12 @@ func streamFormatCsvToLine(csv *csvLine) (*csvFlowLine, error) {
 			cft.created_at = csv.Get("c")
 		}
 	*/
-	cft.created_at = csv.Get("created_at")
-	cft.duration = csv.Get("duration")
-	cft.duration_time = csv.Get("duration_time")
-	cft.finished_at = csv.Get("finished_at")
-	cft.service = csv.Get("service")
-	cft.topic = csv.Get("topic")
+	cft.created_at = csv.GetByName("created_at")
+	cft.duration = csv.GetByName("duration")
+	cft.duration_time = csv.GetByName("duration_time")
+	cft.finished_at = csv.GetByName("finished_at")
+	cft.service = csv.GetByName("service")
+	cft.topic = csv.GetByName("topic")
 	return &cft, nil
 }
 

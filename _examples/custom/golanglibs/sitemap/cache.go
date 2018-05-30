@@ -145,17 +145,17 @@ func loadSkipList(filepath string) {
 	csv := csv.NewReader(fp)
 	lines := streamCsv(csv, csvReaderBuffer)
 	for line := range lines {
-		expiresAt, err := parseTimeStamp(line.Get("task_expired_timestamp"))
+		expiresAt, err := parseTimeStamp(line.GetByName("task_expired_timestamp"))
 		if err != nil {
-			log.Errorln("[SKIP-ERROR] taskInfo, service=", line.Get("service"), "topic=", line.Get("topic"), "expiresTimestamp", line.Get("task_expired_timestamp"))
+			log.Errorln("[SKIP-ERROR] taskInfo, service=", line.GetByName("service"), "topic=", line.GetByName("topic"), "expiresTimestamp", line.GetByName("task_expired_timestamp"))
 			continue
 		}
 		now := time.Now()
 		if now.After(expiresAt.Add(cacheTTL)) {
-			log.Infoln("[TSK-ALLOW] task info, service=", line.Get("service"), "topic=", line.Get("topic"), "expiresAt=", expiresAt)
+			log.Infoln("[TSK-ALLOW] task info, service=", line.GetByName("service"), "topic=", line.GetByName("topic"), "expiresAt=", expiresAt)
 			continue
 		}
-		cuckflt.InsertUnique([]byte(line.Get("topic")))
+		cuckflt.InsertUnique([]byte(line.GetByName("topic")))
 	}
 	log.Warnln("[TSK-EXCLUDED] taskInfo, count=", cuckflt.Count())
 }

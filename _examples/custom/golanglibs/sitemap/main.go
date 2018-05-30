@@ -49,6 +49,7 @@ func init() {
 	libraries = make([]library, 0)
 	entries = make(map[string]bool, 0)
 
+	q, err = initQueue(2, 1000000, "InMemory")
 	if err != nil {
 		log.Fatalln("error: ", err)
 	}
@@ -108,11 +109,14 @@ func main() {
 	//
 	// Parallelism can be controlled also by spawning fixed
 	// number of go routines.
-	scraper.Limit(&colly.LimitRule{
-		Parallelism: 4,
-		DomainGlob:  "*",
-		// RandomDelay: 2 * time.Second,
-	})
+
+	/*
+		scraper.Limit(&colly.LimitRule{
+			Parallelism: 4,
+			DomainGlob:  "*",
+			// RandomDelay: 2 * time.Second,
+		})
+	*/
 
 	// Find and visit next page links
 	scraper.OnHTML(`li.page-item a[href]`, func(e *colly.HTMLElement) {
@@ -232,6 +236,8 @@ func main() {
 
 		}
 	})
+
+	// scraper.Visit(defaultDomain)
 
 	for i := 1; i <= 11560; i++ {
 		// Add URLs to the queue
