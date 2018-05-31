@@ -13,18 +13,22 @@ import (
 	cmap "github.com/sniperkit/xutil/plugin/map/multi"
 )
 
-// concurrent maps, datasets and databooks defaults
-var (
-	sheets   map[string][]interface{}   = make(map[string][]interface{}, 0)
-	datasets map[string]*tablib.Dataset = make(map[string]*tablib.Dataset, 0) // := NewDataset([]string{"firstName", "lastName"})
-	cds                                 = cmap.NewConcurrentMultiMap()
-)
-
 /*
 	Refs:
 	- https://github.com/keyid/overlord/blob/master/overlord.go
 	- https://github.com/keyid/overlord/blob/master/src/overlord/models/page.go
 */
+
+// concurrent maps, datasets and databooks defaults
+var (
+	conf_file    string
+	results_file string
+	showVersion  bool                       = false
+	verbose      bool                       = false
+	sheets       map[string][]interface{}   = make(map[string][]interface{}, 0)
+	datasets     map[string]*tablib.Dataset = make(map[string]*tablib.Dataset, 0) // := NewDataset([]string{"firstName", "lastName"})
+	cds                                     = cmap.NewConcurrentMultiMap()
+)
 
 ///// App ///////////////////////////////////////////////
 type Application struct {

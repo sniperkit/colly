@@ -2,9 +2,9 @@ package tui
 
 import (
 	"fmt"
+	"log"
 	"time"
 
-	// "github.com/gizak/termui"
 	"github.com/sasile/termui"
 )
 
@@ -76,6 +76,7 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 
 		// ignore empty updates
 		if snapshot.Timestamp().IsZero() {
+			log.Println("ignore empty updates...")
 			return
 		}
 
@@ -83,6 +84,7 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 		if len(snapshots) > 0 {
 			previousSnapShot := snapshots[len(snapshots)-1]
 			if snapshot.Timestamp() == previousSnapShot.Timestamp() {
+				log.Println("don't update if there is no new snapshot available...")
 				return
 			}
 		}
@@ -151,6 +153,7 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 	})
 
 	termui.Handle("/sys/kbd/q", func(termui.Event) {
+		log.Println("touch 'q' is pressed")
 		stopTheCrawler <- true
 		termui.StopLoop()
 	})

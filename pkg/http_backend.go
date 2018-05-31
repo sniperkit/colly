@@ -131,6 +131,10 @@ func (h *httpBackend) Cache(request *http.Request, bodySize int, cacheDir string
 	if cacheDir == "" || request.Method != "GET" {
 		return h.Do(request, bodySize)
 	}
+
+	var contentType string
+	var startTime, endTime time.Time
+
 	sum := sha1.Sum([]byte(request.URL.String()))
 	hash := hex.EncodeToString(sum[:])
 	dir := path.Join(cacheDir, hash[:2])
@@ -140,27 +144,67 @@ func (h *httpBackend) Cache(request *http.Request, bodySize int, cacheDir string
 		err := gob.NewDecoder(file).Decode(resp)
 		file.Close()
 		if resp.StatusCode < 500 {
+			startTime = time.Now().UTC()
+			// content type
+			contentType = resp.Headers.Get("Content-Type")
+			if contentType == "" {
+				contentType = http.DetectContentType(resp.GetBody())
+			}
+			resp.ContentType = contentType
+			resp.StartTime = startTime
+			endTime = time.Now().UTC()
+			resp.EndTime = endTime
 			return resp, err
 		}
 	}
+
+	startTime = time.Now().UTC()
 	resp, err := h.Do(request, bodySize)
+	// content type
+	contentType = resp.Headers.Get("Content-Type")
+	if contentType == "" {
+		contentType = http.DetectContentType(resp.GetBody())
+	}
+
 	if err != nil || resp.StatusCode >= 500 {
+		resp.ContentType = contentType
+		resp.StartTime = startTime
+		endTime = time.Now().UTC()
+		resp.EndTime = endTime
 		return resp, err
 	}
 	if _, err := os.Stat(dir); err != nil {
 		if err := os.MkdirAll(dir, 0750); err != nil {
+			resp.ContentType = contentType
+			resp.StartTime = startTime
+			endTime = time.Now().UTC()
+			resp.EndTime = endTime
 			return resp, err
 		}
 	}
 	file, err := os.Create(filename + "~")
 	if err != nil {
+		resp.ContentType = contentType
+		resp.StartTime = startTime
+		endTime = time.Now().UTC()
+		resp.EndTime = endTime
 		return resp, err
 	}
 	if err := gob.NewEncoder(file).Encode(resp); err != nil {
 		file.Close()
+		resp.ContentType = contentType
+		resp.StartTime = startTime
+		endTime = time.Now().UTC()
+		resp.EndTime = endTime
 		return resp, err
 	}
 	file.Close()
+
+	resp.ContentType = contentType
+	resp.StartTime = startTime
+	endTime = time.Now().UTC()
+	resp.EndTime = endTime
+
 	return resp, os.Rename(filename+"~", filename)
 }
 
@@ -178,6 +222,10 @@ func (h *httpBackend) Do(request *http.Request, bodySize int) (*Response, error)
 		}(r)
 	}
 
+	var contentType string
+	var startTime, endTime time.Time
+
+	startTime = time.Now().UTC()
 	res, err := h.Client.Do(request)
 	if err != nil {
 		return nil, err
@@ -190,13 +238,26 @@ func (h *httpBackend) Do(request *http.Request, bodySize int) (*Response, error)
 	}
 	body, err := ioutil.ReadAll(bodyReader)
 	defer res.Body.Close()
+
+	// content type
+	contentType = res.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = http.DetectContentType(body)
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
+	endTime = time.Now().UTC()
+
 	return &Response{
-		StatusCode: res.StatusCode,
-		Body:       body,
-		Headers:    &res.Header,
+		StatusCode:  res.StatusCode,
+		Body:        body,
+		Headers:     &res.Header,
+		StartTime:   startTime,
+		EndTime:     endTime,
+		ContentType: contentType,
 	}, nil
 }
 

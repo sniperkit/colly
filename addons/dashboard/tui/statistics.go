@@ -4,9 +4,14 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
 )
 
-var stats Statistics
+var (
+	stats                        Statistics
+	AllStatisticsHaveBeenUpdated chan bool
+	AllURLsHaveBeenVisited       chan bool
+)
 
 func init() {
 	stats = Statistics{
@@ -16,12 +21,11 @@ func init() {
 	}
 }
 
-func updateStatistics(workResult WorkResult) {
-	go stats.Add(workResult)
+func UpdateStatistics(w WorkResult) {
+	go stats.Add(w)
 }
 
 type Snapshot struct {
-
 	// time
 	timestamp           time.Time
 	timeSinceStart      time.Duration
@@ -42,36 +46,36 @@ type Snapshot struct {
 	averageSizeInBytes int
 }
 
-func (snapshot Snapshot) Timestamp() time.Time {
-	return snapshot.timestamp
+func (s Snapshot) Timestamp() time.Time {
+	return s.timestamp
 }
 
-func (snapshot Snapshot) NumberOfWorkers() int {
-	return snapshot.numberOfWorkers
+func (s Snapshot) NumberOfWorkers() int {
+	return s.numberOfWorkers
 }
 
-func (snapshot Snapshot) NumberOfErrors() int {
-	return snapshot.numberOfUnsuccessfulRequests
+func (s Snapshot) NumberOfErrors() int {
+	return s.numberOfUnsuccessfulRequests
 }
 
-func (snapshot Snapshot) TotalNumberOfRequests() int {
-	return snapshot.totalNumberOfRequests
+func (s Snapshot) TotalNumberOfRequests() int {
+	return s.totalNumberOfRequests
 }
 
-func (snapshot Snapshot) TotalSizeInBytes() int {
-	return snapshot.totalSizeInBytes
+func (s Snapshot) TotalSizeInBytes() int {
+	return s.totalSizeInBytes
 }
 
-func (snapshot Snapshot) AverageSizeInBytes() int {
-	return snapshot.averageSizeInBytes
+func (s Snapshot) AverageSizeInBytes() int {
+	return s.averageSizeInBytes
 }
 
-func (snapshot Snapshot) AverageResponseTime() time.Duration {
-	return snapshot.averageResponseTime
+func (s Snapshot) AverageResponseTime() time.Duration {
+	return s.averageResponseTime
 }
 
-func (snapshot Snapshot) RequestsPerSecond() float64 {
-	return snapshot.numberOfRequestsPerSecond
+func (s Snapshot) RequestsPerSecond() float64 {
+	return s.numberOfRequestsPerSecond
 }
 
 type Statistics struct {
@@ -96,124 +100,133 @@ type Statistics struct {
 	totalSizeInBytes int
 }
 
-func (statistics *Statistics) Add(workResult WorkResult) Snapshot {
-
+func (s *Statistics) Add(w WorkResult) Snapshot {
 	// update the raw results
-	statistics.lock.Lock()
-	defer statistics.lock.Unlock()
-	statistics.rawResults = append(statistics.rawResults, workResult)
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	/*
+		log.Println("Add new WorkResult URL=", w.GetURL(),
+			"NumberOfWorkers=", w.GetNumberOfWorkers(),
+			"WorkerID=", w.GetWorkerID(),
+			"ResponseSize=", w.GetSize(),
+			"StatusCode=", w.GetStatusCode(),
+			"StartTime=", w.GetStartTime(),
+			"EndTime=", w.GetEndTime(),
+			"ContentType=", w.GetContentType(),
+		)
+	*/
+
+	s.rawResults = append(s.rawResults, w)
 
 	// initialize start and end time
-	if statistics.numberOfRequests == 0 {
-		statistics.startTime = workResult.StartTime()
-		statistics.endTime = workResult.EndTime()
+	if s.numberOfRequests == 0 {
+		s.startTime = w.GetStartTime()
+		s.endTime = w.GetEndTime()
 	}
 
 	// start time
-	if workResult.StartTime().Before(statistics.startTime) {
-		statistics.startTime = workResult.StartTime()
+	if w.GetStartTime().Before(s.startTime) {
+		s.startTime = w.GetStartTime()
 	}
 
 	// end time
-	if workResult.EndTime().After(statistics.endTime) {
-		statistics.endTime = workResult.EndTime()
+	if w.GetEndTime().After(s.endTime) {
+		s.endTime = w.GetEndTime()
 	}
 
 	// update the total number of requests
-	statistics.numberOfRequests = len(statistics.rawResults)
+	s.numberOfRequests = len(s.rawResults)
 
 	// is successful
-	if workResult.StatusCode() > 199 && workResult.StatusCode() < 400 {
-		statistics.numberOfSuccessfulRequests += 1
+	if w.GetStatusCode() > 199 && w.GetStatusCode() < 400 {
+		s.numberOfSuccessfulRequests += 1
 	} else {
-		statistics.numberOfUnsuccessfulRequests += 1
+		s.numberOfUnsuccessfulRequests += 1
 	}
 
 	// number of workers
-	statistics.numberOfWorkers = workResult.NumberOfWorkers()
+	s.numberOfWorkers = w.GetNumberOfWorkers()
 
 	// number of requests by status code
-	statistics.numberOfRequestsByStatusCode[workResult.StatusCode()] += 1
+	s.numberOfRequestsByStatusCode[w.GetStatusCode()] += 1
 
 	// number of requests by content type
-	statistics.numberOfRequestsByContentType[workResult.ContentType()] += 1
+	s.numberOfRequestsByContentType[w.GetContentType()] += 1
 
 	// update the total duration
-	responseTime := workResult.EndTime().Sub(workResult.StartTime())
-	statistics.totalResponseTime += responseTime
+	responseTime := w.GetEndTime().Sub(w.GetStartTime())
+	s.totalResponseTime += responseTime
 
 	// size
-	statistics.totalSizeInBytes += workResult.Size()
-	averageSizeInBytes := statistics.totalSizeInBytes / statistics.numberOfRequests
+	s.totalSizeInBytes += w.GetSize()
+	averageSizeInBytes := s.totalSizeInBytes / s.numberOfRequests
 
 	// average response time
-	averageResponseTime := time.Duration(statistics.totalResponseTime.Nanoseconds() / int64(statistics.numberOfRequests))
+	averageResponseTime := time.Duration(s.totalResponseTime.Nanoseconds() / int64(s.numberOfRequests))
 
 	// number of requests per second
-	requestsPerSecond := float64(statistics.numberOfRequests) / statistics.endTime.Sub(statistics.startTime).Seconds()
+	requestsPerSecond := float64(s.numberOfRequests) / s.endTime.Sub(s.startTime).Seconds()
 
 	// log messages
-	statistics.logMessages = append(statistics.logMessages, workResult.String())
+	s.logMessages = append(s.logMessages, w.String())
 
 	// create a snapshot
 	snapShot := Snapshot{
 		// times
-		timestamp:           workResult.EndTime(),
+		timestamp:           w.GetEndTime(),
 		averageResponseTime: averageResponseTime,
 
 		// counters
-		numberOfWorkers:               statistics.numberOfWorkers,
-		totalNumberOfRequests:         statistics.numberOfRequests,
-		numberOfSuccessfulRequests:    statistics.numberOfSuccessfulRequests,
-		numberOfUnsuccessfulRequests:  statistics.numberOfUnsuccessfulRequests,
+		numberOfWorkers:               s.numberOfWorkers,
+		totalNumberOfRequests:         s.numberOfRequests,
+		numberOfSuccessfulRequests:    s.numberOfSuccessfulRequests,
+		numberOfUnsuccessfulRequests:  s.numberOfUnsuccessfulRequests,
 		numberOfRequestsPerSecond:     requestsPerSecond,
-		numberOfRequestsByStatusCode:  statistics.numberOfRequestsByStatusCode,
-		numberOfRequestsByContentType: statistics.numberOfRequestsByContentType,
+		numberOfRequestsByStatusCode:  s.numberOfRequestsByStatusCode,
+		numberOfRequestsByContentType: s.numberOfRequestsByContentType,
 
 		// size
-		totalSizeInBytes:   statistics.totalSizeInBytes,
+		totalSizeInBytes:   s.totalSizeInBytes,
 		averageSizeInBytes: averageSizeInBytes,
 	}
 
-	statistics.snapShots = append(statistics.snapShots, snapShot)
+	// pp.Println(snapShot)
 
+	s.snapShots = append(s.snapShots, snapShot)
 	return snapShot
 }
 
-func (statistics *Statistics) LastSnapshot() Snapshot {
-	statistics.lock.RLock()
-	defer statistics.lock.RUnlock()
+func (s *Statistics) LastSnapshot() Snapshot {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
-	lastSnapshotIndex := len(statistics.snapShots) - 1
+	lastSnapshotIndex := len(s.snapShots) - 1
 	if lastSnapshotIndex < 0 {
 		return Snapshot{}
 	}
 
-	return statistics.snapShots[lastSnapshotIndex]
+	return s.snapShots[lastSnapshotIndex]
 }
 
-func (statistics *Statistics) LastLogMessages(count int) []string {
+func (s *Statistics) LastLogMessages(count int) []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
-	statistics.lock.RLock()
-	defer statistics.lock.RUnlock()
-
-	messages, err := getLatestLogMessages(statistics.logMessages, count)
+	messages, err := getLatestLogMessages(s.logMessages, count)
 	if err != nil {
 		panic(err)
 	}
 
 	return messages
-
 }
 
 func getLatestLogMessages(messages []string, count int) ([]string, error) {
-
 	if count < 0 {
 		return nil, fmt.Errorf("The count cannot be negative")
 	}
 
 	numberOfMessges := len(messages)
-
 	if count == numberOfMessges {
 		return messages, nil
 	}
@@ -226,6 +239,5 @@ func getLatestLogMessages(messages []string, count int) ([]string, error) {
 		fillLines := make([]string, count-numberOfMessges)
 		return append(fillLines, messages...), nil
 	}
-
 	panic("Unreachable")
 }

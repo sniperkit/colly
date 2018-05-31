@@ -45,6 +45,8 @@ type Response struct {
 	EndTime time.Time
 	//
 	ContentType string
+	//
+	Err error
 }
 
 // Save writes response body to disk

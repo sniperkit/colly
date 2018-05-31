@@ -31,8 +31,8 @@ type TermUI struct {
 	iops_put_fifo            *Float64Fifo
 	logs_fifo                *StringsFifo
 	statuses                 map[int]uint64
-	M                        sync.RWMutex
 	ch_done                  chan struct{}
+	M                        sync.RWMutex
 }
 
 type StringsFifo struct {
@@ -66,6 +66,7 @@ func (self *StringsFifo) Init(length int) {
 func (self *StringsFifo) Insert(msg string) {
 	self.ch_messages <- msg
 }
+
 func (self *StringsFifo) Get() []string {
 	self.lock.Lock()
 	defer self.lock.Unlock()
@@ -305,7 +306,7 @@ func (self *TermUI) ui_set_get_latency_bar_chart(x, y, w, h int) *ui.BarChart {
 
 func (self *TermUI) ui_get_iops(x, y, w, h int) *ui.LineChart {
 	lc2 := ui.NewLineChart()
-	lc2.BorderLabel = "[GET] iops chart"
+	lc2.BorderLabel = "[GET] IOPS chart"
 	lc2.Mode = "braille"
 
 	lc2.Width = w
@@ -320,7 +321,7 @@ func (self *TermUI) ui_get_iops(x, y, w, h int) *ui.LineChart {
 
 func (self *TermUI) ui_put_iops(x, y, w, h int) *ui.LineChart {
 	lc2 := ui.NewLineChart()
-	lc2.BorderLabel = "[PUT] iops chart"
+	lc2.BorderLabel = "[PUT] IOPS chart"
 	lc2.Mode = "braille"
 
 	lc2.Data = self.iops_put_fifo.Get()
@@ -335,7 +336,7 @@ func (self *TermUI) ui_put_iops(x, y, w, h int) *ui.LineChart {
 
 func (self *TermUI) ui_post_iops(x, y, w, h int) *ui.LineChart {
 	lc2 := ui.NewLineChart()
-	lc2.BorderLabel = "[POST] iops chart"
+	lc2.BorderLabel = "[POST] IOPS chart"
 	lc2.Mode = "braille"
 
 	lc2.Data = self.iops_post_fifo.Get()
@@ -353,8 +354,8 @@ func (self *TermUI) Update_requests(duration time.Duration, post_count, put_coun
 	if seconds == 0 {
 		seconds = 1
 	}
-	post_iops := post_count / seconds
 	get_iops := get_count / seconds
+	post_iops := post_count / seconds
 	put_iops := put_count / seconds
 	if get_iops > 0 {
 		self.iops_get_fifo.Insert(float64(get_iops) / 1000)
@@ -365,9 +366,9 @@ func (self *TermUI) Update_requests(duration time.Duration, post_count, put_coun
 	if put_iops > 0 {
 		self.iops_put_fifo.Insert(float64(put_iops) / 1000)
 	}
-	self.widget_put_iops_chart.Data = self.iops_put_fifo.Get()
-	self.widget_post_iops_chart.Data = self.iops_post_fifo.Get()
 	self.widget_get_iops_chart.Data = self.iops_get_fifo.Get()
+	self.widget_post_iops_chart.Data = self.iops_post_fifo.Get()
+	self.widget_put_iops_chart.Data = self.iops_put_fifo.Get()
 }
 
 func (self *TermUI) Refresh_log() {

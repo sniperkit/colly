@@ -16,8 +16,10 @@ import (
 
 // stats/metrics engine
 var (
-	xStatsEngine *stats.Engine
-	xStatsTags   []*stats.Tag
+	xStatsEngine                 *stats.Engine
+	xStatsTags                   []*stats.Tag
+	allStatisticsHaveBeenUpdated chan bool
+	// allURLsHaveBeenVisited       chan bool
 )
 
 // stats storage client(s)

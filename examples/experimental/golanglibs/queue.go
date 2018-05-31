@@ -30,8 +30,9 @@ var (
 )
 
 var (
-	queueConsumerThreads int = 2
-	queueMaxSize         int = 100000
+	queueConsumerThreads int = 4
+	numberOfWorkers      int = 4
+	queueMaxSize         int = 1000000
 	// queueStorage         storage.Storage // Storage interface
 )
 
