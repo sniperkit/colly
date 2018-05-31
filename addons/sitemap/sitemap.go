@@ -4,8 +4,12 @@ import (
 	"sync"
 )
 
+type SitemapEntries struct {
+	Location string `xml:"loc"`
+}
+
 type Sitemap struct {
-	Location      string `default:''`
+	Location      string `default:'' xml:"loc"`
 	CacheDir      string `default:'./shared/storage/cache/sitemaps'`
 	ExportDir     string `default:'./shared/storage/export/sitemaps'`
 	IsCache       bool   `default:'true'`
