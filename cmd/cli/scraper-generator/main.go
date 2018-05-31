@@ -24,6 +24,8 @@ import (
 	"github.com/jawher/mow.cli"
 )
 
+var version = "0.0.1-alpha"
+
 var scraperHeadTemplate = `package main
 
 import (
