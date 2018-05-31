@@ -10,6 +10,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 // Mail is the container of a single e-mail
 type Mail struct {
 	Title   string

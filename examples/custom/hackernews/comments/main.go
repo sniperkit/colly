@@ -11,6 +11,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 type comment struct {
 	Author  string `selector:"a.hnuser"`
 	URL     string `selector:".age a[href]" attr:"href"`

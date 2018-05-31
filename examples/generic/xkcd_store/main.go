@@ -8,6 +8,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 func main() {
 	fName := "xkcd_store_items.csv"
 	file, err := os.Create(fName)

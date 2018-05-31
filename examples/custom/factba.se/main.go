@@ -9,6 +9,7 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
 var baseSearchURL = "https://factba.se/json/json-transcript.php?q=&f=&dt=&p="
 var baseTranscriptURL = "https://factba.se/transcript/"
 

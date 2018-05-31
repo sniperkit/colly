@@ -12,6 +12,8 @@ import (
 // DATE_FORMAT default format date used in openedx
 const DATE_FORMAT = "Jan 02, 2006"
 
+var version = "0.0.1-alpha"
+
 // Course store openedx course data
 type Course struct {
 	CourseID  string

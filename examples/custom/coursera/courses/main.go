@@ -9,6 +9,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 // Course stores information about a coursera course
 type Course struct {
 	Title       string

@@ -13,6 +13,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 // found in https://www.instagram.com/static/bundles/en_US_Commons.js/68e7390c5938.js
 // included from profile page
 const instagramQueryId = "42323d64886122307be10013ad2dcc45"

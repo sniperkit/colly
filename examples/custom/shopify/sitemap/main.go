@@ -6,6 +6,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 func main() {
 	// Array containing all the known URLs in a sitemap
 	knownUrls := []string{}

@@ -14,6 +14,8 @@ import (
 	sm "github.com/sniperkit/colly/addons/sitemap"
 )
 
+var version = "0.0.1-alpha"
+
 var (
 	isDebug         bool   = false
 	isStrict        bool   = true

@@ -1,14 +1,9 @@
-# colly-plugin-example
+# {{.APP_NAME}}
 
 ## Purpose
 
-Showcase of a web scraper used as a go plugin
+{{.APP_DESCRIPTION}}
 
-## Build status [![Build Status](https://travis-ci.org/prusya/colly-plugin-example.svg?branch=master)](https://travis-ci.org/prusya/colly-plugin-example)
-
-## Description
-
-Use https://github.com/gocolly/colly in a plugin
 
 ## Requirements
 
@@ -17,17 +12,17 @@ go 1.8+
 ## Installation
 
 ```bash
-go get -t -v github.com/prusya/colly-plugin-example
+go get -t -v {{.APP_PKG_URI}}
 ```
 
 ## Compilation
 
-Inside your GOPATH directory
+Build as executable and plugin:
 
 ```bash
-cd src/github.com/prusya/colly-plugin-example
-go build -buildmode=plugin -o plugins/bitcq/bitcq.so plugins/bitcq/main.go
-go build .
+cd $GOPATH/src/{{.APP_PKG_URI}}
+go build -buildmode=plugin -o plugins/{{.APP_NAME}}/{{.APP_NAME}}.so main.go
+go build -o ../../../bin/{{.APP_NAME}} main.go 
 ```
 
 ## Testing

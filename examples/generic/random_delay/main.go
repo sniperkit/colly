@@ -8,6 +8,8 @@ import (
 	"github.com/sniperkit/colly/pkg/debug"
 )
 
+var version = "0.0.1-alpha"
+
 func main() {
 	url := "https://httpbin.org/delay/2"
 

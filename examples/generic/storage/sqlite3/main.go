@@ -9,6 +9,8 @@ import (
 	"github.com/sniperkit/colly/pkg/queue"
 )
 
+var version = "0.0.1-alpha"
+
 func main() {
 	// Instantiate collector
 	c := colly.NewCollector(

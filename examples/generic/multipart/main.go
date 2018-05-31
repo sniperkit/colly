@@ -10,6 +10,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 func generateFormData() map[string][]byte {
 	f, _ := os.Open("gocolly.jpg")
 	defer f.Close()

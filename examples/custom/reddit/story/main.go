@@ -8,6 +8,8 @@ import (
 	"github.com/sniperkit/colly/pkg"
 )
 
+var version = "0.0.1-alpha"
+
 type item struct {
 	StoryURL  string
 	Source    string

@@ -8,6 +8,8 @@ import (
 	"github.com/sniperkit/colly/pkg/web/proxy"
 )
 
+var version = "0.0.1-alpha"
+
 func main() {
 	// Instantiate default collector
 	c := colly.NewCollector(colly.AllowURLRevisit())
