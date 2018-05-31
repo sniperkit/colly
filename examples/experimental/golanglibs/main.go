@@ -8,8 +8,6 @@ import (
 	"github.com/sniperkit/colly/pkg"
 	cfg "github.com/sniperkit/colly/pkg/config"
 	"github.com/sniperkit/colly/pkg/queue"
-	// "github.com/sniperkit/colly/pkg/web/proxy"
-	// "github.com/sniperkit/colly/pkg/debug"
 
 	sm "github.com/sniperkit/colly/addons/sitemap"
 )
