@@ -1,11 +1,21 @@
 package: github.com/sniperkit/colly
+ignore:
+- gob
 import:
 - package: github.com/BurntSushi/toml
 - package: github.com/DataDog/zstd
 - package: github.com/PuerkitoBio/goquery
 - package: github.com/agrison/mxj
+- package: github.com/alessio/shellescape
 - package: github.com/antchfx/htmlquery
 - package: github.com/antchfx/xmlquery
+- package: github.com/asciimoo/morty
+  subpackages:
+  - contenttype
+- package: github.com/asciimoo/wuzz
+  subpackages:
+  - config
+  - formatter
 - package: github.com/birkelund/boltdbcache
 - package: github.com/bndr/gotabulate
 - package: github.com/go-redis/redis
@@ -23,12 +33,17 @@ import:
   - dialects/postgres
   - dialects/sqlite
 - package: github.com/jmoiron/sqlx
+- package: github.com/jroimartin/gocui
 - package: github.com/json-iterator/go
 - package: github.com/kennygrant/sanitize
 - package: github.com/klaidliadon/go-couch-cache
 - package: github.com/klaidliadon/go-memcached
 - package: github.com/klaidliadon/go-redis-cache
+- package: github.com/mattn/go-runewidth
 - package: github.com/mattn/go-sqlite3
+- package: github.com/mitchellh/go-homedir
+- package: github.com/nsf/termbox-go
+- package: github.com/nwidger/jsoncolor
 - package: github.com/pquerna/ffjson
   subpackages:
   - ffjson
@@ -61,13 +76,19 @@ import:
   - general
   - protocol
   - raw
+- package: github.com/tidwall/gjson
+- package: github.com/valyala/fasthttp
 - package: github.com/willf/bloom
 - package: github.com/x-cray/logrus-prefixed-formatter
+- package: github.com/x86kernel/htmlcolor
 - package: golang.org/x/net
   subpackages:
   - html
   - html/charset
   - proxy
+- package: golang.org/x/text
+  subpackages:
+  - encoding
 - package: google.golang.org/appengine
   subpackages:
   - urlfetch

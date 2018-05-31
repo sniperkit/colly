@@ -10,8 +10,11 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	jsoniter "github.com/json-iterator/go"
 	yaml "gopkg.in/yaml.v2"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // UnmatchedTomlKeysError errors are returned by the Load function when
 // ErrorOnUnmatchedKeys is set to true and there are unmatched keys in the input
@@ -21,13 +24,13 @@ type UnmatchedTomlKeysError struct {
 }
 
 func (configor *Configor) getENVPrefix(config interface{}) string {
-	if configor.Config.ENVPrefix == "" {
+	if configor.Setting.ENVPrefix == "" {
 		if prefix := os.Getenv("CONFIGOR_ENV_PREFIX"); prefix != "" {
 			return prefix
 		}
 		return DefaultEnvPrefix
 	}
-	return configor.Config.ENVPrefix
+	return configor.Setting.ENVPrefix
 }
 
 func getConfigurationFileWithENVPrefix(file, env string) (string, error) {
@@ -51,7 +54,7 @@ func getConfigurationFileWithENVPrefix(file, env string) (string, error) {
 func (configor *Configor) getConfigurationFiles(files ...string) []string {
 	var results []string
 
-	if configor.Config.Debug || configor.Config.Verbose {
+	if configor.Setting.Debug || configor.Setting.Verbose {
 		fmt.Printf("Current environment: '%v'\n", configor.GetEnvironment())
 	}
 
@@ -182,14 +185,14 @@ func (configor *Configor) processTags(config interface{}, prefixes ...string) er
 			envNames = []string{envName}
 		}
 
-		if configor.Config.Verbose {
+		if configor.Setting.Verbose {
 			fmt.Printf("Trying to load struct `%v`'s field `%v` from env %v\n", configType.Name(), fieldStruct.Name, strings.Join(envNames, ", "))
 		}
 
 		// Load From Shell ENV
 		for _, env := range envNames {
 			if value := os.Getenv(env); value != "" {
-				if configor.Config.Debug || configor.Config.Verbose {
+				if configor.Setting.Debug || configor.Setting.Verbose {
 					fmt.Printf("Loading configuration for struct `%v`'s field `%v` from env %v...\n", configType.Name(), fieldStruct.Name, env)
 				}
 				if err := yaml.Unmarshal([]byte(value), field.Addr().Interface()); err != nil {
@@ -233,7 +236,5 @@ func (configor *Configor) processTags(config interface{}, prefixes ...string) er
 	}
 	return nil
 }
-
-// export config struct with imported values
 
 // export config struct with default values

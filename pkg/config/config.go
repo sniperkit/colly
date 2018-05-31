@@ -6,10 +6,10 @@ import (
 )
 
 type Configor struct {
-	*Config
+	*Setting
 }
 
-type Config struct {
+type Setting struct {
 	Environment string
 	ENVPrefix   string
 	Debug       bool
@@ -22,9 +22,9 @@ type Config struct {
 }
 
 // New initialize a Configor
-func New(config *Config) *Configor {
+func New(config *Setting) *Configor {
 	if config == nil {
-		config = &Config{}
+		config = &Setting{}
 	}
 
 	if os.Getenv("CONFIGOR_DEBUG_MODE") != "" {
@@ -35,7 +35,7 @@ func New(config *Config) *Configor {
 		config.Verbose = true
 	}
 
-	return &Configor{Config: config}
+	return &Configor{Setting: config}
 }
 
 // GetEnvironment get environment
@@ -64,13 +64,13 @@ func (configor *Configor) GetErrorOnUnmatchedKeys() bool {
 // Load will unmarshal configurations to struct from files that you provide
 func (configor *Configor) Load(config interface{}, files ...string) error {
 	defer func() {
-		if configor.Config.Debug || configor.Config.Verbose {
+		if configor.Setting.Debug || configor.Setting.Verbose {
 			fmt.Printf("Configuration:\n  %#v\n", config)
 		}
 	}()
 
 	for _, file := range configor.getConfigurationFiles(files...) {
-		if configor.Config.Debug || configor.Config.Verbose {
+		if configor.Setting.Debug || configor.Setting.Verbose {
 			fmt.Printf("Loading configurations from file '%v'...\n", file)
 		}
 		if err := processFile(config, file, configor.GetErrorOnUnmatchedKeys()); err != nil {

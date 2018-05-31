@@ -23,6 +23,11 @@ import (
 	"sync/atomic"
 )
 
+/*
+	Refs:
+	- https://play.golang.org/p/q2KUHa_qiP
+*/
+
 // Request is the representation of a HTTP request made by a Collector
 type Request struct {
 	// URL is the parsed URL of the HTTP request

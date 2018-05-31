@@ -13,8 +13,10 @@
 // limitations under the License.
 
 /*
-	Check:
+	Refs:
 	- https://github.com/sniperkit/colly/pkg/pull/148/files
+	- https://github.com/vosmith/colly/tree/http_backend
+	-
 */
 
 // Package colly implements a HTTP scraping framework

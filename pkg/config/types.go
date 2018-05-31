@@ -4,7 +4,7 @@ import (
 	"regexp"
 )
 
-type CollectorConfig struct {
+type Config struct {
 	// UserAgent is the User-Agent string used by HTTP requests
 	UserAgent string `default:'colly - https://github.com/sniperkit/colly'`
 
