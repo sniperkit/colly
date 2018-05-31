@@ -16,6 +16,8 @@ package colly
 
 import (
 	"errors"
+	"io"
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -156,4 +158,46 @@ func getDOMValue(s *goquery.Selection, attr string) string {
 	}
 	attrV, _ := s.Attr(attr)
 	return attrV
+}
+
+func getDependentRequests(baseURL url.URL, input io.Reader) ([]url.URL, error) {
+	doc, err := goquery.NewDocumentFromReader(input)
+	if err != nil {
+		return nil, err
+	}
+
+	var urls []url.URL
+	// base url
+	base, _ := doc.Find("base[href]").Attr("href")
+	if base == "" {
+		base = baseURL.Scheme + "://" + baseURL.Host
+	} else if strings.HasPrefix(base, "/") {
+		base = baseURL.Scheme + "://" + baseURL.Host + base
+	}
+
+	// get all links
+	doc.Find("a[href]").Each(func(i int, s *goquery.Selection) {
+		// For each item found, get the band and title
+		href, _ := s.Attr("href")
+		if strings.HasPrefix(href, "/") {
+			href = baseURL.Scheme + "://" + baseURL.Host + href
+		} else if !strings.HasPrefix(href, "http://") && !strings.HasPrefix(href, "https://") {
+			href = strings.TrimSuffix(base, "/") + "/" + href
+		}
+		// cut off hashes
+		if strings.Contains(href, "#") {
+			hashPosition := strings.Index(href, "#")
+			href = href[0 : hashPosition-1]
+		}
+		hrefURL, err := url.Parse(href)
+		if err != nil {
+			return
+		}
+		// ignore external links
+		if hrefURL.Host != baseURL.Host {
+			return
+		}
+		urls = append(urls, *hrefURL)
+	})
+	return urls, nil
 }

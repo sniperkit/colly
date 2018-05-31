@@ -60,7 +60,7 @@ import (
 
 var (
 	collectorCounter uint32
-	collectorConfig  *cfg.CollectorConfig
+	collectorConfig  *cfg.Config
 	json             = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
@@ -68,7 +68,7 @@ var (
 type Collector struct {
 
 	// Collector's settings
-	cfg.CollectorConfig
+	cfg.Config
 
 	// RedirectHandler allows control on how a redirect will be managed
 	RedirectHandler func(req *http.Request, via []*http.Request) error

@@ -25,7 +25,7 @@ func NewCollector(options ...func(*Collector)) *Collector {
 }
 
 // NewCollector creates a new Collector instance with cfg.Default configuration
-func NewCollectorWithConfig(cfg *cfg.CollectorConfig) (c *Collector) {
+func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
 	c = &Collector{}
 	if cfg != nil {
 

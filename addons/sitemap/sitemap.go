@@ -1,34 +1,12 @@
 package sitemap
 
 import (
+	"encoding/xml"
+	"net/url"
+	"os"
+	"strings"
 	"sync"
 )
-
-type SitemapEntries struct {
-	Location string `xml:"loc"`
-}
-
-type Sitemap struct {
-	Location      string `default:'' xml:"loc"`
-	CacheDir      string `default:'./shared/storage/cache/sitemaps'`
-	ExportDir     string `default:'./shared/storage/export/sitemaps'`
-	IsCache       bool   `default:'true'`
-	ExportEntries bool   `default:'false'`
-	DryMode       bool   `default:'false'`
-	EnsureDirs    bool   `default:'true'`
-	entries       []string
-	converted     map[string]string
-	prefixPath    string
-	localPath     string
-	size          int
-	isValid       bool
-	isIndex       bool // index or sitemap
-	isCompressed  bool
-	isLocalFile   bool // if false, expecting sitemap as []byte or string
-	isDone        bool
-	lock          *sync.RWMutex
-	wg            *sync.WaitGroup
-}
 
 func NewWithConfig(s *Sitemap) (*Sitemap, error) {
 	s.lock = &sync.RWMutex{}
@@ -60,4 +38,44 @@ func (s *Sitemap) Read() error {
 
 func (s *Sitemap) Print(format string) error {
 	return errInvalidContent
+}
+
+func GetXMLSitemap(xmlSitemapURL url.URL) (XMLSitemap, error) {
+	response, readErr := readURL(xmlSitemapURL)
+	if readErr != nil {
+		return XMLSitemap{}, readErr
+	}
+
+	if !strings.Contains(string(response.GetBody()), "</urlset>") {
+		return XMLSitemap{}, XmlSitemapError{"Invalid content"}
+	}
+
+	var urlSet XMLSitemap
+	unmarshalError := xml.Unmarshal(response.GetBody(), &urlSet)
+	if unmarshalError != nil {
+		return XMLSitemap{}, unmarshalError
+	}
+	return urlSet, nil
+}
+
+func (sitemapIndexError XmlSitemapError) Error() string {
+	return sitemapIndexError.message
+}
+
+func isInvalidXMLSitemapContent(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	return err.Error() == "Invalid content"
+}
+
+func CreateDirs(dirs []string) (res map[string]bool) {
+	res = make(map[string]bool, len(dirs))
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0777); err == nil {
+			res[dir] = true
+		}
+	}
+	return
 }

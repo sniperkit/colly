@@ -21,12 +21,18 @@ import (
 	"net/url"
 	"strings"
 	"sync/atomic"
+
+	backoff "github.com/jpillora/backoff"
 )
 
 /*
 	Refs:
 	- https://play.golang.org/p/q2KUHa_qiP
 */
+
+var (
+	xBackoff *backoff.Backoff
+)
 
 // Request is the representation of a HTTP request made by a Collector
 type Request struct {

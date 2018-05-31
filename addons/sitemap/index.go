@@ -11,23 +11,15 @@ func GetSitemapIndex(xmlSitemapURL url.URL) (SitemapIndex, error) {
 	if readErr != nil {
 		return SitemapIndex{}, readErr
 	}
-	if !strings.Contains(string(response.Body()), "</sitemapindex>") {
+	if !strings.Contains(string(response.GetBody()), "</sitemapindex>") {
 		return SitemapIndex{}, SitemapIndexError{"Invalid content"}
 	}
 	var sitemapIndex SitemapIndex
-	unmarshalError := xml.Unmarshal(response.Body(), &sitemapIndex)
+	unmarshalError := xml.Unmarshal(response.GetBody(), &sitemapIndex)
 	if unmarshalError != nil {
 		return SitemapIndex{}, unmarshalError
 	}
 	return sitemapIndex, nil
-}
-
-type SitemapIndex struct {
-	Sitemaps []URL `xml:"sitemap"`
-}
-
-type SitemapIndexError struct {
-	message string
 }
 
 func (sitemapIndexError SitemapIndexError) Error() string {

@@ -20,8 +20,8 @@ import (
 	"io/ioutil"
 	"mime"
 	"net/http"
-	// "sync"
 	"strings"
+	"time"
 
 	"github.com/saintfish/chardet"
 	"golang.org/x/net/html/charset"
@@ -39,7 +39,12 @@ type Response struct {
 	Request *Request
 	// Headers contains the Response's HTTP headers
 	Headers *http.Header
-	// lock *sync.RWMutex
+	//
+	StartTime time.Time
+	//
+	EndTime time.Time
+	//
+	ContentType string
 }
 
 // Save writes response body to disk
@@ -50,6 +55,47 @@ func (r *Response) Save(fileName string) error {
 // GetBody returns response body as byte array
 func (r *Response) GetBody() []byte {
 	return r.Body
+}
+
+func (r *Response) GetSize() int {
+	return len(r.Body)
+}
+
+func (r *Response) GetContentType() string {
+	return r.ContentType
+}
+
+func (r *Response) GetStatusCode() int {
+	return r.StatusCode
+}
+
+func (r *Response) GetStartTime() time.Time {
+	return r.StartTime
+}
+
+func (r *Response) GetEndTime() time.Time {
+	return r.EndTime
+}
+
+func (r *Response) IsHTML() bool {
+	return strings.HasPrefix(r.ContentType, "text/html")
+}
+
+// to finish properly
+func (r *Response) IsXML() bool {
+	return strings.HasPrefix(r.ContentType, "application/xml")
+}
+
+func (r *Response) IsCSV() bool {
+	return strings.HasPrefix(r.ContentType, "application/csv")
+}
+
+func (r *Response) IsJSON() bool {
+	return strings.HasPrefix(r.ContentType, "application/json")
+}
+
+func (r *Response) IsYAML() bool {
+	return strings.HasPrefix(r.ContentType, "application/yaml")
 }
 
 // FileName returns the sanitized file name parsed from "Content-Disposition"

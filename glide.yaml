@@ -1,5 +1,6 @@
 package: github.com/sniperkit/colly
 ignore:
+- github.com/jbrukh/bayesian
 - gob
 import:
 - package: github.com/BurntSushi/toml
