@@ -447,12 +447,10 @@ func (self *TermUI) Init_term_ui(cfg *cfg.Config) chan struct{} {
 			ui.NewCol(6, 0, self.widget_sys_info),
 			ui.NewCol(6, 0, self.widget_server_info),
 		),
-		/*
-			ui.NewRow(
-				ui.NewCol(6, 0, self.widget_put_iops_chart),
-				ui.NewCol(6, 0, self.widget_put_latency),
-			),
-		*/
+		ui.NewRow(
+			ui.NewCol(6, 0, self.widget_put_iops_chart),
+			ui.NewCol(6, 0, self.widget_put_latency),
+		),
 		ui.NewRow(
 			ui.NewCol(6, 0, self.widget_post_iops_chart),
 			ui.NewCol(6, 0, self.widget_post_latency),

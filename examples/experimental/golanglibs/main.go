@@ -204,27 +204,18 @@ func main() {
 	*/
 
 	// On every a element which has href attribute call callback
-	scraper.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		absLink := e.Request.AbsoluteURL(link)
-		cds.Append("links", e.Request.AbsoluteURL(link))
-		scraper.Visit(e.Request.AbsoluteURL(link))
+	/*
+		scraper.OnHTML("a[href]", func(e *colly.HTMLElement) {
+			link := e.Attr("href")
+			absLink := e.Request.AbsoluteURL(link)
+			cds.Append("links", e.Request.AbsoluteURL(link))
+			scraper.Visit(e.Request.AbsoluteURL(link))
 
-		if !enable_ui {
-			log.Infof("[LINK] link='%s', absLink='%s'\n", link, absLink)
-		} else {
-			// tui.WorkResult{}
-			xResults <- tui.WorkResult{
-				URL:             *e.Request.URL,
-				NumberOfWorkers: numberOfWorkers,
-				ResponseSize:    e.Response.GetSize(),
-				StatusCode:      e.Response.GetStatusCode(),
-				StartTime:       e.Response.GetStartTime(),
-				EndTime:         e.Response.GetEndTime(),
-				ContentType:     e.Response.GetContentType(),
+			if !enable_ui {
+				log.Infof("[LINK] link='%s', absLink='%s'\n", link, absLink)
 			}
-		}
-	})
+		})
+	*/
 
 	// On every a HTML element which has name attribute call callback
 	scraper.OnHTML(`div.col-md-8`, func(e *colly.HTMLElement) {
@@ -269,24 +260,74 @@ func main() {
 			// Enqueue Libraries.IO bindings
 		})
 
-		if len(meta) > 0 {
-			// absLink := e.Request.AbsoluteURL(e.Request.URL)
-			xResults <- tui.WorkResult{
-				URL:             *e.Request.URL,
-				NumberOfWorkers: numberOfWorkers,
-				ResponseSize:    e.Response.GetSize(),
-				StatusCode:      e.Response.GetStatusCode(),
-				StartTime:       e.Response.GetStartTime(),
-				EndTime:         e.Response.GetEndTime(),
-				ContentType:     e.Response.GetContentType(),
+		/*
+			if len(meta) > 0 {
+				// absLink := e.Request.AbsoluteURL(e.Request.URL)
+				xResults <- tui.WorkResult{
+					URL:             *e.Request.URL,
+					NumberOfWorkers: numberOfWorkers,
+					ResponseSize:    e.Response.GetSize(),
+					StatusCode:      e.Response.GetStatusCode(),
+					StartTime:       e.Response.GetStartTime(),
+					EndTime:         e.Response.GetEndTime(),
+					ContentType:     e.Response.GetContentType(),
+				}
 			}
-		}
+		*/
 
 	})
 
-	scraper.OnRequest(func(r *colly.Request) {
+	/*
+		c.OnResponse(func(r *colly.Response) {
+			if strings.Index(r.Headers.Get("Content-Type"), "image") > -1 {
+				r.Save(outputDir + r.FileName())
+				return
+			}
+
+			if strings.Index(r.Headers.Get("Content-Type"), "json") == -1 {
+				return
+			}
+
+			data := &nextPageData{}
+			err := json.Unmarshal(r.Body, data)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, obj := range data.Data.User.Container.Edges {
+				// skip videos
+				if obj.Node.IsVideo {
+					continue
+				}
+				c.Visit(obj.Node.ImageURL)
+			}
+			if data.Data.User.Container.PageInfo.NextPage {
+				nextPageVars := fmt.Sprintf(nextPagePayload, actualUserId, data.Data.User.Container.PageInfo.EndCursor)
+				r.Request.Ctx.Put("variables", nextPageVars)
+				u := fmt.Sprintf(
+					nextPageURL,
+					requestID,
+					url.QueryEscape(nextPageVars),
+				)
+				log.Println("Next page found", u)
+				r.Request.Visit(u)
+			}
+		})
+	*/
+
+	scraper.OnResponse(func(r *colly.Response) {
 		if !enable_ui {
-			log.Infoln("[REQUEST] url=", r.URL.String())
+			log.Infoln("[REQUEST] url=", r.Request.URL.String())
+		} else {
+			xResults <- tui.WorkResult{
+				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
+				NumberOfWorkers: numberOfWorkers,
+				ResponseSize:    r.GetSize(),
+				StatusCode:      r.GetStatusCode(),
+				StartTime:       r.GetStartTime(),
+				EndTime:         r.GetEndTime(),
+				ContentType:     r.GetContentType(),
+			}
 		}
 	})
 
@@ -294,9 +335,8 @@ func main() {
 		if !enable_ui {
 			log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
 		} else {
-			// absLink := r.Request.AbsoluteURL(r.Request.URL.String())
 			xResults <- tui.WorkResult{
-				URL:             *r.Request.URL,
+				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
 				NumberOfWorkers: numberOfWorkers,
 				ResponseSize:    r.GetSize(),
 				StatusCode:      r.GetStatusCode(),
@@ -343,12 +383,13 @@ func main() {
 		q.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i)) // Add URLs to the queue
 	}
 
-	links, err := linksFromCSV(sitemapURL)
-	check(err)
-
-	for _, link := range links {
-		q.AddURL(link)
-	}
+	/*
+		links, err := linksFromCSV(sitemapURL)
+		check(err)
+		for _, link := range links {
+			q.AddURL(link)
+		}
+	*/
 
 	//go func() {
 	/*

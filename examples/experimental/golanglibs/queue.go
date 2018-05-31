@@ -25,14 +25,14 @@ import (
 // collector's queues defaults
 var (
 	defaultQueueConsumerThreads int    = 2
-	defaultQueueMaxSize         int    = 100000
+	defaultQueueMaxSize         int    = 10000
 	defaultQueueStorageEngine   string = "InMemory" // Available: InMemory, Redis, SQlite3, Badger KV or Mysql
 )
 
 var (
 	queueConsumerThreads int = 4
 	numberOfWorkers      int = 4
-	queueMaxSize         int = 1000000
+	queueMaxSize         int = 10000
 	// queueStorage         storage.Storage // Storage interface
 )
 

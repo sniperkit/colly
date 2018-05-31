@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/sasile/termui"
@@ -16,67 +15,85 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 
 	var snapshots []Snapshot
 
+	mimeTypes := termui.NewPar("")
+	mimeTypes.Height = 3
+	mimeTypes.TextFgColor = termui.ColorWhite
+	mimeTypes.BorderLabel = "Mime Types:"
+	mimeTypes.BorderFg = termui.ColorCyan
+	mimeTypes.Y = 3
+
+	patternsCount := termui.NewPar("")
+	patternsCount.Height = 3
+	patternsCount.TextFgColor = termui.ColorWhite
+	patternsCount.BorderLabel = "Total Patterns:"
+	patternsCount.BorderFg = termui.ColorCyan
+	patternsCount.Y = 3
+
 	logWindow := termui.NewList()
 	logWindow.ItemFgColor = termui.ColorYellow
-	logWindow.BorderLabel = "Log"
+	logWindow.BorderLabel = "Log:"
 	logWindow.Height = 22
-	logWindow.Y = 0
+	// logWindow.Y = 3
+
+	logParser := termui.NewList()
+	logParser.ItemFgColor = termui.ColorYellow
+	logParser.BorderLabel = "Patterns:"
+	logParser.Height = 22
+	// logParser.Y = 3
 
 	totalBytesDownloaded := termui.NewPar("")
 	totalBytesDownloaded.Height = 3
 	totalBytesDownloaded.TextFgColor = termui.ColorWhite
-	totalBytesDownloaded.BorderLabel = "Data downloaded"
+	totalBytesDownloaded.BorderLabel = "Data downloaded:"
 	totalBytesDownloaded.BorderFg = termui.ColorCyan
 
 	totalNumberOfRequests := termui.NewPar("")
 	totalNumberOfRequests.Height = 3
 	totalNumberOfRequests.TextFgColor = termui.ColorWhite
-	totalNumberOfRequests.BorderLabel = "URLs crawled"
+	totalNumberOfRequests.BorderLabel = "URLs crawled:"
 	totalNumberOfRequests.BorderFg = termui.ColorCyan
 
 	requestsPerSecond := termui.NewPar("")
 	requestsPerSecond.Height = 3
 	requestsPerSecond.TextFgColor = termui.ColorWhite
-	requestsPerSecond.BorderLabel = "URLs/second"
+	requestsPerSecond.BorderLabel = "URLs/second:"
 	requestsPerSecond.BorderFg = termui.ColorCyan
 
 	averageResponseTime := termui.NewPar("")
 	averageResponseTime.Height = 3
 	averageResponseTime.TextFgColor = termui.ColorWhite
-	averageResponseTime.BorderLabel = "Average response time"
+	averageResponseTime.BorderLabel = "Average response time:"
 	averageResponseTime.BorderFg = termui.ColorCyan
 
 	numberOfWorkers := termui.NewPar("")
 	numberOfWorkers.Height = 3
 	numberOfWorkers.TextFgColor = termui.ColorWhite
-	numberOfWorkers.BorderLabel = "Number of workers"
+	numberOfWorkers.BorderLabel = "Number of workers:"
 	numberOfWorkers.BorderFg = termui.ColorCyan
 
 	averageSizeInBytes := termui.NewPar("")
 	averageSizeInBytes.Height = 3
 	averageSizeInBytes.TextFgColor = termui.ColorWhite
-	averageSizeInBytes.BorderLabel = "Average response size"
+	averageSizeInBytes.BorderLabel = "Average response size:"
 	averageSizeInBytes.BorderFg = termui.ColorCyan
 
 	numberOfErrors := termui.NewPar("")
 	numberOfErrors.Height = 3
 	numberOfErrors.TextFgColor = termui.ColorWhite
-	numberOfErrors.BorderLabel = "Number of 4xx errors"
+	numberOfErrors.BorderLabel = "Number of 4xx errors:"
 	numberOfErrors.BorderFg = termui.ColorCyan
 
 	elapsedTime := termui.NewPar("")
 	elapsedTime.Height = 3
 	elapsedTime.TextFgColor = termui.ColorWhite
-	elapsedTime.BorderLabel = "Elapsed time"
+	elapsedTime.BorderLabel = "Elapsed time:"
 	elapsedTime.BorderFg = termui.ColorCyan
 
 	draw := func() {
-
 		snapshot := stats.LastSnapshot()
 
 		// ignore empty updates
 		if snapshot.Timestamp().IsZero() {
-			log.Println("ignore empty updates...")
 			return
 		}
 
@@ -84,7 +101,6 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 		if len(snapshots) > 0 {
 			previousSnapShot := snapshots[len(snapshots)-1]
 			if snapshot.Timestamp() == previousSnapShot.Timestamp() {
-				log.Println("don't update if there is no new snapshot available...")
 				return
 			}
 		}
@@ -125,7 +141,12 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 
 	termui.Body.AddRows(
 		termui.NewRow(
-			termui.NewCol(12, 0, logWindow),
+			termui.NewCol(6, 0, mimeTypes),
+			termui.NewCol(6, 0, patternsCount),
+		),
+		termui.NewRow(
+			termui.NewCol(7, 0, logWindow),
+			termui.NewCol(5, 0, logParser),
 		),
 		termui.NewRow(
 			termui.NewCol(3, 0, totalBytesDownloaded),
@@ -142,7 +163,6 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 	)
 
 	termui.Body.Align()
-
 	termui.Render(termui.Body)
 
 	termui.Handle("/sys/wnd/resize", func(e termui.Event) {
@@ -153,7 +173,7 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 	})
 
 	termui.Handle("/sys/kbd/q", func(termui.Event) {
-		log.Println("touch 'q' is pressed")
+		// log.Println("touch 'q' is pressed")
 		stopTheCrawler <- true
 		termui.StopLoop()
 	})

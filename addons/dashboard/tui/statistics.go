@@ -105,18 +105,6 @@ func (s *Statistics) Add(w WorkResult) Snapshot {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	/*
-		log.Println("Add new WorkResult URL=", w.GetURL(),
-			"NumberOfWorkers=", w.GetNumberOfWorkers(),
-			"WorkerID=", w.GetWorkerID(),
-			"ResponseSize=", w.GetSize(),
-			"StatusCode=", w.GetStatusCode(),
-			"StartTime=", w.GetStartTime(),
-			"EndTime=", w.GetEndTime(),
-			"ContentType=", w.GetContentType(),
-		)
-	*/
-
 	s.rawResults = append(s.rawResults, w)
 
 	// initialize start and end time
@@ -173,6 +161,7 @@ func (s *Statistics) Add(w WorkResult) Snapshot {
 
 	// create a snapshot
 	snapShot := Snapshot{
+
 		// times
 		timestamp:           w.GetEndTime(),
 		averageResponseTime: averageResponseTime,
