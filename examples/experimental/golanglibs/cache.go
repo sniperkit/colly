@@ -102,7 +102,9 @@ func cloneCacheHTTP() httpcache.Cache {
 
 func newCacheWithTransport(engine string, prefixPath string) (httpcache.Cache, *httpcache.Transport) {
 	cacheBackend, err := newCacheBackend(engine, prefixPath)
-	panic(err)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
 
 	cacheTransport := httpcache.NewTransport(cacheBackend)
 	cacheTransport.MarkCachedResponses = true
