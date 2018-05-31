@@ -18,6 +18,9 @@ Icon
 .Spotlight-V100
 .Trashes
 
+*.db
+*.boltdb
+
 ### Windows ###
 # Windows image file caches
 Thumbs.db
