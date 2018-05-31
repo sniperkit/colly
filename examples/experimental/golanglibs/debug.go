@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,11 @@ import (
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
+
+/*
+	Refs:
+	- https://github.com/v3io/http_blaster/blob/master/http_blaster.go
+*/
 
 var (
 	logTasks           bool = true
@@ -31,6 +37,35 @@ var (
 func init() {
 	log.Formatter = new(prefixed.TextFormatter)
 	log.Level = logrus.DebugLevel
+}
+
+func start_cpu_profile() {
+	if cpu_profile {
+		log.Println("CPU Profile enabled")
+		f, err := os.Create("cpu_profile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+	}
+}
+
+func stop_cpu_profile() {
+	if cpu_profile {
+		pprof.StopCPUProfile()
+	}
+}
+
+func write_mem_profile() {
+	if mem_profile {
+		log.Println("MEM Profile enabled")
+		f, err := os.Create("mem_profile")
+		defer f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.WriteHeapProfile(f)
+	}
 }
 
 // type logFields logrus.Fields

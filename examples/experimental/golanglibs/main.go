@@ -58,7 +58,7 @@ func init() {
 
 func main() {
 
-	dashboardQuick()
+	// dashboardMcap()
 
 	if collyConfig != nil {
 		collyConfig = &cfg.Config{}

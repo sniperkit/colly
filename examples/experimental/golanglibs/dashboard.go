@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -20,7 +19,7 @@ import (
 	- https://github.com/c1982/mcap/blob/master/main.go
 */
 
-func dashboardQuick() {
+func dashboardMcap() {
 
 	var err error
 	conn, err = storm.Open(databaseName)
@@ -63,7 +62,6 @@ func loadData(t *tview.Table, exchanges []string) {
 	t.SetCell(0, 1, tview.NewTableCell("capital").SetTextColor(tcell.ColorYellow))
 
 	list := dataList(exchanges)
-
 	for i := 0; i < len(list); i++ {
 		t.SetCell(i+1, 0, tview.NewTableCell(list.ToMarket(i)).SetTextColor(tcell.ColorDarkCyan))
 		t.SetCell(i+1, 1, tview.NewTableCell(list.ToCap(i)).SetAlign(tview.AlignRight))
@@ -71,26 +69,6 @@ func loadData(t *tview.Table, exchanges []string) {
 
 	t.SetCell(len(list)+1, 0, tview.NewTableCell(""))
 	t.SetCell(len(list)+1, 1, tview.NewTableCell(""))
-
-	t.SetCell(len(list)+2, 0, tview.NewTableCell("total ").SetAlign(tview.AlignRight).SetTextColor(tcell.ColorDarkRed))
-	t.SetCell(len(list)+2, 1, tview.NewTableCell(list.Total()))
-}
-
-func loadData(t *tview.Table, exchanges []string) {
-
-	t.SetCell(0, 0, tview.NewTableCell("exchange").SetTextColor(tcell.ColorYellow))
-	t.SetCell(0, 1, tview.NewTableCell("capital").SetTextColor(tcell.ColorYellow))
-
-	list := dataList(exchanges)
-
-	for i := 0; i < len(list); i++ {
-		t.SetCell(i+1, 0, tview.NewTableCell(list.ToMarket(i)).SetTextColor(tcell.ColorDarkCyan))
-		t.SetCell(i+1, 1, tview.NewTableCell(list.ToCap(i)).SetAlign(tview.AlignRight))
-	}
-
-	t.SetCell(len(list)+1, 0, tview.NewTableCell(""))
-	t.SetCell(len(list)+1, 1, tview.NewTableCell(""))
-
 	t.SetCell(len(list)+2, 0, tview.NewTableCell("total ").SetAlign(tview.AlignRight).SetTextColor(tcell.ColorDarkRed))
 	t.SetCell(len(list)+2, 1, tview.NewTableCell(list.Total()))
 }
