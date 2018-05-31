@@ -5,14 +5,13 @@ import (
 	"strings"
 	"time"
 
-	// "mvdan.cc/xurls"
-
 	"github.com/sniperkit/colly/pkg"
-	// "github.com/sniperkit/colly/pkg/debug"
+	cfg "github.com/sniperkit/colly/pkg/config"
 	"github.com/sniperkit/colly/pkg/queue"
+	// "github.com/sniperkit/colly/pkg/web/proxy"
+	// "github.com/sniperkit/colly/pkg/debug"
 
 	sm "github.com/sniperkit/colly/addons/sitemap"
-	cfg "github.com/sniperkit/colly/pkg/config"
 )
 
 var (
@@ -82,13 +81,11 @@ func main() {
 	}
 
 	ensurePathExists(exportFile)
-
 	writer, err := newSafeCsvWriter(exportFile)
 	if err != nil {
 		log.Fatal("Failed to make data file")
 	}
 	defer writer.Flush()
-
 	writer.Delimiter('|').Write([]string{"package_uri", "referrer", "name", "description", "stars", "tags"})
 
 	/*
@@ -97,6 +94,18 @@ func main() {
 			DomainGlob:  "*",
 			// RandomDelay: 2 * time.Second,
 		})
+	*/
+
+	xCache, xTransport = newCacheTransport("badger", "./shared/storage/cache/http")
+	scraper.WithTransport(xTransport)
+
+	/*
+		// Rotate two socks5 proxies
+		rp, err := proxy.RoundRobinProxySwitcher("socks5://127.0.0.1:1337", "socks5://127.0.0.1:1338")
+		if err != nil {
+			log.Fatal(err)
+		}
+		c.SetProxyFunc(rp)
 	*/
 
 	// On every a element which has href attribute call callback

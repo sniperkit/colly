@@ -209,7 +209,7 @@ func (c *Collector) scrape(u, method string, depth int, requestData io.Reader, c
 		return err
 	}
 	if parsedURL.Scheme == "" {
-		parsedURL.Scheme = "http"
+		parsedURL.Scheme = DEFAULT_HTTP_SCHEME
 	}
 	if !c.isDomainAllowed(parsedURL.Host) {
 		return ErrForbiddenDomain
@@ -229,7 +229,7 @@ func (c *Collector) scrape(u, method string, depth int, requestData io.Reader, c
 	req := &http.Request{
 		Method:     method,
 		URL:        parsedURL,
-		Proto:      "HTTP/1.1",
+		Proto:      DEFAULT_HTTP_REQUEST_PROTO,
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 		Header:     hdr,
@@ -479,7 +479,8 @@ func (c *Collector) OnHTML(goquerySelector string, f HTMLCallback) {
 	c.lock.Unlock()
 }
 
-// TXTElement registers a function. Function will be executed on any type of dataset
+// Experimental
+// RAWCallback registers a function. Function will be executed on any type of dataset
 func (c *Collector) OnRAW(rawSelector string, f RAWCallback) {
 	c.lock.Lock()
 	if c.rawCallbacks == nil {
@@ -523,6 +524,7 @@ func (c *Collector) OnHTMLDetach(goquerySelector string) {
 	c.lock.Unlock()
 }
 
+// Experimental
 // OnHTMLDetach deregister a function. Function will not be execute after detached
 func (c *Collector) OnRAWDetach(tabSelector string) {
 	c.lock.Lock()

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/sniperkit/colly/pkg"
-	"github.com/sniperkit/colly/pkg/proxy"
+	"github.com/sniperkit/colly/pkg/web/proxy"
 )
 
 func main() {

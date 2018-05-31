@@ -2,21 +2,35 @@ package main
 
 import (
 	"encoding/csv"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	// cache - core
 	"github.com/gregjones/httpcache"
+
+	// cache - backends
+	"github.com/birkelund/boltdbcache"
+	"github.com/gregjones/httpcache/diskcache"
+	"github.com/gregjones/httpcache/memcache"
+	"github.com/klaidliadon/go-couch-cache"
+	"github.com/klaidliadon/go-memcached"
+	"github.com/klaidliadon/go-redis-cache"
+	"sourcegraph.com/sourcegraph/s3cache"
+
+	// cache - advanced backends
+	"github.com/sniperkit/xcache/backend/default/badger"
+	"github.com/sniperkit/xcache/backend/default/diskv"
+
+	// filters - probalistic data-structure
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/willf/bloom"
 
-	"github.com/sniperkit/xcache/backend/default/badger"
-	"github.com/sniperkit/xcache/backend/default/diskv"
-	"github.com/sniperkit/xtask/util/fs" // move into a separate repo/package
+	// general helpers
+	"github.com/sniperkit/xtask/util/fs"
 )
-
-var xcache httpcache.Cache
 
 // defaults
 var (
@@ -25,6 +39,13 @@ var (
 	defaultCacheFreqDuration time.Duration = 1
 	defaultCacheTTL          time.Duration = time.Duration(defaultCacheFreqDuration * time.Hour)
 	defaultCacheBackends     []string      = []string{"inmemory", "redis", "sqlite3", "badger", "mysql", "postgres"}
+)
+
+// cache related objects
+var (
+	xCache     httpcache.Cache
+	xTransport *httpcache.Transport
+	xClient    *http.Client
 )
 
 // global cache variables
@@ -60,6 +81,13 @@ var (
 	cuckflt                 = cuckoo.NewDefaultCuckooFilter()
 )
 
+/*
+	Refs:
+	- https://github.com/docker/leeroy/blob/master/github/github.go
+	- https://github.com/calavera/openlandings/blob/master/github/transport.go
+	- https://github.com/Dreae/esi-graphql/blob/master/resolvers/http/init.go
+*/
+
 func initCacheHTTP(b string, d time.Duration, u string) (ttl time.Duration, ok bool, err error) {
 	if d <= 0 {
 		err = errInvalidCacheDuration
@@ -91,14 +119,14 @@ func initCacheHTTP(b string, d time.Duration, u string) (ttl time.Duration, ok b
 
 func cloneCacheHTTP() httpcache.Cache {
 	defer funcTrack(time.Now())
-	backendCache, err := newCacheHTTP(cacheEngine, cacheStoragePath)
+	backendCache, err := newCacheBackend(cacheEngine, cacheStoragePath)
 	if err != nil {
 		log.Fatal("cache err", err.Error())
 	}
 	return backendCache
 }
 
-func newCacheHTTP(engine string, prefixPath string) (backend httpcache.Cache, err error) {
+func newCacheBackend(engine string, prefixPath string) (backend httpcache.Cache, err error) {
 	defer funcTrack(time.Now())
 	fsutil.EnsureDir(prefixPath)
 	engine = strings.ToLower(engine)
@@ -112,7 +140,7 @@ func newCacheHTTP(engine string, prefixPath string) (backend httpcache.Cache, er
 		fsutil.EnsureDir(cacheStoragePath)
 		backend, err = badgercache.New(
 			&badgercache.Config{
-				ValueDir:    "api.github.com.v3.snappy",
+				ValueDir:    "golanglibs.com",
 				StoragePath: cacheStoragePath,
 				SyncWrites:  false,
 				Debug:       false,
@@ -126,6 +154,41 @@ func newCacheHTTP(engine string, prefixPath string) (backend httpcache.Cache, er
 		err = errInvalidCacheBackend
 	}
 	return
+}
+
+func newCacheTransport(c httpcache.Cache, markCachedResponses bool) http.RoundTripper {
+	defer funcTrack(time.Now())
+
+	t := httpcache.NewTransport(c)
+	t.MarkCachedResponses = markCachedResponses
+	return t
+}
+
+// InitHTTP initializes the HTTP client using an appropriate cache service
+func initHTTP() {
+	if memcachedURL := os.Getenv("MEMCACHE_URL"); memcachedURL != "" {
+		client = httpcache.NewTransport(memcache.New(memcachedURL)).Client()
+	} else {
+		client = httpcache.NewTransport(httpcache.NewMemoryCache()).Client()
+	}
+}
+
+func newCacheTransport(engine string, prefixPath string) (httpcache.Cache, *httpcache.Transport) {
+	defer funcTrack(time.Now())
+
+	backendCache, err := newCacheBackend(engine, prefixPath)
+	if err != nil {
+		log.Fatal("cache err", err.Error())
+	}
+
+	var httpTransport = http.DefaultTransport
+	httpTransport = httpstats.NewTransport(httpTransport)
+	http.DefaultTransport = httpTransport
+
+	cachingTransport := httpcache.NewTransportFrom(backendCache, httpTransport) // httpcache.NewMemoryCacheTransport()
+	cachingTransport.MarkCachedResponses = true
+
+	return backendCache, cachingTransport
 }
 
 func setServiceCache(createdAt time.Time, service string, key string, obj map[string]interface{}) {

@@ -1,21 +1,27 @@
 package main
 
 import (
+	"net/http"
+	"time"
+
+	"github.com/sniperkit/xstats/pkg"
+
 	"github.com/sniperkit/xstats/client/datadog"
 	"github.com/sniperkit/xstats/client/influxdb"
-	"github.com/sniperkit/xstats/pkg"
+	// "github.com/sniperkit/xstats/client/prometheus"
 )
 
 // stats/metrics engine
 var (
-	statsEngine *stats.Engine
-	statsTags   []*stats.Tag
+	xStatsEngine *stats.Engine
+	xStatsTags   []*stats.Tag
 )
 
 // stats storage client(s)
 var (
-	influxClient      *influxdb.Client
-	influxClientConf  *influxdb.ClientConfig
+	influxClient     *influxdb.Client
+	influxClientConf *influxdb.ClientConfig
+
 	datadogClient     *datadog.Client
 	datadogClientConf *datadog.ClientConfig
 )
@@ -42,6 +48,11 @@ var (
 		}))
 	}
 */
+
+func newStatsTransport(rt http.RoundTripper) http.RoundTripper {
+	defer funcTrack(time.Now())
+	return stats.NewTransport(rt)
+}
 
 func newStatsEngine(backend string) {
 	switch backend {

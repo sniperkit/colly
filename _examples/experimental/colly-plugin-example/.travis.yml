@@ -1,8 +1,0 @@
-language: go
-
-go:
- - 1.9
-
-script:
- - go build -buildmode=plugin -o plugins/bitcq/bitcq.so plugins/bitcq/main.go
- - go test -v ./...

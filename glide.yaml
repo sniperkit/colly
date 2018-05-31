@@ -6,9 +6,15 @@ import:
 - package: github.com/agrison/mxj
 - package: github.com/antchfx/htmlquery
 - package: github.com/antchfx/xmlquery
+- package: github.com/birkelund/boltdbcache
 - package: github.com/bndr/gotabulate
 - package: github.com/go-redis/redis
 - package: github.com/gobwas/glob
+- package: github.com/gocolly/colly
+- package: github.com/gregjones/httpcache
+  subpackages:
+  - diskcache
+  - memcache
 - package: github.com/jawher/mow.cli
 - package: github.com/jinzhu/gorm
   subpackages:
@@ -19,14 +25,35 @@ import:
 - package: github.com/jmoiron/sqlx
 - package: github.com/json-iterator/go
 - package: github.com/kennygrant/sanitize
+- package: github.com/klaidliadon/go-couch-cache
+- package: github.com/klaidliadon/go-memcached
+- package: github.com/klaidliadon/go-redis-cache
 - package: github.com/mattn/go-sqlite3
+- package: github.com/pquerna/ffjson
+  subpackages:
+  - ffjson
 - package: github.com/saintfish/chardet
+- package: github.com/seiflotfy/cuckoofilter
+- package: github.com/sirupsen/logrus
+- package: github.com/sniperkit/xcache
+  subpackages:
+  - backend/default/badger
+  - backend/default/diskv
+- package: github.com/sniperkit/xstats
+  subpackages:
+  - client/datadog
+  - client/influxdb
+  - pkg
 - package: github.com/sniperkit/xtask
   subpackages:
   - plugin/counter
+  - util/fs
 - package: github.com/sniperkit/xutil
   subpackages:
+  - plugin/format/convert/json2csv
+  - plugin/format/convert/tabular
   - plugin/format/json
+  - plugin/map/multi
 - package: github.com/tealeg/xlsx
 - package: github.com/temoto/robotstxt
 - package: github.com/thrift-iterator/go
@@ -34,14 +61,18 @@ import:
   - general
   - protocol
   - raw
+- package: github.com/willf/bloom
+- package: github.com/x-cray/logrus-prefixed-formatter
 - package: golang.org/x/net
   subpackages:
   - html
   - html/charset
+  - proxy
 - package: google.golang.org/appengine
   subpackages:
   - urlfetch
 - package: gopkg.in/yaml.v2
+- package: sourcegraph.com/sourcegraph/s3cache
 testImport:
 - package: github.com/jimsmart/collysqlite
 - package: github.com/onsi/ginkgo
