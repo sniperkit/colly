@@ -1,7 +1,12 @@
 package: github.com/sniperkit/colly
 ignore:
-- github.com/jbrukh/bayesian
+- graylog-cli/graylog
 - gob
+- secureimage
+- github.com/jbrukh/bayesian
+- github.com/sniperkit/xcache
+- github.com/sniperkit/xstats
+- github.com/ghetzel/go-stockutil
 import:
 - package: github.com/BurntSushi/toml
 - package: github.com/DataDog/zstd
@@ -17,15 +22,24 @@ import:
   subpackages:
   - config
   - formatter
-- package: github.com/birkelund/boltdbcache
+- package: github.com/asdine/storm
 - package: github.com/bndr/gotabulate
+- package: github.com/fatih/structs
+- package: github.com/gdamore/tcell
+- package: github.com/ghetzel/pivot
+  subpackages:
+  - dal
+  - mapper
+- package: github.com/gin-gonic/gin
 - package: github.com/go-redis/redis
 - package: github.com/gobwas/glob
 - package: github.com/gocolly/colly
 - package: github.com/gregjones/httpcache
   subpackages:
-  - diskcache
   - memcache
+- package: github.com/hackebrot/go-librariesio
+  subpackages:
+  - librariesio
 - package: github.com/jawher/mow.cli
 - package: github.com/jinzhu/gorm
   subpackages:
@@ -33,13 +47,12 @@ import:
   - dialects/mysql
   - dialects/postgres
   - dialects/sqlite
+- package: github.com/jmoiron/jsonq
 - package: github.com/jmoiron/sqlx
+- package: github.com/jpillora/backoff
 - package: github.com/jroimartin/gocui
 - package: github.com/json-iterator/go
 - package: github.com/kennygrant/sanitize
-- package: github.com/klaidliadon/go-couch-cache
-- package: github.com/klaidliadon/go-memcached
-- package: github.com/klaidliadon/go-redis-cache
 - package: github.com/mattn/go-runewidth
 - package: github.com/mattn/go-sqlite3
 - package: github.com/mitchellh/go-homedir
@@ -48,7 +61,15 @@ import:
 - package: github.com/pquerna/ffjson
   subpackages:
   - ffjson
+- package: github.com/rivo/tview
 - package: github.com/saintfish/chardet
+- package: github.com/sasile/gohistogram
+- package: github.com/sasile/termui
+- package: github.com/segmentio/stats
+  subpackages:
+  - datadog
+  - httpstats
+  - influxdb
 - package: github.com/seiflotfy/cuckoofilter
 - package: github.com/sirupsen/logrus
 - package: github.com/sniperkit/xcache
@@ -57,8 +78,6 @@ import:
   - backend/default/diskv
 - package: github.com/sniperkit/xstats
   subpackages:
-  - client/datadog
-  - client/influxdb
   - pkg
 - package: github.com/sniperkit/xtask
   subpackages:
@@ -73,10 +92,6 @@ import:
 - package: github.com/tealeg/xlsx
 - package: github.com/temoto/robotstxt
 - package: github.com/thrift-iterator/go
-  subpackages:
-  - general
-  - protocol
-  - raw
 - package: github.com/tidwall/gjson
 - package: github.com/valyala/fasthttp
 - package: github.com/willf/bloom
@@ -90,11 +105,13 @@ import:
 - package: golang.org/x/text
   subpackages:
   - encoding
+  - internal/language
 - package: google.golang.org/appengine
   subpackages:
   - urlfetch
 - package: gopkg.in/yaml.v2
-- package: sourcegraph.com/sourcegraph/s3cache
+- package: graylog-cli/graylog
+- package: secureimage
 testImport:
 - package: github.com/jimsmart/collysqlite
 - package: github.com/onsi/ginkgo

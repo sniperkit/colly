@@ -23,6 +23,7 @@ import (
 	"sync/atomic"
 
 	backoff "github.com/jpillora/backoff"
+	//	"github.com/valyala/fasthttp"
 )
 
 /*
@@ -180,3 +181,12 @@ func (r *Request) Marshal() ([]byte, error) {
 		Ctx:    ctx,
 	})
 }
+
+/*
+func CloneRequest(req *fasthttp.Request) *fasthttp.Request {
+	new_req := new(fasthttp.Request)
+	req.Header.CopyTo(&new_req.Header)
+	new_req.AppendBody(req.Body())
+	return new_req
+}
+*/

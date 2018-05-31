@@ -143,7 +143,9 @@ func NewStreamCSV(fp string, st string) (*csvStream, error) {
 		if _, err := os.Stat(s.path); os.IsNotExist(err) {
 			return nil, err
 		}
-		log.Infoln("reading file:", s.path)
+		//if !enable_tui {
+		//	log.Infoln("reading file:", s.path)
+		//}
 		file, err := os.Open(s.path)
 		if err != nil {
 			log.Fatalln("failed to open file, error: ", err)
@@ -153,7 +155,9 @@ func NewStreamCSV(fp string, st string) (*csvStream, error) {
 		s.reader = csv.NewReader(file)
 
 	} else {
-		log.Infoln("loading remote:", s.path)
+		//if !enable_tui {
+		//	log.Infoln("loading remote:", s.path)
+		//}
 		resp, err := http.Get(s.path)
 		if err != nil {
 			log.Fatalln("failed to fetch content, error: ", err)
@@ -201,14 +205,19 @@ func (cs *csvStream) ReadAsync() (lines chan *csvLine) {
 					header: header,
 					line:   line,
 				}
-				log.Println("header=", header, ", line=", line)
+				if !enable_ui {
+					log.Println("header=", header, ", line=", line)
+				}
 			}
 			if err == io.EOF {
 				// cs.wg.Done()
 				return
 			}
 			if err != nil {
-				log.Printf("Sent %d lines\n", i)
+				if !enable_ui {
+					log.Printf("enable_ui? %d\n", enable_ui)
+					log.Printf("Sent %d lines\n", i)
+				}
 				close(lines)
 				// cs.wg.Done()
 				return
@@ -375,7 +384,9 @@ func streamCsv(csv *csv.Reader, buffer int) (lines chan *csvLine) {
 				}
 			}
 			if err != nil {
-				log.Printf("Sent %d lines\n", i)
+				//if !enable_tui {
+				//	log.Printf("Sent %d lines\n", i)
+				//}
 				close(lines)
 				return
 			}

@@ -26,10 +26,6 @@ import (
 	"github.com/sniperkit/xcache/backend/default/badger"
 	"github.com/sniperkit/xcache/backend/default/diskv"
 
-	// filters - probalistic data-structure
-	cuckoo "github.com/seiflotfy/cuckoofilter"
-	"github.com/willf/bloom"
-
 	// general helpers
 	"github.com/sniperkit/xtask/util/fs"
 )
@@ -75,20 +71,6 @@ var (
 	cacheEngine      = "badger"
 	cachePrefixPath  = ""
 	cacheStoragePath = cachePrefixPath + "./shared/storage/cache/http"
-)
-
-// cache lists - bloom filters
-var (
-	bloomFilterSize uint = 20000 // default: 500000
-	bloomFilterKeys uint = 5
-	blmflt               = bloom.New(bloomFilterSize, bloomFilterKeys)
-)
-
-// cache lists - cuckoo filters
-var (
-	cuckFilterCapacity uint = 20000 // default: 1000000
-	cuckFilter              = cuckoo.NewCuckooFilter(cuckFilterCapacity)
-	cuckflt                 = cuckoo.NewDefaultCuckooFilter()
 )
 
 func cloneCacheHTTP() httpcache.Cache {

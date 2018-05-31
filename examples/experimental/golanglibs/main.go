@@ -20,13 +20,14 @@ var (
 	isVerbose       bool   = true
 	sitemapURL      string = "https://golanglibs.com/sitemap.txt"
 	exportFile      string = "./shared/storage/exports/reports/latest.csv"
+	ch_done         chan struct{}
 	startedAt       time.Time
 	sitemap         *sm.Sitemap
 	q               *queue.Queue
 	scraper         *colly.Collector
 	detailCollector *colly.Collector
 	libraries       []library
-	collyConfig     *cfg.Config
+	collyConfig     *cfg.Config = &cfg.Config{}
 	entries         map[string]bool
 	links           []string = []string{} // Array containing all the known URLs in a sitemap
 )
@@ -60,26 +61,46 @@ func main() {
 
 	// dashboardMcap()
 
-	if collyConfig != nil {
-		collyConfig = &cfg.Config{}
-		scraper = colly.NewCollectorWithConfig(collyConfig)
-	} else {
-		// Create a Collector specifically for Shopify
-		scraper = colly.NewCollector(
-			colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
-			colly.AllowedDomains(defaultAllowedDomains...),
-			colly.DisallowedURLFilters(defaultDisabledURLFilters...),
-			colly.URLFilters(defaultAllowedURLFilters...),
-			colly.IgnoreRobotsTxt(),
-			// colly.AllowURLRevisit(),
-			// Cache responses to prevent multiple download of pages even if the collector is restarted
-			// colly.Debugger(&debug.LogDebugger{}),
-			colly.CacheDir(defaultStorageCacheDir),
-			// colly.CacheHTTP(defaultStorageCacheDir),
-			// colly.Async(true),
-			// MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
-			// colly.MaxDepth(2),
-		)
+	// defer handle_exit()
+	// defer close_log_file()
+
+	//if collyConfig != nil {
+	//	// collyConfig = &cfg.Config{}
+	//	scraper = colly.NewCollectorWithConfig(collyConfig)
+	// } else {
+	// Create a Collector specifically for Shopify
+	scraper = colly.NewCollector(
+		colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
+		colly.AllowedDomains(defaultAllowedDomains...),
+		colly.DisallowedURLFilters(defaultDisabledURLFilters...),
+		colly.URLFilters(defaultAllowedURLFilters...),
+		colly.IgnoreRobotsTxt(),
+		// colly.AllowURLRevisit(),
+		// Cache responses to prevent multiple download of pages even if the collector is restarted
+		// colly.Debugger(&debug.LogDebugger{}),
+		colly.CacheDir(defaultStorageCacheDir),
+		// colly.CacheHTTP(defaultStorageCacheDir),
+		// colly.Async(true),
+		// MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
+		// colly.MaxDepth(2),
+	)
+	//}
+
+	if cpu_profile || mem_profile {
+		isDebug = true
+	}
+
+	collyConfig.Title = APP_NAME
+	collyConfig.IsModeTUI = enable_ui
+	collyConfig.VerboseMode = enable_log
+	collyConfig.DebugMode = isDebug
+
+	if enable_ui {
+		ch_done = enable_tui()
+
+		defer stop_cpu_profile()
+		defer write_mem_profile()
+		start_cpu_profile()
 	}
 
 	ensurePathExists(exportFile)
@@ -148,29 +169,39 @@ func main() {
 				}
 			})
 			tagsStr = strings.Join(tags, ",")
-			log.Infof("[PKG] uri='%s', pkg='%s', name='%s', stars='%s', desc='%s', tags='%s'\n", url, pkg, name, stars, desc, tagsStr)
-			writer.Write([]string{pkg, url, name, desc, stars, tagsStr})
 
+			if !enable_ui {
+				log.Infof("[PKG] uri='%s', pkg='%s', name='%s', stars='%s', desc='%s', tags='%s'\n", url, pkg, name, stars, desc, tagsStr)
+			}
+			// TUI_EVENT
+
+			writer.Write([]string{pkg, url, name, desc, stars, tagsStr})
 			// Similar PKGs ?!
+
+			// Enqueue Libraries.IO bindings
 
 		})
 
 	})
 
-	/*
-		scraper.OnRequest(func(r *colly.Request) {
+	scraper.OnRequest(func(r *colly.Request) {
+		if !enable_ui {
 			log.Infoln("[REQUEST] url=", r.URL.String())
-		})
-	*/
+		}
+		// TUI_EVENT
+	})
 
 	scraper.OnError(func(r *colly.Response, e error) {
-		log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
+		if !enable_ui {
+			log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
+		}
+		// TUI_EVENT
+
 	})
 
 	/*
 		// Before making a request print "Visiting ..."
 		scraper.OnResponse(func(r *colly.Response) {
-
 			contentType := r.Headers.Get("Content-Type")
 			var urls []string
 			if isStrict {
@@ -184,10 +215,10 @@ func main() {
 				// url = r.Request.AbsoluteURL(url)
 				// url = r.URL.String()
 
-				///?page=2
 				// url = r.Request.URL.String()
 				// if strings.Index(url, "/?page=") > -1 {
 
+				// TUI_EVENT
 				// log.Println("[ADD] URL=", url, ", AbsoluteURL=", r.Request.AbsoluteURL(url), ", contentType=", contentType)
 				// Visit link found on page
 				// Only those links are visited which are matched by  any of the URLFilter regexps
@@ -224,5 +255,10 @@ func main() {
 		// Dump json to the standard output
 		enc.Encode(libraries)
 	*/
+
+	if enable_ui {
+		wait_for_ui_completion(ch_done)
+	}
+	// exit(err_code)
 
 }

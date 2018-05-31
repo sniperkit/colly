@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"runtime"
 	"runtime/pprof"
@@ -11,6 +12,9 @@ import (
 
 	"github.com/sniperkit/xstats/pkg"
 	"github.com/sniperkit/xtask/plugin/counter"
+
+	// "github.com/sniperkit/xstats/pkg/config"
+
 	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
 	// "github.com/sniperkit/colly/pkg/debug"
 
@@ -21,11 +25,23 @@ import (
 /*
 	Refs:
 	- https://github.com/v3io/http_blaster/blob/master/http_blaster.go
+	- github.com/timjchin/logcounter
+	- https://github.com/timjchin/streaming-counter
+	- https://github.com/blacktop/how-ya-doing
+	- https://github.com/jessfraz/tdash
 */
 
 var (
-	logTasks           bool = true
-	FullyQualifiedPath bool = false
+	logTasks           bool   = true
+	FullyQualifiedPath bool   = false
+	cpu_profile        bool   = false
+	mem_profile        bool   = false
+	enable_log         bool   = false
+	dump_failures      bool   = true
+	dump_location      string = "."
+	start_time         time.Time
+	end_time           time.Time
+	log_file           *os.File
 )
 
 var (
@@ -65,6 +81,27 @@ func write_mem_profile() {
 			log.Fatal(err)
 		}
 		pprof.WriteHeapProfile(f)
+	}
+}
+
+func close_log_file() {
+	if log_file != nil {
+		log_file.Close()
+	}
+}
+
+func exit(err_code int) {
+	if err_code != 0 {
+		log.Errorln("Test failed with error")
+		os.Exit(err_code)
+	}
+	log.Println("Test completed successfully")
+}
+
+func handle_exit() {
+	if err := recover(); err != nil {
+		log.Println(err)
+		// log.Exit(1)
 	}
 }
 

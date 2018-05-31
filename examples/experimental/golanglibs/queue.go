@@ -2,18 +2,17 @@ package main
 
 import (
 	"encoding/csv"
-	"strings"
-	// "time"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/sniperkit/colly/pkg/queue"
+
+	res "github.com/sniperkit/colly/addons/storage/external/redis"
 	// "github.com/sniperkit/colly/pkg/helper"
 	// "github.com/sniperkit/colly/pkg/storage"
 	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
-
-	res "github.com/sniperkit/colly/addons/storage/external/redis"
-	sq3 "github.com/sniperkit/colly/addons/storage/external/sqlite3"
+	// sq3 "github.com/sniperkit/colly/addons/storage/external/sqlite3"
 	// baq "github.com/sniperkit/colly/addons/storage/external/badger"
 	// stq "github.com/sniperkit/colly/addons/storage/external/storm"
 	// myq "github.com/sniperkit/colly/addons/storage/external/mysql"
@@ -53,30 +52,16 @@ func initQueue(ct int, s int, b string) (q *queue.Queue, err error) {
 		fallthrough
 	case "sqlite3":
 		/*
-			queueStorage = &sq3.Storage{
-				Filename: "./shared/datastore/queue.db",
-			}
+			// create a request queue with 2 consumer threads
+			q, err = queue.New(
+				ct, // Number of consumer threads
+				&sq3.Storage{
+					Filename: "./shared/datastore/queue.db",
+				},
+			)
 		*/
-
-		// create a request queue with 2 consumer threads
-		q, err = queue.New(
-			ct, // Number of consumer threads
-			&sq3.Storage{
-				Filename: "./shared/datastore/queue.db",
-			},
-		)
 
 	case "redis":
-
-		/*
-			queueStorage = &res.Storage{
-				Address:  "127.0.0.1:6379",
-				Password: "",
-				DB:       0,
-				Prefix:   "job01",
-			}
-		*/
-
 		// create a request queue with 2 consumer threads
 		q, err = queue.New(
 			ct, // Number of consumer threads
@@ -104,21 +89,10 @@ func initQueue(ct int, s int, b string) (q *queue.Queue, err error) {
 		)
 		return
 	}
-
 	return
 }
 
 func linksFromCSV(filePath string) ([]string, error) {
-
-	/*
-		csvStream, err := NewStreamCSV(filePath, "by_key")
-		if err != nil {
-			log.Println("error could not create new CSV stream")
-		}
-
-		// csvStream.Buffer(csvStreamBuffer).SetColumnsKeys(0).SplitAt(5000)
-		// lines.ReadAsync() // .Wait()
-	*/
 
 	isRemote := isRemoteURL(filePath)
 
@@ -127,17 +101,23 @@ func linksFromCSV(filePath string) ([]string, error) {
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
 			return nil, err
 		}
-		log.Infoln("reading file:", filePath)
+		if !enable_ui {
+			log.Infoln("reading file:", filePath)
+		}
 		file, err := os.Open(filePath)
 		if err != nil {
-			log.Fatalln("failed to open file, error: ", err)
+			if !enable_ui {
+				log.Fatalln("failed to open file, error: ", err)
+			}
 			return nil, err
 		}
 		defer file.Close()
 		reader = csv.NewReader(file)
 
 	} else {
-		log.Infoln("loading remote:", filePath)
+		if !enable_ui {
+			log.Infoln("loading remote:", filePath)
+		}
 		resp, err := http.Get(filePath)
 		if err != nil {
 			log.Fatalln("failed to fetch content, error: ", err)
@@ -156,12 +136,14 @@ func linksFromCSV(filePath string) ([]string, error) {
 	lines := streamCsv(reader, csvStreamBuffer)
 	links := make([]string, len(lines))
 	for line := range lines {
-		// pp.Println(line)
 		links = append(links, line.GetByKey(0))
-		log.Infoln("[LIST-ROW] col[0]=", line.GetByKey(0))
+		if !enable_ui {
+			log.Infoln("[LIST-ROW] col[0]=", line.GetByKey(0))
+		}
 	}
-
-	log.Infoln("links pre-loaded:", len(links))
+	if !enable_ui {
+		log.Infoln("links pre-loaded:", len(links))
+	}
 	return links, nil
 
 	/*

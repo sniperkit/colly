@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
-	"secureimage"
+
+	"github.com/sniperkit/colly/addons/content/secureimage"
 )
 
 func main() {
@@ -14,8 +15,8 @@ func main() {
 	}
 
 	if trusted {
-		fmt.Println("yes.")
+		log.Println("yes.")
 	} else {
-		fmt.Println("bad image file")
+		log.Println("bad image file")
 	}
 }

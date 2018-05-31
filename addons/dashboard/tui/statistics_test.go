@@ -1,4 +1,4 @@
-package dashboard_termui
+package tui
 
 import (
 	"strings"

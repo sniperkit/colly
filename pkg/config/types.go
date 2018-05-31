@@ -2,9 +2,19 @@ package config
 
 import (
 	"regexp"
+	"time"
 )
 
 type Config struct {
+	// Title/name of the current crawling campaign
+	Title string `default:'Colly - Golanglibs.com'`
+
+	// Global object...
+	Global Global
+
+	// Workload stores...
+	Workloads map[string]Workload
+
 	// UserAgent is the User-Agent string used by HTTP requests
 	UserAgent string `default:'colly - https://github.com/sniperkit/colly'`
 
@@ -95,4 +105,67 @@ type Config struct {
 
 	// VerboseMode
 	VerboseMode bool `default:'false'`
+
+	// IsModeTUI
+	IsModeTUI bool `default:'true'`
+}
+
+type duration struct {
+	time.Duration
+}
+
+func (d *duration) UnmarshalText(text []byte) error {
+	var err error
+	d.Duration, err = time.ParseDuration(string(text))
+	return err
+}
+
+type Sep struct {
+	Rune rune
+}
+
+func (r *Sep) UnmarshalText(text []byte) error {
+	if len(text) > 0 {
+		data := int32(text[0])
+		r.Rune = data
+	}
+	return nil
+}
+
+type Global struct {
+	Duration              duration
+	Block_size            int32
+	Servers               []string
+	Server                string
+	Port                  string
+	PemFile               string
+	TLSMode               bool
+	StatusCodesAcceptance map[string]float64
+	RetryOnStatusCodes    []int
+	RetryCount            int
+	IgnoreAttrs           []string
+}
+
+type Workload struct {
+	Name             string
+	Container        string
+	Target           string
+	Type             string
+	Duration         duration
+	Count            int
+	Workers          int
+	Id               int
+	Header           map[string]string
+	Payload          string
+	FileIndex        int
+	FilesCount       int
+	Random           bool
+	Generator        string
+	Schema           string
+	Lazy             int
+	ShardCount       uint32
+	ShardColumn      uint32
+	Separator        string
+	UpdateMode       string
+	UpdateExpression string
 }
