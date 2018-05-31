@@ -20,6 +20,7 @@ var (
 	isStrict        bool   = true
 	isVerbose       bool   = true
 	sitemapURL      string = "https://golanglibs.com/sitemap.txt"
+	exportFile      string = "./shared/storage/exports/reports/latest.csv"
 	startedAt       time.Time
 	sitemap         *sm.Sitemap
 	q               *queue.Queue
@@ -49,14 +50,10 @@ func init() {
 	libraries = make([]library, 0)
 	entries = make(map[string]bool, 0)
 
-	q, err = initQueue(2, 1000000, "InMemory")
+	q, err = initQueue(4, 1000000, "InMemory")
 	if err != nil {
 		log.Fatalln("error: ", err)
 	}
-
-	// log.Println("Loading cache engine")
-	// cacheTTL, cacheStatus, cacheError = initCacheHTTP(defaultCacheEngine, defaultCacheFreqDuration, defaultCacheFreqUnit)
-	// log.Printf("Result: TTL=%d, Status=%b, Error=%s", cacheTTL, cacheStatus, cacheError)
 
 }
 
@@ -84,13 +81,15 @@ func main() {
 		)
 	}
 
-	writer, err := newSafeCsvWriter("export.csv")
+	ensurePathExists(exportFile)
+
+	writer, err := newSafeCsvWriter(exportFile)
 	if err != nil {
 		log.Fatal("Failed to make data file")
 	}
 	defer writer.Flush()
 
-	writer.Delimiter('|').Write([]string{"url", "package_uri", "name", "description", "stars", "tags"})
+	writer.Delimiter('|').Write([]string{"package_uri", "referrer", "name", "description", "stars", "tags"})
 
 	/*
 		scraper.Limit(&colly.LimitRule{
@@ -104,7 +103,7 @@ func main() {
 	scraper.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		cds.Append("links", e.Request.AbsoluteURL(link))
-		// scraper.Visit(e.Request.AbsoluteURL(link))
+		scraper.Visit(e.Request.AbsoluteURL(link))
 	})
 
 	// On every a HTML element which has name attribute call callback
@@ -139,7 +138,7 @@ func main() {
 			})
 			tagsStr = strings.Join(tags, ",")
 			log.Infof("[PKG] uri='%s', pkg='%s', name='%s', stars='%s', desc='%s', tags='%s'\n", url, pkg, name, stars, desc, tagsStr)
-			writer.Write([]string{url, pkg, name, desc, stars, tagsStr})
+			writer.Write([]string{pkg, url, name, desc, stars, tagsStr})
 
 			// Similar PKGs ?!
 
@@ -147,9 +146,11 @@ func main() {
 
 	})
 
-	scraper.OnRequest(func(r *colly.Request) {
-		log.Infoln("[REQUEST] url=", r.URL.String())
-	})
+	/*
+		scraper.OnRequest(func(r *colly.Request) {
+			log.Infoln("[REQUEST] url=", r.URL.String())
+		})
+	*/
 
 	scraper.OnError(func(r *colly.Response, e error) {
 		log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
@@ -192,20 +193,18 @@ func main() {
 		q.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i)) // Add URLs to the queue
 	}
 
-	// Async
-	// scraper.Wait()
+	links, err := linksFromCSV(sitemapURL)
+	check(err)
 
-	/*
-		links, err := linksFromCSV(sitemapURL)
-		check(err)
-
-		for _, link := range links {
-			q.AddURL(link)
-		}
-	*/
+	for _, link := range links {
+		q.AddURL(link)
+	}
 
 	// Consume URLs
 	q.Run(scraper)
+
+	// Async
+	// scraper.Wait()
 
 	/*
 		enc := json.NewEncoder(os.Stdout)
