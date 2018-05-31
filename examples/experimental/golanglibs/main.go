@@ -58,6 +58,8 @@ func init() {
 
 func main() {
 
+	dashboardQuick()
+
 	if collyConfig != nil {
 		collyConfig = &cfg.Config{}
 		scraper = colly.NewCollectorWithConfig(collyConfig)
