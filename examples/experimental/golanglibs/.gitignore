@@ -4,6 +4,7 @@
 .staging/**
 
 ./golanglibs
+golanglibs
 
 shared/
 shared/*
