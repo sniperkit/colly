@@ -2,6 +2,8 @@ package tui
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -15,8 +17,13 @@ var (
 func init() {
 	stats = Statistics{
 		lock: sync.RWMutex{},
+		// counters
 		numberOfRequestsByStatusCode:  make(map[int]int),
 		numberOfRequestsByContentType: make(map[string]int),
+		// top lists
+		listOfResponsesContentTypes:   make(map[string]int),
+		listOfResponsesStatusCodes:    make(map[string]int),
+		listOfResponsesFiltersMatches: make(map[string]int),
 	}
 }
 
@@ -39,6 +46,11 @@ type Snapshot struct {
 
 	numberOfRequestsByStatusCode  map[int]int
 	numberOfRequestsByContentType map[string]int
+
+	// lists
+	listOfResponsesContentTypes   map[string]int
+	listOfResponsesStatusCodes    map[string]int
+	listOfResponsesFiltersMatches map[string]int
 
 	// size
 	totalSizeInBytes   int
@@ -96,6 +108,11 @@ type Statistics struct {
 	numberOfRequestsByStatusCode  map[int]int
 	numberOfRequestsByContentType map[string]int
 
+	// lists
+	listOfResponsesContentTypes   map[string]int
+	listOfResponsesStatusCodes    map[string]int
+	listOfResponsesFiltersMatches map[string]int
+
 	totalSizeInBytes int
 }
 
@@ -141,6 +158,26 @@ func (s *Statistics) Add(w WorkResult) Snapshot {
 	// number of requests by content type
 	s.numberOfRequestsByContentType[w.GetContentType()] += 1
 
+	ct := w.GetContentType()
+	if ct == "" {
+		ct = "unknown"
+	}
+	s.listOfResponsesContentTypes[ct] += 1
+
+	sc := strconv.Itoa(w.GetStatusCode())
+	if sc == "" {
+		sc = "unknown"
+	}
+	s.listOfResponsesStatusCodes[sc] += 1
+
+	/*
+		fm := w.GetFiltersMatches()
+		if fm == "" {
+			fm = "unknown"
+		}
+		 s.listOfResponsesFiltersMatches[w.GetFiltersMatches()] += 1
+	*/
+
 	// update the total duration
 	responseTime := w.GetEndTime().Sub(w.GetStartTime())
 	s.totalResponseTime += responseTime
@@ -180,7 +217,6 @@ func (s *Statistics) Add(w WorkResult) Snapshot {
 	}
 
 	// pp.Println(snapShot)
-
 	s.snapShots = append(s.snapShots, snapShot)
 	return snapShot
 }
@@ -214,18 +250,136 @@ func getLatestLogMessages(messages []string, count int) ([]string, error) {
 		return nil, fmt.Errorf("The count cannot be negative")
 	}
 
-	numberOfMessges := len(messages)
-	if count == numberOfMessges {
+	numberOfMessages := len(messages)
+	if count == numberOfMessages {
 		return messages, nil
 	}
 
-	if count < numberOfMessges {
-		return messages[numberOfMessges-count:], nil
+	if count < numberOfMessages {
+		return messages[numberOfMessages-count:], nil
 	}
 
-	if count > numberOfMessges {
-		fillLines := make([]string, count-numberOfMessges)
+	if count > numberOfMessages {
+		fillLines := make([]string, count-numberOfMessages)
 		return append(fillLines, messages...), nil
+	}
+	panic("Unreachable")
+}
+
+func sortTopList(input map[string]int) (sorted []string) {
+	n := map[int][]string{}
+	var a []int
+	for k, v := range input {
+		n[v] = append(n[v], k)
+	}
+	for k := range n {
+		a = append(a, k)
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+	for _, k := range a {
+		for _, s := range n[k] {
+			sorted = append(sorted, s)
+			// fmt.Printf("%s, %d\n", s, k)
+		}
+	}
+	return
+}
+
+func (s *Statistics) TopList(count int) (res []string) { return }
+
+// Get top list of content types responses
+/*
+	notes:
+	- sort string slices with 'sortedKeys' https://play.golang.org/p/x4CoUsJ5tK
+	- https://github.com/indraniel/go-learn/blob/master/09-sort-map-keys-by-values.go
+	- https://stackoverflow.com/questions/18695346/how-to-sort-a-mapstringint-by-its-values
+*/
+
+func (s *Statistics) TopContentTypes(count int) []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	types, err := getTopContentTypes(s.listOfResponsesContentTypes, count)
+	if err != nil {
+		panic(err)
+	}
+	return types
+}
+
+func getTopContentTypes(types map[string]int, count int) ([]string, error) {
+	if count < 0 {
+		return nil, fmt.Errorf("The count cannot be negative")
+	}
+	topList := sortTopList(types)
+	numberOfContentTypes := len(topList)
+	if count == numberOfContentTypes {
+		return topList, nil
+	}
+	if count < numberOfContentTypes {
+		return topList[numberOfContentTypes-count:], nil
+	}
+	if count > numberOfContentTypes {
+		fillLines := make([]string, count-numberOfContentTypes)
+		return append(fillLines, topList...), nil
+	}
+	panic("Unreachable")
+}
+
+// Get top list of status code responses
+func (s *Statistics) TopStatusCodes(count int) []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	codes, err := getTopStatusCodes(s.listOfResponsesStatusCodes, count)
+	if err != nil {
+		panic(err)
+	}
+	return codes
+}
+
+func getTopStatusCodes(codes map[string]int, count int) ([]string, error) {
+	if count < 0 {
+		return nil, fmt.Errorf("The count cannot be negative")
+	}
+	topList := sortTopList(codes)
+	numberOfStatusCodes := len(topList)
+	if count == numberOfStatusCodes {
+		return topList, nil
+	}
+	if count < numberOfStatusCodes {
+		return topList[numberOfStatusCodes-count:], nil
+	}
+	if count > numberOfStatusCodes {
+		fillLines := make([]string, count-numberOfStatusCodes)
+		return append(fillLines, topList...), nil
+	}
+	panic("Unreachable")
+}
+
+// Get top list of status code responses
+func (s *Statistics) TopFiltersMatches(count int) []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	filters, err := getTopFiltersMatches(s.listOfResponsesFiltersMatches, count)
+	if err != nil {
+		panic(err)
+	}
+	return filters
+}
+
+func getTopFiltersMatches(filters map[string]int, count int) ([]string, error) {
+	if count < 0 {
+		return nil, fmt.Errorf("The count cannot be negative")
+	}
+	topList := sortTopList(filters)
+	numberOfFiltersMatches := len(topList)
+	if count == numberOfFiltersMatches {
+		return topList, nil
+	}
+	if count < numberOfFiltersMatches {
+		return topList[numberOfFiltersMatches-count:], nil
+	}
+	if count > numberOfFiltersMatches {
+		fillLines := make([]string, count-numberOfFiltersMatches)
+		return append(fillLines, topList...), nil
 	}
 	panic("Unreachable")
 }

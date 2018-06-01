@@ -6,17 +6,22 @@ import (
 	"time"
 )
 
+// rename ?!
 type WorkResult struct {
 	ParentURL       url.URL
 	URL             url.URL
+	StatusCode      int
 	NumberOfWorkers int
 	WorkerID        int
-	Err             error
-	ContentType     string
 	ResponseSize    int
-	StatusCode      int
+	ContentType     string
+	Meta            string
+	Keywords        string
+	Topics          string
+	Patterns        string
 	StartTime       time.Time
 	EndTime         time.Time
+	Err             error
 }
 
 func (w WorkResult) String() string {
