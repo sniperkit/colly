@@ -47,5 +47,4 @@ func (self *CollectorLatency) GetCount() float64 {
 
 func (self *CollectorLatency) String() string {
 	return self.WeighHist.String()
-
 }

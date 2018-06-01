@@ -10,6 +10,8 @@ examples/experimental/golanglibs/shared
 .LSOverride
 Icon
 
+_staging
+_projects
 
 # Thumbnails
 ._*

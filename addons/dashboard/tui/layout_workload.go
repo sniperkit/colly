@@ -125,46 +125,6 @@ func (self *TermUI) ui_set_title(x, y, w, h int) ui.GridBufferer {
 		ui.Render(ui.Body)
 	})
 
-	/*
-		ui.Handle("/timer/1s", func(e ui.Event) {
-			draw()
-		})
-
-		// handle key q pressing
-		ui.Handle("/sys/kbd/q", func(ui.Event) {
-			// press q to quit
-			ui.StopLoop()
-		})
-
-		ui.Handle("/sys/kbd/C-x", func(ui.Event) {
-			// handle Ctrl + x combination
-		})
-
-		ui.Handle("/sys/kbd", func(ui.Event) {
-			// handle all other key pressing
-		})
-
-		// handle a 1s timer
-		ui.Handle("/timer/1s", func(e ui.Event) {
-			t := e.Data.(ui.EvtTimer)
-			// t is a EvtTimer
-			if t.Count%2 ==0 {
-				// do something
-			}
-		})
-
-		// stop when the crawler is done
-		go func() {
-			select {
-			case <-stopTheUI:
-				// wait 10 seconds before closing the ui
-				time.Sleep(time.Second * 10)
-				termui.StopLoop()
-			}
-		}()
-
-	*/
-
 	ui.Render(ui_titile_par)
 	return ui_titile_par
 }

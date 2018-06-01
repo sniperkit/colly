@@ -1,5 +1,6 @@
 package tui
 
+/*
 import (
 	"github.com/sasile/gohistogram"
 )
@@ -23,3 +24,4 @@ func (self *CollectorStatusCode) New(n int, alpha float64) chan int {
 func (self *CollectorStatusCode) Get() ([]string, []int) {
 	return self.WeighHist.BarArray()
 }
+*/

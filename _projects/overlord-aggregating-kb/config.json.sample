@@ -1,5 +1,0 @@
-{
-	Data:    "~/.local/share/overlord/",
-	SeedURL: "https://www.google.de/search?q=Test",
-	Debug:   true
-}
