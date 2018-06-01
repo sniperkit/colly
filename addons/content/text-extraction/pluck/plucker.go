@@ -15,8 +15,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
-	"github.com/schollz/pluck/pluck/striphtml"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/sniperkit/colly/addons/content/striphtml"
 )
 
 // Config specifies parameters for plucking
