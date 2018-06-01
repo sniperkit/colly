@@ -34,6 +34,12 @@ var (
 		defaultStorageExportDir,
 		defaultStorageSitemapDirname,
 	}
+
+	defaultProxyTypes []string = []string{
+		"default|socks5",
+		"onion",
+	}
+
 	defaultAllowedDomains []string = []string{
 		"golanglibs.com",
 		"golanglibs.com:443",

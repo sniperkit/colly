@@ -10,6 +10,11 @@ import (
 	colly "github.com/sniperkit/colly/pkg"
 	proxy "github.com/sniperkit/colly/pkg/proxy/default"
 
+	// experimental addons
+	// onion "github.com/sniperkit/colly/addons/proxy/onion"
+	// morty "github.com/sniperkit/colly/addons/proxy/morty"
+
+	// datastructure helpers
 	tablib "github.com/sniperkit/xutil/plugin/format/convert/tabular"
 	cmap "github.com/sniperkit/xutil/plugin/map/multi"
 )

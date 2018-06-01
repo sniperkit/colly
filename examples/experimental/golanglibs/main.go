@@ -14,6 +14,7 @@ import (
 
 	// experimental addons
 	tui "github.com/sniperkit/colly/addons/dashboard/tui"
+	onion "github.com/sniperkit/colly/addons/proxy/onion"
 	sm "github.com/sniperkit/colly/addons/sitemap"
 	ta "github.com/sniperkit/colly/addons/stats/tachymeter"
 )
@@ -32,40 +33,54 @@ var version = APP_VERSION
 */
 
 var (
-	isPolite               bool   = true
-	isProxy                bool   = false
-	isDebug                bool   = false
-	isStrict               bool   = true
-	isVerbose              bool   = true
-	worker_qd              int    = 10000
-	sitemapURL             string = "https://golanglibs.com/sitemap.txt"
-	exportFile             string = "./shared/storage/exports/reports/latest.csv"
-	startedAt              time.Time
-	sitemap                *sm.Sitemap
-	q                      *queue.Queue
-	scraper                *colly.Collector
-	detailCollector        *colly.Collector
-	libraries              []library
-	collyConfig            *cfg.Config = &cfg.Config{}
-	currentCrawlerMode     string      = "queue"
-	availableCrawlerMode   []string    = []string{"queue", "async", "distributed", "default"}
-	entries                map[string]bool
-	links                  []string = []string{} // Array containing all the known URLs in a sitemap
+	// features activation
+	isPolite  bool = true
+	isProxy   bool = false
+	isDebug   bool = false
+	isStrict  bool = true
+	isVerbose bool = true
+	worker_qd int  = 10000
+
+	// collector
+	scraper              *colly.Collector
+	detailCollector      *colly.Collector
+	collyConfig          *cfg.Config = &cfg.Config{}
+	currentCrawlerMode   string      = "queue"
+	availableCrawlerMode []string    = []string{"queue", "async", "distributed", "default"}
+	q                    *queue.Queue
+
+	// sitemaps
+	sitemapURL string = "https://golanglibs.com/sitemap.txt"
+	exportFile string = "./shared/storage/exports/reports/latest.csv"
+	sitemap    *sm.Sitemap
+
+	// tachymeter
+	startedAt            time.Time
+	isTachymeter         bool = true
+	isTachymeterParallel bool = false
+	cTachymeter          chan *ta.Tachymeter
+	xTachymeter          *ta.Tachymeter
+	xTachyResults        *ta.Metrics
+	xTachymeterTL        ta.Timeline
+	wallTimeStart        time.Time
+
+	// proxy list
+	xProxyList *onion.ProxyList
+
+	// channels
 	ch_done                chan struct{}
 	stopTheCrawler         chan bool
 	allURLsHaveBeenVisited chan bool
 	crawlResult            chan error
 	xResults               chan tui.WorkResult
-	isTachymeter           bool = true
-	isTachymeterParallel   bool = false
-	cTachymeter            chan *ta.Tachymeter
-	xTachymeter            *ta.Tachymeter
-	xTachyResults          *ta.Metrics
-	xTachymeterTL          ta.Timeline
-	wallTimeStart          time.Time
+
+	// extracted patterns
+	libraries []library
+	entries   map[string]bool
+	links     []string = []string{} // Array containing all the known URLs in a sitemap
 )
 
-// library stores information about a golang library
+// library stores information about indexed golang library in golanglibs.com
 type library struct {
 	Title       string
 	Description string
