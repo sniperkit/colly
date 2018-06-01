@@ -56,6 +56,7 @@ var (
 
 // global cache variables
 var (
+	isCacheTransport  bool = true
 	cacheVary         bool = true
 	cacheForce        bool = false
 	cacheStatus       bool = false

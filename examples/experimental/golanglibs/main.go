@@ -35,7 +35,6 @@ var (
 	worker_qd              int    = 10000
 	sitemapURL             string = "https://golanglibs.com/sitemap.txt"
 	exportFile             string = "./shared/storage/exports/reports/latest.csv"
-	ch_done                chan struct{}
 	startedAt              time.Time
 	sitemap                *sm.Sitemap
 	q                      *queue.Queue
@@ -43,14 +42,21 @@ var (
 	detailCollector        *colly.Collector
 	libraries              []library
 	collyConfig            *cfg.Config = &cfg.Config{}
+	currentCrawlerMode     string      = "queue"
+	availableCrawlerMode   []string    = []string{"queue", "async", "distributed", "default"}
 	entries                map[string]bool
 	links                  []string = []string{} // Array containing all the known URLs in a sitemap
+	ch_done                chan struct{}
 	stopTheCrawler         chan bool
 	allURLsHaveBeenVisited chan bool
 	crawlResult            chan error
 	xResults               chan tui.WorkResult
+	isTachymeter           bool = true
+	isTachymeterParallel   bool = false
 	cTachymeter            chan *ta.Tachymeter
 	xTachymeter            *ta.Tachymeter
+	xTachyResults          *ta.Metrics
+	xTachymeterTL          ta.Timeline
 	wallTimeStart          time.Time
 )
 
@@ -164,14 +170,31 @@ func main() {
 	)
 	//}
 
-	xTachymeter = ta.New(
-		&ta.Config{
-			SampleSize:       50,
-			Safe:             true, // deprecated
-			HistogramBuckets: 50,
-		},
-	)
-	wallTimeStart = time.Now()
+	if isTachymeter {
+		xTachymeterTL = ta.Timeline{}
+		xTachymeter = ta.New(
+			&ta.Config{
+				// Tachymeter
+				SafeMode:   true, // deprecated
+				SampleSize: 50,
+				HBins:      10,
+				Export: &ta.Export{
+					// Exports
+					Encoding:   "tsv",
+					Basename:   "golanglibs_tachymter_%d",
+					PrefixPath: "./shared/exports/stats/tachymeter/",
+					SplitLimit: 2500,
+					BufferSize: 20000,
+					Overwrite:  true,
+					BackupMode: true,
+				},
+			},
+		)
+		if currentCrawlerMode == "" || currentCrawlerMode == "" {
+			wallTimeStart = time.Now()
+			isTachymeterParallel = true
+		}
+	}
 
 	if cpu_profile || mem_profile {
 		isDebug = true
@@ -190,11 +213,9 @@ func main() {
 			tui.Dashboard(stopTheUI, stopTheCrawler)
 			// uiWaitGroup.Done()
 		}()
-
 		// defer stop_cpu_profile()
 		// defer write_mem_profile()
 		// start_cpu_profile()
-
 	}
 
 	ensurePathExists(exportFile)
@@ -211,10 +232,13 @@ func main() {
 			DomainGlob:  "*",
 			// RandomDelay: 2 * time.Second,
 		})
+
 	*/
 
-	xCache, xTransport = newCacheWithTransport("badger", "./shared/storage/cache/http")
-	scraper.WithTransport(xTransport)
+	if isCacheTransport {
+		xCache, xTransport = newCacheWithTransport("badger", "./shared/storage/cache/http")
+		scraper.WithTransport(xTransport)
+	}
 
 	/*
 		// Rotate two socks5 proxies
@@ -241,9 +265,11 @@ func main() {
 
 	// On every a HTML element which has name attribute call callback
 	scraper.OnHTML(`div.col-md-8`, func(e *colly.HTMLElement) {
+		start := time.Now()
+		// var parentURL string
+		parentURL := e.Request.AbsoluteURL(e.Request.URL.String())
 
 		var meta []string
-
 		e.ForEach(".row", func(_ int, el *colly.HTMLElement) {
 			var url, pkg, name, stars, desc, tagsStr string
 			name = strings.Replace(el.ChildText("div.description > a[href]"), "\n", " ", -1)
@@ -277,70 +303,19 @@ func main() {
 			}
 			meta = []string{pkg, url, name, desc, stars, tagsStr}
 			writer.Write(meta)
-			// writer.Write([]string{pkg, url, name, desc, stars, tagsStr})
-			// Similar PKGs ?!
-			// Enqueue Libraries.IO bindings
 		})
 
-		/*
-			if len(meta) > 0 {
-				// absLink := e.Request.AbsoluteURL(e.Request.URL)
-				xResults <- tui.WorkResult{
-					URL:             *e.Request.URL,
-					NumberOfWorkers: numberOfWorkers,
-					ResponseSize:    e.Response.GetSize(),
-					StatusCode:      e.Response.GetStatusCode(),
-					StartTime:       e.Response.GetStartTime(),
-					EndTime:         e.Response.GetEndTime(),
-					ContentType:     e.Response.GetContentType(),
-				}
-			}
-		*/
+		// Add each loop tachymeter to the event timeline.
+		xTachymeterTL.AddEvent(xTachymeter.Snapshot())
 
+		xTachymeter.AddTimeWithLabel(parentURL, time.Since(start))
 	})
-
-	/*
-		c.OnResponse(func(r *colly.Response) {
-			if strings.Index(r.Headers.Get("Content-Type"), "image") > -1 {
-				r.Save(outputDir + r.FileName())
-				return
-			}
-
-			if strings.Index(r.Headers.Get("Content-Type"), "json") == -1 {
-				return
-			}
-
-			data := &nextPageData{}
-			err := json.Unmarshal(r.Body, data)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			for _, obj := range data.Data.User.Container.Edges {
-				// skip videos
-				if obj.Node.IsVideo {
-					continue
-				}
-				c.Visit(obj.Node.ImageURL)
-			}
-			if data.Data.User.Container.PageInfo.NextPage {
-				nextPageVars := fmt.Sprintf(nextPagePayload, actualUserId, data.Data.User.Container.PageInfo.EndCursor)
-				r.Request.Ctx.Put("variables", nextPageVars)
-				u := fmt.Sprintf(
-					nextPageURL,
-					requestID,
-					url.QueryEscape(nextPageVars),
-				)
-				log.Println("Next page found", u)
-				r.Request.Visit(u)
-			}
-		})
-	*/
 
 	scraper.OnResponse(func(r *colly.Response) {
 		if !enable_ui {
 			log.Infoln("[REQUEST] url=", r.Request.URL.String())
 		} else {
+			// xResults <- tui.ResponseResult{}
 			xResults <- tui.WorkResult{
 				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
 				NumberOfWorkers: numberOfWorkers,
@@ -357,9 +332,10 @@ func main() {
 		if !enable_ui {
 			log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
 		} else {
+			// xResults <- tui.ErrorResult{}
 			xResults <- tui.WorkResult{
 				Err:             e,
-				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
+				URL:             *r.Request.URL,
 				NumberOfWorkers: numberOfWorkers,
 				ResponseSize:    r.GetSize(),
 				StatusCode:      r.GetStatusCode(),
@@ -402,7 +378,8 @@ func main() {
 		})
 	*/
 
-	for i := 1; i <= 11560; i++ {
+	numPages := 30 // 11560
+	for i := 1; i <= numPages; i++ {
 		q.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i)) // Add URLs to the queue
 	}
 
@@ -430,52 +407,71 @@ func main() {
 	// cd /Users/lucmichalski/local/golang/src/github.com/sniperkit/colly/examples/experimental/golanglibs/
 
 	// update the statistics with the results
-	go func() {
-		for {
-			select {
-			case <-allURLsHaveBeenVisited:
-				allStatisticsHaveBeenUpdated <- true
-				return
-
-			case <-stopTheCrawler:
-				stopTheUI <- true
-				// allURLsHaveBeenVisited <- true
-
-			case result := <-xResults:
-				// url := result.URL()
-				// debugf("Received results for URL %q", url.String())
-				// pp.Println(result)
-				tui.UpdateStatistics(result)
-
-				// cds.Append("urls", url.String())
-			}
-		}
-	}()
-
-	q.Run(scraper)
-
-	// When finished, set elapsed wall time.
-	tachymeter.SetWallTime(time.Since(wallTimeStart))
-
-	// Rate outputs will be accurate.
-	log.Println(tachymeter.Calc().String())
-
-	/*
-		uiWaitGroup.Wait()
-		err := <-crawlResult
-		if err != nil {
-			return err
-		}
-	*/
-
-	// Consume URLs
-
-	// Async
-	// scraper.Wait()
-
-	allURLsHaveBeenVisited <- true
 	if enable_ui {
+		go func() {
+			for {
+				select {
+				case <-allURLsHaveBeenVisited:
+					allStatisticsHaveBeenUpdated <- true
+					return
+
+				case <-stopTheCrawler:
+					stopTheUI <- true
+					// allURLsHaveBeenVisited <- true
+
+				case result := <-xResults:
+					// url := result.URL()
+					// debugf("Received results for URL %q", url.String())
+					// pp.Println(result)
+					tui.UpdateStatistics(result)
+					// cds.Append("urls", url.String())
+				}
+			}
+		}()
+	}
+
+	switch currentCrawlerMode {
+	case "async":
+		scraper.Wait() // Async
+	case "queue":
+		q.Run(scraper) // Consume URLs
+	default:
+		scraper.Visit(defaultDomain)
+	}
+
+	if enable_ui {
+		allURLsHaveBeenVisited <- true
 		stopTheUI <- true
+	}
+
+	if isTachymeter {
+
+		// Calc output.
+		// xTachyResults = xTachymeter.Snapshot()
+
+		// Write out an HTML page with the
+		// histogram for all iterations.
+		err := xTachymeterTL.WriteHTML("./shared/exports/stats/tachymeter")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("Results written")
+
+		// Print JSON format to console.
+		// fmt.Printf("%s\n\n", xTachyResults.JSON())
+
+		// Print pre-formatted console output.
+		// fmt.Printf("%s\n\n", xTachyResults.String())
+
+		// Print text histogram.
+		// fmt.Println(xTachyResults.Histogram.String(15))
+
+		// Add each loop tachymeter
+		// to the event timeline.
+		// xTachymeterTimeLine.AddEvent(xTachymeter.Snapshot())
+		// xTachymeter.Reset()
+
 	}
 
 	/*

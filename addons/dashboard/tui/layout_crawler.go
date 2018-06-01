@@ -323,20 +323,22 @@ func Dashboard(stopTheUI, stopTheCrawler chan bool) {
 			termui.NewCol(3, 0, averageSizeInBytes),
 			termui.NewCol(3, 0, elapsedTime),
 		),
-		termui.NewRow(
-			termui.NewCol(4, 0, lc0),
-			termui.NewCol(4, 0, lc1),
-			termui.NewCol(4, 0, lc2),
-		),
-		termui.NewRow(
-			termui.NewCol(4, 0, g0),
-			termui.NewCol(4, 0, g1),
-			termui.NewCol(4, 0, g2),
-		),
-		termui.NewRow(
-			termui.NewCol(6, 0, g3),
-			termui.NewCol(6, 0, g4),
-		),
+		/*
+			termui.NewRow(
+				termui.NewCol(4, 0, lc0),
+				termui.NewCol(4, 0, lc1),
+				termui.NewCol(4, 0, lc2),
+			),
+			termui.NewRow(
+				termui.NewCol(4, 0, g0),
+				termui.NewCol(4, 0, g1),
+				termui.NewCol(4, 0, g2),
+			),
+			termui.NewRow(
+				termui.NewCol(6, 0, g3),
+				termui.NewCol(6, 0, g4),
+			),
+		*/
 	)
 
 	termui.Body.Align()

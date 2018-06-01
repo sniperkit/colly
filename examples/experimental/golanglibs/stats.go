@@ -16,6 +16,7 @@ import (
 
 // stats/metrics engine
 var (
+	isStatsTransport             bool = true
 	xStatsEngine                 *stats.Engine
 	xStatsTags                   []*stats.Tag
 	allStatisticsHaveBeenUpdated chan bool

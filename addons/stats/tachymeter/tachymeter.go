@@ -3,92 +3,132 @@ package tachymeter
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"math"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	ta "github.com/sniperkit/colly/addons/convert/agnostic-tablib"
 )
+
+const PACKAGE_VERSION = "0.0.1"
+
+const (
+	TACHYMETER_DEFAULT_SAMPLE_CAPACITY   int  = 4
+	TACHYMETER_DEFAULT_HISTOGRAM_BUCKETS int  = 10
+	TACHYMETER_DEFAULT_SAFE_MODE         bool = true
+	TACHYMETER_EXPORT_MAX_ROWS           int  = 1000000
+	TACHYMETER_EXPORT_MAX_COLS           int  = 50
+	TACHYMETER_MAX_DATABOOKS             int  = 5
+	TACHYMETER_MAX_DATASETS              int  = 5
+)
+
+var (
+	allowed_export_outputs                 []string = []string{"file", "io", "buffer", "string", "bytes"}
+	allowed_export_datasets                []string = []string{"snapshots", "timeslice|time_slice", "ranks|ranking"}
+	allowed_export_formats                 []string = []string{"yaml|yml", "csv", "json", "xml", "tsv", "xlsx", "ascii"}
+	default_export_tachymeter_metrics_cols []string = []string{
+		"SnapshotAt", "ExportedAt", "Wall", "Cumulative", "HMean", "Avg.", "p50", "p75", "p95", "p99", "p999", "Long 5%", "Short 5%", "Max", "Min", "Range", "Rate/sec.",
+	}
+	default_export_tachymeter_timeslices_cols []string = []string{"CreatedAt"}
+	default_export_tachymeter_ranks_cols      []string = []string{"EventAt"}
+)
+
+/*
+	Refs:
+	- https://github.com/jamiealquiza/tachymeter/tree/master/example/tachymeter-graphing
+	-
+*/
 
 // Config holds tachymeter initialization parameters. Size defines the sample capacity.
 // Note: Tachymeter is thread safe.
 type Config struct {
-	SampleSize       int  `default:'50'`
-	HistogramBuckets int  `default:'10'`   // Histogram buckets.
-	Safe             bool `default:'true'` // Deprecated. Flag held on to as to not break existing users.
+	SampleSize int  `default:'50'`
+	HBins      int  `default:'10'`   // Histogram buckets. change for HBins
+	SafeMode   bool `default:'true'` // Deprecated. Flag held on to as to not break existing users.
+	Export     *Export
 }
 
 // Tachymeter holds event durations
 // and counts.
 type Tachymeter struct {
 	sync.Mutex
+	hBins    int
+	safeMode bool
 	size     uint64
-	times    timeSlice
-	ranks    timeRank
 	count    uint64
 	wallTime time.Duration
-	hBuckets int
+	times    timeSlice
+	ranks    timeRank
+	buffer   *bytes.Buffer
+	dataset  *ta.Dataset
+	databook *ta.Databook
 }
 
 // New initializes a new Tachymeter.
 func New(c *Config) *Tachymeter {
-	var hSize int
-
 	if c == nil {
 		c = &Config{
-			HBuckets: 10,
-			Size:     50,
-			Safe:     true,
+			HBins:      10,
+			SampleSize: 50,
+			SafeMode:   true,
 		}
 	}
 
-	if c.HBuckets != 0 {
-		hSize = c.HBuckets
+	var hSize int
+	if c.HBins >= 0 {
+		hSize = c.HBins
 	} else {
 		hSize = 10
 	}
 
 	return &Tachymeter{
-		size:     uint64(c.Size),
-		ranks:    make(timeRank, c.Size),
-		hBuckets: hSize,
+		size:     uint64(c.SampleSize),
+		ranks:    make(timeRank, c.SampleSize),
+		hBins:    hSize,
+		safeMode: c.SafeMode,
 	}
 }
 
-func Clone(t *Tachymeter) *Tachymeter {
+// Setter for the sample size
+func (m *Tachymeter) SetConfig(c *Config) *Tachymeter {
 	m.Lock()
 	defer m.Unlock()
-	return t
+
+	if c == nil {
+		c = &Config{
+			HBins:      TACHYMETER_DEFAULT_HISTOGRAM_BUCKETS,
+			SampleSize: TACHYMETER_DEFAULT_SAMPLE_CAPACITY,
+			SafeMode:   TACHYMETER_DEFAULT_SAFE_MODE,
+		}
+	}
+
+	var hSize int
+	if c.HBins >= 0 {
+		hSize = c.HBins
+	} else {
+		hSize = TACHYMETER_DEFAULT_HISTOGRAM_BUCKETS
+	}
+
+	m.size = uint64(c.SampleSize)
+	m.ranks = make(timeRank, c.SampleSize)
+	m.hBins = hSize
+	m.safeMode = c.SafeMode
+
+	return m
 }
 
-func (m *Tachymeter) WallTime(t time.Duration) {
+// By default, tachymeter calcualtes rate based on the number of events
+// possible per-second according to average event duration.
+// This model doesn't work in asynchronous or parallelized scenarios since events
+// may be overlapping in time. For example, with many Goroutines writing durations
+// to a shared tachymeter in parallel, the global rate must be determined by using
+// the total event count over the total wall time elapsed.
+func (m *Tachymeter) WallTime(wallTime time.Duration) time.Duration {
 	m.Lock()
 	defer m.Unlock()
-	return m.WallTime
-}
-
-func (m *Tachymeter) Size() uint64, int {
-	m.Lock()
-	defer m.Unlock()
-	return m.size, int(m.size)
-}
-
-// Reset resets a Tachymeter instance for reuse.
-func (m *Tachymeter) Reset() {
-	// This lock is obviously not needed for
-	// the m.Count update, rather to prevent a
-	// Tachymeter reset while Calc is being called.
-	m.Lock()
-	atomic.StoreUint64(&m.Count, 0)
-	m.Unlock()
-}
-
-// AddTime adds a time.Duration to Tachymeter.
-func (m *Tachymeter) AddTime(label string, t time.Duration) {
-	//	m.Times[(atomic.AddUint64(&m.Count, 1)-1)%m.Size] = t
-	m.Ranks[(atomic.AddUint64(&m.Count, 1)-1)%m.Size] = ranking{duration: t, label: label}
+	return m.wallTime
 }
 
 // SetWallTime optionally sets an elapsed wall time duration.
@@ -96,179 +136,151 @@ func (m *Tachymeter) AddTime(label string, t time.Duration) {
 // This is useful for concurrent/parallelized events that overlap
 // in wall time and are writing to a shared Tachymeter instance.
 func (m *Tachymeter) SetWallTime(t time.Duration) {
-	m.WallTime = t
+	m.Lock()
+	defer m.Unlock()
+	m.wallTime = t
 }
 
-// WriteHTML writes a histograph
-// html file to the cwd.
-func (m *Metrics) WriteHTML(p string) error {
-	w := Timeline{}
-	w.AddEvent(m)
-	return w.WriteHTML(p)
+// SetWallTime optionally sets an elapsed wall time duration.
+// This affects rate output by using total events counted over time.
+// This is useful for concurrent/parallelized events that overlap
+// in wall time and are writing to a shared Tachymeter instance.
+func (m *Tachymeter) WittWallTime(t time.Duration) *Tachymeter {
+	m.Lock()
+	defer m.Unlock()
+	m.wallTime = t
+	return m
 }
 
-// Dump prints a formatted Metrics output to console.
-func (m *Metrics) Dump() {
-	fmt.Println(m.String())
+// AddTimeWithLabel adds a time.Duration to Tachymeter with a specific label.
+func (m *Tachymeter) AddTimeWithLabel(label string, t time.Duration) {
+	//	m.Times[(atomic.AddUint64(&m.Count, 1)-1)%m.Size] = t
+	m.ranks[(atomic.AddUint64(&m.count, 1)-1)%m.size] = ranking{duration: t, label: label}
+}
+
+// AddTime adds a time.Duration to Tachymeter.
+func (m *Tachymeter) AddTime(t time.Duration) {
+	// m.times[(atomic.AddUint64(&m.count, 1)-1)%m.size] = t
+	m.ranks[(atomic.AddUint64(&m.count, 1)-1)%m.size] = ranking{duration: t}
+}
+
+// Reset resets a Tachymeter instance for reuse.
+func (m *Tachymeter) Reset() {
+	// This lock is obviously not needed for  the m.Count update, rather to prevent a
+	// Tachymeter reset while Calc is being called.
+	m.Lock()
+	atomic.StoreUint64(&m.count, 0)
+	m.Unlock()
+}
+
+// Getter for the sample size
+func (m *Tachymeter) Size() uint64 {
+	m.Lock()
+	defer m.Unlock()
+	return m.size
+}
+
+// Setter for the sample size
+func (m *Tachymeter) SetSize(size uint64) {
+	m.Lock()
+	defer m.Unlock()
+	m.size = size
+}
+
+// Setter for the sample size
+func (m *Tachymeter) WithSize(size uint64) *Tachymeter {
+	m.Lock()
+	defer m.Unlock()
+	m.size = size
+	return m
+}
+
+// Setter for the number of histogram buckets
+func (m *Tachymeter) Buckets() int {
+	m.Lock()
+	defer m.Unlock()
+	return m.hBins
+}
+
+// Setter for the number of histogram buckets
+func (m *Tachymeter) WithHistBuckets(hBins int) *Tachymeter {
+	m.Lock()
+	defer m.Unlock()
+	m.hBins = hBins
+	return m
+}
+
+// Setter for the number of histogram buckets
+func (m *Tachymeter) SetHistBuckets(hBins int) {
+	m.Lock()
+	defer m.Unlock()
+	m.hBins = hBins
 }
 
 // String returns a formatted Metrics string.
-func (m *Metrics) String() string {
-	return fmt.Sprintf(`%d samples of %d events
-Wall:		%s
-Cumulative:	%s
-HMean:		%s
-Avg.:		%s
-p50: 		%s
-p75:		%s
-p95:		%s
-p99:		%s
-p999:		%s
-Long 5%%:	%s
-Short 5%%:	%s
-Max:		%s (%s)
-Min:		%s (%s)
-Range:		%s
-Rate/sec.:	%.2f`,
-		m.Samples,
-		m.Count,
-		m.Wall.String(),
-		m.Rank.Cumulative,
-		m.Rank.HMean,
-		m.Rank.Avg,
-		m.Rank.P50,
-		m.Rank.P75,
-		m.Rank.P95,
-		m.Rank.P99,
-		m.Rank.P999,
-		m.Rank.Long5p,
-		m.Rank.Short5p,
-		m.Rank.Max,
-		m.Rank.Max,
-		m.Rank.Min,
-		m.Rank.Min,
-		m.Rank.Range,
-		m.Rate.Second)
-}
+func (m *Tachymeter) Convert(dataset string, format string) (output string, err error) {
 
-// JSON returns a *Metrics as
-// a JSON string.
-func (m *Metrics) JSON() string {
-	j, _ := json.Marshal(m)
-
-	return string(j)
-}
-
-// MarshalJSON defines the output formatting
-// for the JSON() method. This is exported as a
-// requirement but not intended for end users.
-func (m *Metrics) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		Time struct {
-			Cumulative string
-			HMean      string
-			Avg        string
-			P50        string
-			P75        string
-			P95        string
-			P99        string
-			P999       string
-			Long5p     string
-			Short5p    string
-			Max        string
-			Min        string
-			Range      string
-		}
-		Rate struct {
-			Second float64
-		}
-		Samples   int
-		Count     int
-		Histogram *Histogram
-		Wall      string
-	}{
-		Time: struct {
-			Cumulative string
-			HMean      string
-			Avg        string
-			P50        string
-			P75        string
-			P95        string
-			P99        string
-			P999       string
-			Long5p     string
-			Short5p    string
-			Max        string
-			Min        string
-			Range      string
-		}{
-			Cumulative: m.Time.Cumulative.String(),
-			HMean:      m.Time.HMean.String(),
-			Avg:        m.Time.Avg.String(),
-			P50:        m.Time.P50.String(),
-			P75:        m.Time.P75.String(),
-			P95:        m.Time.P95.String(),
-			P99:        m.Time.P99.String(),
-			P999:       m.Time.P999.String(),
-			Long5p:     m.Time.Long5p.String(),
-			Short5p:    m.Time.Short5p.String(),
-			Max:        m.Time.Max.String(),
-			Min:        m.Time.Min.String(),
-			Range:      m.Time.Range.String(),
-		},
-		Rate: struct{ Second float64 }{
-			Second: m.Rate.Second,
-		},
-		Histogram: m.Histogram,
-		Samples:   m.Samples,
-		Count:     m.Count,
-		Wall:      m.Wall.String(),
-	})
-}
-
-// Dump prints a formatted histogram output to console
-// scaled to a width of s.
-func (h *Histogram) Dump(s int) {
-	fmt.Println(h.String(s))
-}
-
-// String returns a formatted Metrics string scaled
-// to a width of s.
-func (h *Histogram) String(s int) string {
-	if h == nil {
-		return ""
+	// select/prepare dataset
+	var rawResults []string
+	dataset = strings.ToLower(dataset)
+	switch dataset {
+	case "ranks", "ranking":
+		// rawResults = m.ranks // []ranking: label, startedAt, endedAt, duration, err
+	case "timeslice", "time_slice":
+		// rawResults = m.times // []time.Duration
+	default:
+		rawResults = []string{""}
+		err = errTachymeterDataset
+		return
 	}
 
-	var min, max uint64 = math.MaxUint64, 0
-	// Get the histogram min/max counts.
-	for _, bucket := range *h {
-		for _, v := range bucket {
-			if v > max {
-				max = v
-			}
-			if v < min {
-				min = v
-			}
-		}
+	// export format
+	format = strings.ToLower(format)
+	switch format {
+	case "postgres", "postgresql":
+		output = fmt.Sprintf("%v", rawResults)
+	case "ascii":
+		output = fmt.Sprintf("%v", rawResults)
+	case "mysql":
+		output = fmt.Sprintf("%v", rawResults)
+	case "xlsx":
+		output = fmt.Sprintf("%v", rawResults)
+	case "tsv":
+		output = fmt.Sprintf("%v", rawResults)
+	case "csv":
+		output = fmt.Sprintf("%v", rawResults)
+	case "xml":
+		output = fmt.Sprintf("%v", rawResults)
+	case "yaml":
+		output = fmt.Sprintf("%v", rawResults)
+	case "json":
+		output = fmt.Sprintf("%v", rawResults)
+	default:
+		err = errTachymeterEncoding
+		return
 	}
+	return
+}
 
-	var b bytes.Buffer
+// Bytes(), String(), WriteTo(io.Writer), WriteFile(filename string, perm os.FileMode)
 
-	// Build histogram string.
-	for _, bucket := range *h {
-		for k, v := range bucket {
-			// Get the bar length.
-			blen := scale(float64(v), float64(min), float64(max), 1, float64(s))
-			line := fmt.Sprintf("%20s %s\n", k, strings.Repeat("-", int(blen)))
-			b.WriteString(line)
-		}
-	}
+// Getter to check the count of samples registered
+func (m *Tachymeter) Count() uint64 {
+	m.Lock()
+	defer m.Unlock()
 
-	return b.String()
+	return m.count
 }
 
 // Scale scales the input x with the input-min a0,
 // input-max a1, output-min b0, and output-max b1.
-func scale(x float64, a0, a1, b0, b1 float64) float64 {
-	return (x-a0)/(a1-a0)*(b1-b0) + b0
+func scale(x, a0, a1, b0, b1 float64) float64 {
+	a, b := x-a0, a1-a0
+	var c float64
+	if a == 0 {
+		c = 0
+	} else {
+		c = a / b
+	}
+	return c*(b1-b0) + b0
 }
