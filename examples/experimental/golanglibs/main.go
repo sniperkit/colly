@@ -6,18 +6,27 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sniperkit/colly/addons/dashboard/tui"
 	"github.com/sniperkit/colly/pkg"
 	cfg "github.com/sniperkit/colly/pkg/config"
 	"github.com/sniperkit/colly/pkg/queue"
 
+	"github.com/sniperkit/colly/addons/dashboard/tui"
 	sm "github.com/sniperkit/colly/addons/sitemap"
-	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
+	ta "github.com/sniperkit/colly/addons/stats/tachymeter"
 )
 
-const AppVersion = "0.0.1-alpha"
+var version = APP_VERSION
 
-var version = AppVersion
+/*
+	Refs:
+	- https://github.com/zdavep/dozer
+	- https://github.com/yuansudong/msg_center/blob/master/node/sentinel/workpool.go
+	- https://github.com/xor-gate/snippets/blob/master/golang/channel-sync/main.go
+	- https://github.com/v3io/http_blaster/blob/master/http_blaster.go
+	- https://github.com/prgrm0x1/cmh/blob/master/cmh.go
+	- https://github.com/test-circle-provisioner/go-sample-template/blob/master/cmd/service/main.go
+	- https://github.com/jamiealquiza/tachymeter
+*/
 
 var (
 	isDebug                bool   = false
@@ -40,6 +49,9 @@ var (
 	allURLsHaveBeenVisited chan bool
 	crawlResult            chan error
 	xResults               chan tui.WorkResult
+	cTachymeter            chan *ta.Tachymeter
+	xTachymeter            *ta.Tachymeter
+	wallTimeStart          time.Time
 )
 
 // library stores information about a golang library
@@ -118,6 +130,7 @@ func main() {
 	stopTheCrawler = make(chan bool)
 	crawlResult = make(chan error)
 	xResults = make(chan tui.WorkResult)
+	cTachymeter = make(chan *ta.Tachymeter)
 
 	if enable_ui {
 		stopTheUI = make(chan bool)
@@ -150,6 +163,15 @@ func main() {
 		// colly.MaxDepth(2),
 	)
 	//}
+
+	xTachymeter = ta.New(
+		&ta.Config{
+			SampleSize:       50,
+			Safe:             true, // deprecated
+			HistogramBuckets: 50,
+		},
+	)
+	wallTimeStart = time.Now()
 
 	if cpu_profile || mem_profile {
 		isDebug = true
@@ -336,6 +358,7 @@ func main() {
 			log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
 		} else {
 			xResults <- tui.WorkResult{
+				Err:             e,
 				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
 				NumberOfWorkers: numberOfWorkers,
 				ResponseSize:    r.GetSize(),
@@ -430,6 +453,12 @@ func main() {
 	}()
 
 	q.Run(scraper)
+
+	// When finished, set elapsed wall time.
+	tachymeter.SetWallTime(time.Since(wallTimeStart))
+
+	// Rate outputs will be accurate.
+	log.Println(tachymeter.Calc().String())
 
 	/*
 		uiWaitGroup.Wait()

@@ -7,6 +7,7 @@ import (
 // date/time related constants
 const (
 	APP_NAME            = "Colly - GolangLibs"
+	APP_VERSION         = "0.0.1-alpha"
 	DEFAULT_DATE_FORMAT = "Jan 02, 2006" // DATE_FORMAT default format date
 )
 

@@ -2,4 +2,13 @@
 .staging/
 .staging/*
 .staging/**
+
 ./golanglibs
+
+shared/
+shared/*
+shared/**
+
+vendor/
+vendor/*
+vendor/**

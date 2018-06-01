@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+var errorMessages []string
 var debugf func(format string, a ...interface{})
 
 func init() {
