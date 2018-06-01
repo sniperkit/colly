@@ -12,16 +12,11 @@ import:
 - package: github.com/DataDog/zstd
 - package: github.com/PuerkitoBio/goquery
 - package: github.com/agrison/mxj
-- package: github.com/alessio/shellescape
 - package: github.com/antchfx/htmlquery
 - package: github.com/antchfx/xmlquery
 - package: github.com/asciimoo/morty
   subpackages:
   - contenttype
-- package: github.com/asciimoo/wuzz
-  subpackages:
-  - config
-  - formatter
 - package: github.com/asdine/storm
 - package: github.com/bndr/gotabulate
 - package: github.com/fatih/structs
@@ -53,11 +48,7 @@ import:
 - package: github.com/jroimartin/gocui
 - package: github.com/json-iterator/go
 - package: github.com/kennygrant/sanitize
-- package: github.com/mattn/go-runewidth
 - package: github.com/mattn/go-sqlite3
-- package: github.com/mitchellh/go-homedir
-- package: github.com/nsf/termbox-go
-- package: github.com/nwidger/jsoncolor
 - package: github.com/pquerna/ffjson
   subpackages:
   - ffjson
@@ -76,9 +67,6 @@ import:
   subpackages:
   - backend/default/badger
   - backend/default/diskv
-- package: github.com/sniperkit/xstats
-  subpackages:
-  - pkg
 - package: github.com/sniperkit/xtask
   subpackages:
   - plugin/counter
@@ -92,11 +80,9 @@ import:
 - package: github.com/tealeg/xlsx
 - package: github.com/temoto/robotstxt
 - package: github.com/thrift-iterator/go
-- package: github.com/tidwall/gjson
 - package: github.com/valyala/fasthttp
 - package: github.com/willf/bloom
 - package: github.com/x-cray/logrus-prefixed-formatter
-- package: github.com/x86kernel/htmlcolor
 - package: golang.org/x/net
   subpackages:
   - html
@@ -105,14 +91,12 @@ import:
 - package: golang.org/x/text
   subpackages:
   - encoding
-  - internal/language
 - package: google.golang.org/appengine
   subpackages:
   - urlfetch
 - package: gopkg.in/yaml.v2
-- package: graylog-cli/graylog
-- package: secureimage
 testImport:
+- package: github.com/jamiealquiza/tachymeter
 - package: github.com/jimsmart/collysqlite
 - package: github.com/onsi/ginkgo
 - package: github.com/onsi/gomega

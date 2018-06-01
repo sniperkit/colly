@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	tablib "github.com/sniperkit/colly/addons/convert/agnostic-tablib"
+	tablib "github.com/sniperkit/colly/addons/convert/tabular"
 	. "gopkg.in/check.v1"
 )
 

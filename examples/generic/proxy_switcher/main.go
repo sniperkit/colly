@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/sniperkit/colly/pkg"
-	"github.com/sniperkit/colly/pkg/web/proxy"
+	"github.com/sniperkit/colly/pkg/proxy/default"
 )
 
 var version = "0.0.1-alpha"

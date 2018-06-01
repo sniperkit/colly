@@ -13,9 +13,20 @@ import (
 	queue "github.com/sniperkit/colly/pkg/queue"
 
 	// experimental addons
-	tui "github.com/sniperkit/colly/addons/dashboard/tui"
+
+	//// console UI
+	cui "github.com/sniperkit/colly/addons/dashboard/gocui"
+	tui "github.com/sniperkit/colly/addons/dashboard/termui"
+	// dash "github.com/sniperkit/colly/addons/dashboard"
+	// tvi "github.com/sniperkit/colly/addons/dashboard/tview"
+
+	//// proxies
 	onion "github.com/sniperkit/colly/addons/proxy/onion"
+
+	//// sitemaps
 	sm "github.com/sniperkit/colly/addons/sitemap"
+
+	//// stats
 	ta "github.com/sniperkit/colly/addons/stats/tachymeter"
 )
 
@@ -53,6 +64,10 @@ var (
 	sitemapURL string = "https://golanglibs.com/sitemap.txt"
 	exportFile string = "./shared/storage/exports/reports/latest.csv"
 	sitemap    *sm.Sitemap
+
+	// tui/cui
+	xConsoleUI *cui.TermUI
+	xTermUI    *cui.TermUI
 
 	// tachymeter
 	startedAt            time.Time

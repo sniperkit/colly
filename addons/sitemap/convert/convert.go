@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sniperkit/colly/addons/convert/agnostic-tablib"
+	"github.com/sniperkit/colly/addons/convert/tabular"
 	"github.com/sniperkit/colly/addons/sitemap"
 )
 

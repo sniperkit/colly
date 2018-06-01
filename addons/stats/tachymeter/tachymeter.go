@@ -8,8 +8,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	ta "github.com/sniperkit/colly/addons/convert/agnostic-tablib"
 )
 
 const PACKAGE_VERSION = "0.0.1"
@@ -62,8 +60,6 @@ type Tachymeter struct {
 	times    timeSlice
 	ranks    timeRank
 	buffer   *bytes.Buffer
-	dataset  *ta.Dataset
-	databook *ta.Databook
 }
 
 // New initializes a new Tachymeter.

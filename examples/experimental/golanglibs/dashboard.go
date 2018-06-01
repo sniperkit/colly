@@ -18,9 +18,12 @@ import (
 	// core
 	colly "github.com/sniperkit/colly/pkg"
 
-	// addons
-	tui "github.com/sniperkit/colly/addons/dashboard/tui"
-	tui_hist "github.com/sniperkit/colly/addons/dashboard/tui/histogram"
+	// experimental addons
+	tui "github.com/sniperkit/colly/addons/dashboard/termui"
+	tui_hist "github.com/sniperkit/colly/addons/dashboard/termui/histogram"
+	// dash "github.com/sniperkit/colly/addons/dashboard"
+	// cui "github.com/sniperkit/colly/addons/dashboard/gocui"
+	// tvi "github.com/sniperkit/colly/addons/dashboard/tview"
 )
 
 /*

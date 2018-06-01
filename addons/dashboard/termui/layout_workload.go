@@ -11,6 +11,7 @@ import (
 )
 
 type TermUI struct {
+	Config                   *cfg.Config
 	cfg                      *cfg.Config
 	widget_title             ui.GridBufferer
 	widget_sys_info          ui.GridBufferer
