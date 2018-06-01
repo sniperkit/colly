@@ -6,12 +6,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sniperkit/colly/pkg/queue"
+	// helpers
+	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
 
-	res "github.com/sniperkit/colly/addons/storage/external/redis"
+	// queue - core
+	queue "github.com/sniperkit/colly/pkg/queue"
 	// "github.com/sniperkit/colly/pkg/helper"
 	// "github.com/sniperkit/colly/pkg/storage"
-	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
+
+	// queue - addons
+	res "github.com/sniperkit/colly/addons/storage/external/redis"
 	// sq3 "github.com/sniperkit/colly/addons/storage/external/sqlite3"
 	// baq "github.com/sniperkit/colly/addons/storage/external/badger"
 	// stq "github.com/sniperkit/colly/addons/storage/external/storm"
@@ -51,7 +55,7 @@ func initQueue(ct int, s int, b string) (q *queue.Queue, err error) {
 
 	case "sqlite":
 		fallthrough
-	case "sqlite3":
+	case "sqlite3": // Conflict with Pivot
 		/*
 			// create a request queue with 2 consumer threads
 			q, err = queue.New(

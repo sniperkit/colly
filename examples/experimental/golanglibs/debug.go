@@ -10,14 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sniperkit/xstats/pkg"
+	// concurrent counters
 	"github.com/sniperkit/xtask/plugin/counter"
 
-	// "github.com/sniperkit/xstats/pkg/config"
-
-	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
-	// "github.com/sniperkit/colly/pkg/debug"
-
+	// Logger
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
@@ -168,17 +164,6 @@ func trimPath(path string) string {
 		}
 	}
 	return path
-}
-
-func addMetrics(start time.Time, incr int, failed bool) {
-	callTime := time.Now().Sub(start)
-	m := &funcMetrics{}
-	m.calls.count = incr
-	m.calls.time = callTime
-	if failed {
-		m.calls.failed = incr
-	}
-	stats.Report(m)
 }
 
 func funcTrack(start time.Time) {

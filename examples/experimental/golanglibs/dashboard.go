@@ -15,11 +15,12 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 
-	"github.com/sniperkit/colly/pkg"
+	// core
+	colly "github.com/sniperkit/colly/pkg"
 
-	"github.com/sniperkit/colly/addons/dashboard/tui"
-	"github.com/sniperkit/colly/addons/dashboard/tui/histogram"
-	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
+	// addons
+	tui "github.com/sniperkit/colly/addons/dashboard/tui"
+	tui_hist "github.com/sniperkit/colly/addons/dashboard/tui/histogram"
 )
 
 /*
@@ -39,9 +40,9 @@ var (
 	ch_get_latency       chan time.Duration
 	ch_statuses          chan int
 	term_ui              *tui.TermUI
-	LatencyCollectorGet  histogram.LatencyHistogram // tui.LatencyCollector
-	LatencyCollectorPut  histogram.LatencyHistogram //tui.LatencyCollector
-	LatencyCollectorPost histogram.LatencyHistogram //tui.LatencyCollector
+	LatencyCollectorGet  tui_hist.LatencyHistogram // tui.LatencyCollector
+	LatencyCollectorPut  tui_hist.LatencyHistogram //tui.LatencyCollector
+	LatencyCollectorPost tui_hist.LatencyHistogram //tui.LatencyCollector
 	StatusesCollector    tui.CollectorStatus
 	uiWaitGroup          = &sync.WaitGroup{}
 	stopTheUI            chan bool

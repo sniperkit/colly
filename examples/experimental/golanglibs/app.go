@@ -6,8 +6,9 @@ import (
 	"github.com/asdine/storm"
 	"github.com/gin-gonic/gin"
 
-	"github.com/sniperkit/colly/pkg"
-	"github.com/sniperkit/colly/pkg/web/proxy"
+	// core
+	colly "github.com/sniperkit/colly/pkg"
+	proxy "github.com/sniperkit/colly/pkg/proxy/default"
 
 	tablib "github.com/sniperkit/xutil/plugin/format/convert/tabular"
 	cmap "github.com/sniperkit/xutil/plugin/map/multi"

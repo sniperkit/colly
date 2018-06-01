@@ -6,8 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/structs"
+	// clients
 	"github.com/hackebrot/go-librariesio/librariesio"
+
+	// helpers
+	"github.com/fatih/structs"
 )
 
 var (

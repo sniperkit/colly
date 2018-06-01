@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	// Data Layer Abstraction
 	"github.com/ghetzel/pivot"
 	"github.com/ghetzel/pivot/dal"
 	"github.com/ghetzel/pivot/mapper"
@@ -13,6 +14,7 @@ import (
 	cuckoo "github.com/seiflotfy/cuckoofilter"
 	"github.com/willf/bloom"
 
+	// key-value stores
 	"github.com/asdine/storm"
 	//"gopkg.in/mgo.v2/bson"
 )

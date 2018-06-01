@@ -6,11 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sniperkit/colly/pkg"
+	// core
+	colly "github.com/sniperkit/colly/pkg"
 	cfg "github.com/sniperkit/colly/pkg/config"
-	"github.com/sniperkit/colly/pkg/queue"
+	proxy "github.com/sniperkit/colly/pkg/proxy/default"
+	queue "github.com/sniperkit/colly/pkg/queue"
 
-	"github.com/sniperkit/colly/addons/dashboard/tui"
+	// experimental addons
+	tui "github.com/sniperkit/colly/addons/dashboard/tui"
 	sm "github.com/sniperkit/colly/addons/sitemap"
 	ta "github.com/sniperkit/colly/addons/stats/tachymeter"
 )
@@ -29,6 +32,8 @@ var version = APP_VERSION
 */
 
 var (
+	isPolite               bool   = true
+	isProxy                bool   = false
 	isDebug                bool   = false
 	isStrict               bool   = true
 	isVerbose              bool   = true
@@ -131,28 +136,13 @@ func init() {
 
 func main() {
 
+	// Create a channels for the collector results
 	allStatisticsHaveBeenUpdated = make(chan bool)
 	allURLsHaveBeenVisited = make(chan bool)
 	stopTheCrawler = make(chan bool)
 	crawlResult = make(chan error)
-	xResults = make(chan tui.WorkResult)
-	cTachymeter = make(chan *ta.Tachymeter)
 
-	if enable_ui {
-		stopTheUI = make(chan bool)
-		// tui.StopTheUI
-	}
-
-	// dashboardMcap()
-
-	// defer handle_exit()
-	// defer close_log_file()
-
-	//if collyConfig != nil {
-	//	// collyConfig = &cfg.Config{}
-	//	scraper = colly.NewCollectorWithConfig(collyConfig)
-	// } else {
-	// Create a Collector specifically for Shopify
+	// Create a Collector
 	scraper = colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
 		colly.AllowedDomains(defaultAllowedDomains...),
@@ -168,9 +158,10 @@ func main() {
 		// MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
 		// colly.MaxDepth(2),
 	)
-	//}
 
+	// Create a Tachymeter
 	if isTachymeter {
+		cTachymeter = make(chan *ta.Tachymeter)
 		xTachymeterTL = ta.Timeline{}
 		xTachymeter = ta.New(
 			&ta.Config{
@@ -200,12 +191,16 @@ func main() {
 		isDebug = true
 	}
 
+	// For tests
 	collyConfig.Title = APP_NAME
 	collyConfig.IsModeTUI = enable_ui
 	collyConfig.VerboseMode = enable_log
 	collyConfig.DebugMode = isDebug
 
+	// Create channels to check statuses of TermUI components
 	if enable_ui {
+		xResults = make(chan tui.WorkResult)
+		stopTheUI = make(chan bool)
 		// ch_done = enable_tui()
 		// ch_done = tui.Dashboard()
 		// uiWaitGroup.Add(1)
@@ -218,6 +213,7 @@ func main() {
 		// start_cpu_profile()
 	}
 
+	// Export golanglibs' indexed packages
 	ensurePathExists(exportFile)
 	writer, err := newSafeCsvWriter(exportFile)
 	if err != nil {
@@ -226,28 +222,33 @@ func main() {
 	defer writer.Flush()
 	writer.Delimiter('|').Write([]string{"package_uri", "referrer", "name", "description", "stars", "tags"})
 
-	/*
+	// Set a rate limiter to the collector instanciated
+	if isPolite {
 		scraper.Limit(&colly.LimitRule{
 			Parallelism: 4,
 			DomainGlob:  "*",
-			// RandomDelay: 2 * time.Second,
+			RandomDelay: 5 * time.Second,
 		})
+	}
 
-	*/
-
+	// Set a custom httpTransport for requests using httpcache
 	if isCacheTransport {
 		xCache, xTransport = newCacheWithTransport("badger", "./shared/storage/cache/http")
 		scraper.WithTransport(xTransport)
 	}
 
-	/*
-		// Rotate two socks5 proxies
-		rp, err := proxy.RoundRobinProxySwitcher("socks5://127.0.0.1:1337", "socks5://127.0.0.1:1338")
+	// Set a list of proxies for scraping/crawling the web content
+	if isProxy {
+		// Rotate two socks5 proxies (Add Tor Proxies)
+		rp, err := proxy.RoundRobinProxySwitcher(
+			"socks5://127.0.0.1:1337",
+			"socks5://127.0.0.1:1338",
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
-		c.SetProxyFunc(rp)
-	*/
+		scraper.SetProxyFunc(rp)
+	}
 
 	// On every a element which has href attribute call callback
 	/*
@@ -266,7 +267,6 @@ func main() {
 	// On every a HTML element which has name attribute call callback
 	scraper.OnHTML(`div.col-md-8`, func(e *colly.HTMLElement) {
 		start := time.Now()
-		// var parentURL string
 		parentURL := e.Request.AbsoluteURL(e.Request.URL.String())
 
 		var meta []string
@@ -305,17 +305,16 @@ func main() {
 			writer.Write(meta)
 		})
 
-		// Add each loop tachymeter to the event timeline.
-		xTachymeterTL.AddEvent(xTachymeter.Snapshot())
-
 		xTachymeter.AddTimeWithLabel(parentURL, time.Since(start))
+
+		// Add each loop tachymeter to the event timeline.
+		// xTachymeterTL.AddEvent(xTachymeter.Snapshot())
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
 		if !enable_ui {
 			log.Infoln("[REQUEST] url=", r.Request.URL.String())
 		} else {
-			// xResults <- tui.ResponseResult{}
 			xResults <- tui.WorkResult{
 				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
 				NumberOfWorkers: numberOfWorkers,
@@ -332,7 +331,6 @@ func main() {
 		if !enable_ui {
 			log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
 		} else {
-			// xResults <- tui.ErrorResult{}
 			xResults <- tui.WorkResult{
 				Err:             e,
 				URL:             *r.Request.URL,
@@ -384,27 +382,13 @@ func main() {
 	}
 
 	/*
+		// enqueue a list urls to visit manually from a csv file
 		links, err := linksFromCSV(sitemapURL)
 		check(err)
 		for _, link := range links {
 			q.AddURL(link)
 		}
 	*/
-
-	//go func() {
-	/*
-		result := crawl(targetURL, CrawlOptions{
-			NumberOfConcurrentRequests: int(concurrentRequests),
-			Timeout:                    time.Second * time.Duration(timeoutInSeconds),
-		}, stopTheCrawler)
-	*/
-	//q.Run(scraper)
-	//stopTheUI <- true
-	// crawlResult <- result
-	// q.Run(scraper)
-	//}()
-
-	// cd /Users/lucmichalski/local/golang/src/github.com/sniperkit/colly/examples/experimental/golanglibs/
 
 	// update the statistics with the results
 	if enable_ui {
@@ -420,11 +404,9 @@ func main() {
 					// allURLsHaveBeenVisited <- true
 
 				case result := <-xResults:
-					// url := result.URL()
-					// debugf("Received results for URL %q", url.String())
-					// pp.Println(result)
 					tui.UpdateStatistics(result)
 					// cds.Append("urls", url.String())
+
 				}
 			}
 		}()
@@ -445,17 +427,11 @@ func main() {
 	}
 
 	if isTachymeter {
-
-		// Calc output.
-		// xTachyResults = xTachymeter.Snapshot()
-
-		// Write out an HTML page with the
-		// histogram for all iterations.
+		// Write out an HTML page with the histogram for all iterations.
 		err := xTachymeterTL.WriteHTML("./shared/exports/stats/tachymeter")
 		if err != nil {
 			fmt.Println(err)
 		}
-
 		fmt.Println("Results written")
 
 		// Print JSON format to console.
@@ -467,24 +443,6 @@ func main() {
 		// Print text histogram.
 		// fmt.Println(xTachyResults.Histogram.String(15))
 
-		// Add each loop tachymeter
-		// to the event timeline.
-		// xTachymeterTimeLine.AddEvent(xTachymeter.Snapshot())
-		// xTachymeter.Reset()
-
 	}
-
-	/*
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "  ")
-
-		// Dump json to the standard output
-		enc.Encode(libraries)
-	*/
-
-	// if enable_ui {
-	// wait_for_ui_completion(ch_done)
-	// }
-	// exit(err_code)
 
 }

@@ -10,16 +10,16 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pquerna/ffjson/ffjson"
+	// iterators
+	ffjson "github.com/pquerna/ffjson/ffjson"
+	jsoniter "github.com/sniperkit/xutil/plugin/format/json"
 
-	// "https://github.com/chonla/dbz/blob/master/db/sqlite.go"
+	// helpers
+	json2csv "github.com/sniperkit/xutil/plugin/format/convert/json2csv"
 	// "github.com/cnf/structhash"
 	// "github.com/siddontang/go-mysql-elasticsearch"
 	// "github.com/mandolyte/csv-utils"
 	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
-
-	"github.com/sniperkit/xutil/plugin/format/convert/json2csv"
-	jsoniter "github.com/sniperkit/xutil/plugin/format/json"
 )
 
 /*
