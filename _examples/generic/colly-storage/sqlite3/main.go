@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	"github.com/sniperkit/colly/addons/storage/external/sqlite3"
 	"github.com/sniperkit/colly/pkg"
 	"github.com/sniperkit/colly/pkg/helper"
 	"github.com/sniperkit/colly/pkg/queue"
+	"github.com/sniperkit/colly/plugins/storage/external/sqlite3"
 )
 
 var version = "0.0.1-alpha"
@@ -37,7 +37,7 @@ func main() {
 	q, _ := queue.New(8, storage)
 	q.AddURL("http://www.example.com")
 
-	//c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 4})
+	// c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 4})
 
 	// Find and visit all links
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {

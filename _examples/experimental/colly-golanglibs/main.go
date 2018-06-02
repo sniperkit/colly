@@ -14,12 +14,6 @@ import (
 
 	// experimental addons
 
-	//// console UI
-	cui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/gocui"
-	tui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/termui"
-	// dash "github.com/sniperkit/colly/addons/dashboard"
-	// tvi "github.com/sniperkit/colly/addons/dashboard/tview"
-
 	//// proxies
 	onion "github.com/sniperkit/colly/plugins/net/protocol/http/proxy/onion"
 
@@ -29,8 +23,6 @@ import (
 	//// stats
 	ta "github.com/sniperkit/colly/plugins/data/collection/stats/tachymeter"
 )
-
-var version = APP_VERSION
 
 /*
 	Refs:
@@ -58,16 +50,12 @@ var (
 	collyConfig          *cfg.Config = &cfg.Config{}
 	currentCrawlerMode   string      = "queue"
 	availableCrawlerMode []string    = []string{"queue", "async", "distributed", "default"}
-	q                    *queue.Queue
+	xQueue               *queue.Queue
 
 	// sitemaps
 	sitemapURL string = "https://golanglibs.com/sitemap.txt"
 	exportFile string = "./shared/storage/exports/reports/latest.csv"
 	sitemap    *sm.Sitemap
-
-	// tui/cui
-	xConsoleUI *cui.TermUI
-	xTermUI    *cui.TermUI
 
 	// tachymeter
 	startedAt            time.Time
@@ -87,90 +75,28 @@ var (
 	stopTheCrawler         chan bool
 	allURLsHaveBeenVisited chan bool
 	crawlResult            chan error
-	xResults               chan tui.WorkResult
-
-	// extracted patterns
-	libraries []library
-	entries   map[string]bool
-	links     []string = []string{} // Array containing all the known URLs in a sitemap
 )
-
-// library stores information about indexed golang library in golanglibs.com
-type library struct {
-	Title       string
-	Description string
-	Categories  []string
-	URI         string
-	URL         string
-	Stars       int
-}
 
 func init() {
 
 	var err error
 	startedAt = time.Now()
-	sm.CreateDirs(defaultStorageDirs)
-	libraries = make([]library, 0)
-	entries = make(map[string]bool, 0)
 
-	q, err = initQueue(numberOfWorkers, queueMaxSize, "InMemory")
+	// init collector queue
+	xQueue, err = initQueue(numberOfWorkers, queueMaxSize, "InMemory")
 	if err != nil {
 		log.Fatalln("error: ", err)
 	}
-
-	const (
-		default_conf         = "example.toml"
-		usage_conf           = "conf file path"
-		usage_version        = "show version"
-		default_showversion  = false
-		usage_results_file   = "results file path"
-		default_results_file = "example.results"
-		usage_log_file       = "enable stdout to log"
-		default_log_file     = true
-		default_worker_qd    = 10000
-		usage_worker_qd      = "queue depth for worker requests"
-
-		usage_verbose   = "print debug logs"
-		default_verbose = false
-
-		usage_memprofile   = "write mem profile to file"
-		default_memprofile = false
-
-		usage_cpuprofile   = "write cpu profile to file"
-		default_cpuprofile = false
-
-		usage_enable_ui   = "enable terminal ui"
-		default_enable_ui = true
-
-		usage_dump_failures   = "enable 4xx status requests dump to file"
-		defaule_dump_failures = false
-
-		usage_dump_location   = "location of dump requests"
-		default_dump_location = "."
-	)
-
-	flag.StringVar(&conf_file, "conf", default_conf, usage_conf)
-	flag.StringVar(&conf_file, "c", default_conf, usage_conf+" (shorthand)")
-	flag.StringVar(&results_file, "o", default_results_file, usage_results_file+" (shorthand)")
-	flag.BoolVar(&showVersion, "version", default_showversion, usage_version)
-	flag.BoolVar(&cpu_profile, "p", default_cpuprofile, usage_cpuprofile)
-	flag.BoolVar(&mem_profile, "m", default_memprofile, usage_memprofile)
-	flag.BoolVar(&enable_log, "d", default_log_file, usage_log_file)
-	flag.BoolVar(&verbose, "v", default_verbose, usage_verbose)
-	flag.IntVar(&worker_qd, "q", default_worker_qd, usage_worker_qd)
-	flag.BoolVar(&enable_ui, "u", default_enable_ui, usage_enable_ui)
-	flag.BoolVar(&dump_failures, "f", defaule_dump_failures, usage_dump_failures)
-	flag.StringVar(&dump_location, "l", default_dump_location, usage_dump_location)
-
-}
-
-func main() {
 
 	// Create a channels for the collector results
 	allStatisticsHaveBeenUpdated = make(chan bool)
 	allURLsHaveBeenVisited = make(chan bool)
 	stopTheCrawler = make(chan bool)
 	crawlResult = make(chan error)
+
+}
+
+func main() {
 
 	// Create a Collector
 	scraper = colly.NewCollector(
@@ -179,14 +105,12 @@ func main() {
 		colly.DisallowedURLFilters(defaultDisabledURLFilters...),
 		colly.URLFilters(defaultAllowedURLFilters...),
 		colly.IgnoreRobotsTxt(),
-		// colly.AllowURLRevisit(),
-		// Cache responses to prevent multiple download of pages even if the collector is restarted
-		// colly.Debugger(&debug.LogDebugger{}),
-		colly.CacheDir(defaultStorageCacheDir),
+		colly.CacheDir(defaultStorageCacheDir), // Cache responses to prevent multiple download of pages even if the collector is restarted
 		// colly.CacheHTTP(defaultStorageCacheDir),
+		// colly.AllowURLRevisit(),
+		// colly.Debugger(&debug.LogDebugger{}),
 		// colly.Async(true),
-		// MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
-		// colly.MaxDepth(2),
+		// colly.MaxDepth(2), // MaxDepth is 2, so only the links on the scraped page and links on those pages are visited
 	)
 
 	// Create a Tachymeter
@@ -236,7 +160,6 @@ func main() {
 		// uiWaitGroup.Add(1)
 		go func() {
 			tui.Dashboard(stopTheUI, stopTheCrawler)
-			// uiWaitGroup.Done()
 		}()
 		// defer stop_cpu_profile()
 		// defer write_mem_profile()
@@ -339,6 +262,7 @@ func main() {
 
 		// Add each loop tachymeter to the event timeline.
 		// xTachymeterTL.AddEvent(xTachymeter.Snapshot())
+
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -406,10 +330,12 @@ func main() {
 		})
 	*/
 
-	numPages := 30 // 11560
+	numPages := 11560 // 11560
 	for i := 1; i <= numPages; i++ {
-		q.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i)) // Add URLs to the queue
+		xQueue.AddURL(fmt.Sprintf("https://golanglibs.com/?page=%d", i)) // Add URLs to the queue
 	}
+
+	// AddURLs()
 
 	/*
 		// enqueue a list urls to visit manually from a csv file
@@ -446,7 +372,7 @@ func main() {
 	case "async":
 		scraper.Wait() // Async
 	case "queue":
-		q.Run(scraper) // Consume URLs
+		xQueue.Run(scraper) // Consume URLs
 	default:
 		scraper.Visit(defaultDomain)
 	}
@@ -463,15 +389,6 @@ func main() {
 			fmt.Println(err)
 		}
 		fmt.Println("Results written")
-
-		// Print JSON format to console.
-		// fmt.Printf("%s\n\n", xTachyResults.JSON())
-
-		// Print pre-formatted console output.
-		// fmt.Printf("%s\n\n", xTachyResults.String())
-
-		// Print text histogram.
-		// fmt.Println(xTachyResults.Histogram.String(15))
 
 	}
 

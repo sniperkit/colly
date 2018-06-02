@@ -74,6 +74,10 @@ var (
 	cacheStoragePath = cachePrefixPath + "./shared/storage/cache/http"
 )
 
+func init() {
+	sm.CreateDirs(defaultStorageDirs)
+}
+
 func cloneCacheHTTP() httpcache.Cache {
 	defer funcTrack(time.Now())
 	backendCache, err := newCacheBackend(cacheEngine, cacheStoragePath)

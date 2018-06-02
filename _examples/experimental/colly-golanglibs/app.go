@@ -6,18 +6,13 @@ import (
 	"github.com/asdine/storm"
 	"github.com/gin-gonic/gin"
 
-	// core
-	colly "github.com/sniperkit/colly/pkg"
-	proxy "github.com/sniperkit/colly/pkg/proxy/default"
-
 	// experimental addons
 	// onion "github.com/sniperkit/colly/plugins/net/protocol/http/proxy/onion"
 	// morty "github.com/sniperkit/colly/plugins/net/protocol/http/proxy/morty"
 
-	// datastructure helpers
-	cmmap "github.com/sniperkit/colly/plugins/data/structure/map/multi"
-	tablib "github.com/sniperkit/colly/plugins/data/transform/tabular"
-	// cmap "github.com/sniperkit/xutil/plugin/map/multi"
+	// core
+	colly "github.com/sniperkit/colly/pkg"
+	proxy "github.com/sniperkit/colly/pkg/proxy/default"
 )
 
 /*
@@ -30,12 +25,58 @@ import (
 var (
 	conf_file    string
 	results_file string
-	showVersion  bool                       = false
-	verbose      bool                       = false
-	sheets       map[string][]interface{}   = make(map[string][]interface{}, 0)
-	datasets     map[string]*tablib.Dataset = make(map[string]*tablib.Dataset, 0) // := NewDataset([]string{"firstName", "lastName"})
-	cds                                     = cmmap.NewConcurrentMultiMap()
+	showVersion  bool = false
+	verbose      bool = false
+	version           = APP_VERSION
 )
+
+func init() {
+
+	const (
+		default_conf         = "example.toml"
+		usage_conf           = "conf file path"
+		usage_version        = "show version"
+		default_showversion  = false
+		usage_results_file   = "results file path"
+		default_results_file = "example.results"
+		usage_log_file       = "enable stdout to log"
+		default_log_file     = true
+		default_worker_qd    = 10000
+		usage_worker_qd      = "queue depth for worker requests"
+
+		usage_verbose   = "print debug logs"
+		default_verbose = false
+
+		usage_memprofile   = "write mem profile to file"
+		default_memprofile = false
+
+		usage_cpuprofile   = "write cpu profile to file"
+		default_cpuprofile = false
+
+		usage_enable_ui   = "enable terminal ui"
+		default_enable_ui = true
+
+		usage_dump_failures   = "enable 4xx status requests dump to file"
+		defaule_dump_failures = false
+
+		usage_dump_location   = "location of dump requests"
+		default_dump_location = "."
+	)
+
+	flag.StringVar(&conf_file, "conf", default_conf, usage_conf)
+	flag.StringVar(&conf_file, "c", default_conf, usage_conf+" (shorthand)")
+	flag.StringVar(&results_file, "o", default_results_file, usage_results_file+" (shorthand)")
+	flag.BoolVar(&showVersion, "version", default_showversion, usage_version)
+	flag.BoolVar(&cpu_profile, "p", default_cpuprofile, usage_cpuprofile)
+	flag.BoolVar(&mem_profile, "m", default_memprofile, usage_memprofile)
+	flag.BoolVar(&enable_log, "d", default_log_file, usage_log_file)
+	flag.BoolVar(&verbose, "v", default_verbose, usage_verbose)
+	flag.IntVar(&worker_qd, "q", default_worker_qd, usage_worker_qd)
+	flag.BoolVar(&enable_ui, "u", default_enable_ui, usage_enable_ui)
+	flag.BoolVar(&dump_failures, "f", defaule_dump_failures, usage_dump_failures)
+	flag.StringVar(&dump_location, "l", default_dump_location, usage_dump_location)
+
+}
 
 ///// App ///////////////////////////////////////////////
 type Application struct {

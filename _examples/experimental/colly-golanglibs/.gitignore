@@ -5,6 +5,7 @@
 
 ./golanglibs
 golanglibs
+colly-golanglibs
 
 shared/
 shared/*

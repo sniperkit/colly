@@ -9,8 +9,8 @@ import (
 
 var (
 	json     = jsoniter.ConfigCompatibleWithStandardLibrary
-	dataSet  *tabular.Dataset
-	dataBook *tabular.Databook
+	dataset  *tabular.Dataset
+	databook *tabular.Databook
 )
 
 /*

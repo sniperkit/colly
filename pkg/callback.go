@@ -9,14 +9,17 @@ type ResponseCallback func(*Response)
 // HTMLCallback is a type alias for OnHTML callback functions
 type HTMLCallback func(*HTMLElement)
 
-// TABCallback is a type alias for OnTAB callback functions
-type RAWCallback func(*RAWElement)
-
-// BINCallback is a type alias for OnTAB callback functions
-// type BINCallback func(*BINElement)
-
 // XMLCallback is a type alias for OnXML callback functions
 type XMLCallback func(*XMLElement)
+
+// CollectorCallback is a type alias for OnEvent callback functions
+type CollectorCallback func(*Collector)
+
+// FuncCallback is a type alias for OnFunc callback functions
+type FuncCallback func(*Collector)
+
+// EventCallback is a type alias for OnEvent callback functions
+type EventCallback func(*Collector)
 
 // ErrorCallback is a type alias for OnError callback functions
 type ErrorCallback func(*Response, error)
@@ -32,9 +35,4 @@ type htmlCallbackContainer struct {
 type xmlCallbackContainer struct {
 	Query    string
 	Function XMLCallback
-}
-
-type rawCallbackContainer struct {
-	Selector string
-	Function RAWCallback
 }

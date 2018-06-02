@@ -77,7 +77,6 @@ type Collector struct {
 	store             storage.Storage
 	debugger          debug.Debugger
 	robotsMap         map[string]*robotstxt.RobotsData
-	rawCallbacks      []*rawCallbackContainer
 	htmlCallbacks     []*htmlCallbackContainer
 	xmlCallbacks      []*xmlCallbackContainer
 	requestCallbacks  []RequestCallback
@@ -135,12 +134,6 @@ func (c *Collector) Visit(URL string) error {
 // Post also calls the previously provided callbacks
 func (c *Collector) Post(URL string, requestData map[string]string) error {
 	return c.scrape(URL, "POST", 1, createFormReader(requestData), nil, nil, true)
-}
-
-// PostRaw starts a collector job by creating a POST request with raw binary data.
-// Post also calls the previously provided callbacks
-func (c *Collector) PostRaw(URL string, requestData []byte) error {
-	return c.scrape(URL, "POST", 1, bytes.NewReader(requestData), nil, nil, true)
 }
 
 // PostMultipart starts a collector job by creating a Multipart POST request
@@ -481,20 +474,6 @@ func (c *Collector) OnHTML(goquerySelector string, f HTMLCallback) {
 	c.lock.Unlock()
 }
 
-// Experimental
-// RAWCallback registers a function. Function will be executed on any type of dataset
-func (c *Collector) OnRAW(rawSelector string, f RAWCallback) {
-	c.lock.Lock()
-	if c.rawCallbacks == nil {
-		c.rawCallbacks = make([]*rawCallbackContainer, 0, 4)
-	}
-	c.rawCallbacks = append(c.rawCallbacks, &rawCallbackContainer{
-		Selector: rawSelector,
-		Function: f,
-	})
-	c.lock.Unlock()
-}
-
 // OnXML registers a function. Function will be executed on every XML
 // element matched by the xpath Query parameter.
 // xpath Query is used by https://github.com/antchfx/xmlquery
@@ -522,23 +501,6 @@ func (c *Collector) OnHTMLDetach(goquerySelector string) {
 	}
 	if deleteIdx != -1 {
 		c.htmlCallbacks = append(c.htmlCallbacks[:deleteIdx], c.htmlCallbacks[deleteIdx+1:]...)
-	}
-	c.lock.Unlock()
-}
-
-// Experimental
-// OnHTMLDetach deregister a function. Function will not be execute after detached
-func (c *Collector) OnRAWDetach(tabSelector string) {
-	c.lock.Lock()
-	deleteIdx := -1
-	for i, cc := range c.rawCallbacks {
-		if cc.Selector == tabSelector {
-			deleteIdx = i
-			break
-		}
-	}
-	if deleteIdx != -1 {
-		c.rawCallbacks = append(c.rawCallbacks[:deleteIdx], c.rawCallbacks[deleteIdx+1:]...)
 	}
 	c.lock.Unlock()
 }
@@ -870,7 +832,6 @@ func (c *Collector) Clone() (clone *Collector) {
 
 	clone.htmlCallbacks = make([]*htmlCallbackContainer, 0, 8)
 	clone.xmlCallbacks = make([]*xmlCallbackContainer, 0, 8)
-	clone.rawCallbacks = make([]*rawCallbackContainer, 0, 8)
 	clone.scrapedCallbacks = make([]ScrapedCallback, 0, 8)
 
 	clone.lock = c.lock
