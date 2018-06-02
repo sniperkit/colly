@@ -1,4 +1,4 @@
-package bayesianFilter
+package bayesian_filter
 
 import (
 	. "github.com/skelterjohn/go.matrix"

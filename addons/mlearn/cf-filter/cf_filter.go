@@ -1,5 +1,5 @@
 // User-item recommendation using nearest-neighrbor collaborative filtering in Go
-package collabFilter
+package cf_filter
 
 import (
 	"errors"

@@ -1,5 +1,5 @@
 // Bayesian Filter collaborative filtering in Go
-package bayesianFilter
+package bayesian_filter
 
 import (
 	"errors"

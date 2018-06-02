@@ -1,5 +1,5 @@
 // Alternating Least Squares recommendation algorithm in Go !
-package ALS
+package als
 
 import (
 	"errors"

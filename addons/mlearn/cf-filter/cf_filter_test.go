@@ -1,4 +1,4 @@
-package collabFilter
+package cf_filter
 
 import (
 	"fmt"
