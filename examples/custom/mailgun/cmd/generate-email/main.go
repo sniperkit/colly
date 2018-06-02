@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/asciimoo/colly"
+	"github.com/sniperkit/colly/pkg"
 
 	"github.com/BurntSushi/toml"
 	"github.com/golang-commonmark/markdown"
