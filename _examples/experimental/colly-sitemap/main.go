@@ -17,9 +17,18 @@ import (
 	tablib "github.com/sniperkit/colly/plugins/data/transform/tabular"
 )
 
+const (
+	SITEMAP_URL       string = "https://www.shopify.com/sitemap.xml"
+	SITEMAP_URL_GZ    string = "http://www.nytimes.com/sitemaps/sitemap_news/sitemap.xml.gz"
+	SITEMAP_URL_TXT   string = "https://golanglibs.com/sitemap.txt"
+	SITEMAP_INDEX_URL string = "https://www.coindesk.com/sitemap_index.xml"
+	// SITEMAP_INDEX_URL_GZ string = "http://www.imdb.com/sitemap_US_index.xml.gz"
+	SITEMAP_INDEX_URL_GZ string = "http://versus.com/sitemap_index.xml.gz"
+)
+
 var (
-	version                                    = "0.0.1-alpha"
-	cacheCollectorDir                          = "./shared/cache/collector"
+	version           string                   = "0.0.1-alpha"
+	cacheCollectorDir string                   = "./shared/cache/collector"
 	sheets            map[string][]interface{} = make(map[string][]interface{}, 0)
 	dsExport          *tablib.Dataset
 	dsURLs            *tablib.Dataset
@@ -60,31 +69,32 @@ func main() {
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Parallelism: 2,
-		//Delay:      5 * time.Second,
+		// Delay:      5 * time.Second,
 	})
 
 	helper.RandomUserAgent(c)
 	helper.Referrer(c)
 
-	// Create a callback on the XPath query searching for the URLs
-	c.OnXML("//urlset/url/loc", func(e *colly.XMLElement) {
-		log.Println("url=", e.Text)
-	})
-
-	cs, err := sitemap.NewWithCollector("https://www.shopify.com/sitemap.xml", c)
+	cs, err := sitemap.NewWithCollector(SITEMAP_INDEX_URL_GZ, c)
 	if err != nil {
 		log.Println("invalid sitemap.")
 	}
+
+	// _, sitemaps := cs.List()
+	// log.Println("sitemaps: ", strings.Join(sitemaps, ","))
+
 	if cq != nil {
 		cs.EnqueueAll()
 	} else {
 		cs.VisitAll()
 	}
+	cs.Count()
+
+	// c.Visit(SITEMAP_INDEX_URL)
 
 	c.Wait()
 
 	// c.Wait()
-
 	// Start the collector
 	// c.Visit("https://www.shopify.com/sitemap.xml")
 

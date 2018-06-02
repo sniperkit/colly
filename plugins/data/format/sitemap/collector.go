@@ -20,16 +20,78 @@ func NewWithCollector(inputURL string, c *colly.Collector) (*Sitemap, error) {
 	return cs, nil
 }
 
-func (cs *Sitemap) List() []string {
-	cs.urls, _ = getURLs(cs.href)
-	var links []string
-	for _, link := range cs.urls {
-		links = append(links, link.String())
+func (cs *Sitemap) Count() int {
+	return len(cs.URLs)
+}
+
+func (cs *Sitemap) List() ([]url.URL, []string) {
+	cs.URLs, _ = getURLs(cs.href)
+	var urls []string
+	for _, u := range cs.URLs {
+		urls = append(urls, u.String())
 	}
-	return links
+	return cs.URLs, urls
+}
+
+func (cs *Sitemap) Index() ([]url.URL, []string) {
+	var sitemaps []string
+	for _, sitemap := range cs.Indices {
+		sitemaps = append(sitemaps, sitemap.String())
+	}
+	return cs.Indices, sitemaps
+}
+
+func (cs *Sitemap) Sitemaps() []url.URL {
+	return cs.Indices
+}
+
+func (cs *Sitemap) getURLs() {
+	if !cs.IsValid() {
+		return
+	}
+	// var urls []url.URL
+	urlsFromIndex, indexError := getURLsFromSitemapIndex(cs.href)
+	if indexError == nil {
+		cs.Indices = urlsFromIndex
+	}
+
+	urlsFromSitemap, sitemapError := getURLsFromSitemap(cs.href)
+	if sitemapError == nil {
+		cs.URLs = append(cs.URLs, urlsFromSitemap...)
+	}
+
+	// if isInvalidSitemapIndexContent(indexError) && isInvalidXMLSitemapContent(sitemapError) {
+	// 	return nil, fmt.Errorf("%q is neither a sitemap index nor a XML sitemap", xmlSitemapURL.String())
+	// }
+}
+
+func (cs *Sitemap) All() ([]url.URL, error) {
+	if !cs.IsValid() {
+		return nil, fmt.Errorf("sitemap at url='%q' is not reachable", cs.href.String())
+	}
+	var urls []url.URL
+	urlsFromIndex, indexError := getURLsFromSitemapIndex(cs.href)
+	if indexError == nil {
+		urls = urlsFromIndex
+		cs.Indices = urlsFromIndex
+	}
+
+	urlsFromSitemap, sitemapError := getURLsFromSitemap(cs.href)
+	if sitemapError == nil {
+		urls = append(urls, urlsFromSitemap...)
+		cs.URLs = append(cs.URLs, urlsFromSitemap...)
+	}
+
+	if isInvalidSitemapIndexContent(indexError) && isInvalidXMLSitemapContent(sitemapError) {
+		return nil, fmt.Errorf("%q is neither a sitemap index nor a XML sitemap", cs.href.String())
+	}
+	return urls, nil
 }
 
 func (cs *Sitemap) VisitAll() *colly.Collector {
+	if !cs.IsValid() {
+		return cs.collector
+	}
 	pp.Println("sitemapURL=", cs.href.String())
 	links, err := getURLs(cs.href)
 	if err != nil {
@@ -45,6 +107,9 @@ func (cs *Sitemap) VisitAll() *colly.Collector {
 }
 
 func (cs *Sitemap) EnqueueAll() {
+	if !cs.IsValid() {
+		return
+	}
 	pp.Println("sitemapURL=", cs.href.String())
 	links, err := getURLs(cs.href)
 	if err != nil {
@@ -65,7 +130,6 @@ func VisitAll(inputURL string, c *colly.Collector) *colly.Collector {
 		log.Fatalln("error: ", err)
 		return c
 	}
-	pp.Println("sitemapURL=", sitemapURL)
 
 	links, err := getURLs(*sitemapURL)
 	if err != nil {

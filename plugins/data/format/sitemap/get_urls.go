@@ -34,7 +34,7 @@ func getURLsFromSitemap(xmlSitemapURL url.URL) ([]url.URL, error) {
 	}
 
 	for _, urlEntry := range sitemap.URLs {
-		parsedURL, parseError := url.Parse(urlEntry.Location)
+		parsedURL, parseError := url.Parse(urlEntry.Loc)
 		if parseError != nil {
 			return nil, parseError
 		}
@@ -53,7 +53,7 @@ func getURLsFromSitemapIndex(xmlSitemapURL url.URL) ([]url.URL, error) {
 	}
 
 	for _, sitemap := range sitemapIndex.Sitemaps {
-		locationURL, err := url.Parse(sitemap.Location)
+		locationURL, err := url.Parse(sitemap.Loc)
 		if err != nil {
 			return nil, err
 		}

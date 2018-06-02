@@ -1,25 +1,35 @@
 package sitemap
 
 import (
+	"bytes"
+	"compress/flate"
+	"compress/gzip"
+	"compress/zlib"
 	"encoding/xml"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/sniperkit/colly/pkg"
 	"github.com/sniperkit/colly/pkg/queue"
-
-	"github.com/sniperkit/xutil/plugin/debug/pp"
+	// "github.com/sniperkit/xutil/plugin/debug/pp"
 )
 
 type Sitemap struct {
-	// *Config
+	Name         xml.Name `xml:"urlset,sitemapindex"`
+	NS           string   `xml:"xmlns,attr"`
+	Indices      []url.URL
+	URLs         []url.URL
 	href         url.URL
-	sub_sitemaps []url.URL
-	urls         []url.URL
 	converted    map[string]string
 	content      []byte
 	contentType  string
@@ -35,17 +45,28 @@ type Sitemap struct {
 	cqueue       *queue.Queue
 	lock         *sync.RWMutex
 	wg           *sync.WaitGroup
+	// Indices []Index `json:"loc" xml:"sitemap"`
+	// URLs    []URL   `json:"url" xml:"url"`
 }
 
 type URL struct {
-	Location string `xml:"loc"`
+	href       url.URL
+	Loc        string `json:"loc" xml:"loc"`
+	LastMod    string `json:"lastmod" xml:"lastmod"`
+	ChangeFreq string `json:"changefreq" xml:"changefreq"`
+	Priority   string `json:"priority" xml:"priority"`
 }
 
-type SitemapIndex struct {
-	Sitemaps []URL `xml:"sitemap"`
+type Index struct {
+	Loc     string `json:"loc" xml:"loc"`
+	LastMod string `json:"lastmod" xml:"lastmod"`
 }
 
-type SitemapIndexError struct {
+type Indices struct {
+	Sitemaps []Index `xml:"sitemap" json:"sitemap"`
+}
+
+type IndexError struct {
 	message string
 }
 
@@ -57,7 +78,7 @@ type XmlSitemapError struct {
 	message string
 }
 
-type TXTSitemap struct {
+type TxtSitemap struct {
 	URLs []URL `csv:"url"`
 }
 
@@ -87,9 +108,13 @@ func New(inputURL string) (*Sitemap, error) {
 		// wg:           &sync.WaitGroup{},
 	}
 
-	pp.Println(s)
-
+	s.getURLs()
+	// pp.Println(s)
 	return s, nil
+}
+
+func (s *Sitemap) IsValid() bool {
+	return s.href.String() != ""
 }
 
 func (s *Sitemap) Read() error {
@@ -134,6 +159,7 @@ func checkSitemap(loc string) bool {
 }
 
 func readURL(url url.URL) (colly.Response, error) {
+
 	startTime := time.Now().UTC()
 	resp, fetchErr := http.Get(url.String())
 	if fetchErr != nil {
@@ -141,18 +167,94 @@ func readURL(url url.URL) (colly.Response, error) {
 	}
 
 	defer resp.Body.Close()
-	body, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
-		return colly.Response{}, readErr
-	}
 
-	endTime := time.Now().UTC()
+	var body []byte
+	var errReader error
 
 	// content type
 	contentType := resp.Header.Get("Content-Type")
-	if contentType == "" {
-		contentType = http.DetectContentType(body)
+
+	body, errReader = ioutil.ReadAll(resp.Body)
+	if errReader != nil {
+		log.Fatalln("error.ReadAll:", contentType, ", msg=", errReader)
+		return colly.Response{}, errReader
 	}
+
+	//if contentType == "" {
+	contentType = http.DetectContentType(body)
+	//}
+
+	pathExtension := path.Ext(url.String())
+	contentEncoding := resp.Header.Get("Content-Encoding")
+
+	log.Println("URL:", resp.Request.URL.String(), "Content-Type:", contentType, "StatusCode:", resp.StatusCode)
+
+	if resp.StatusCode == 404 {
+		return colly.Response{}, errReader
+	}
+
+	switch pathExtension {
+	case ".gz":
+		contentType = "application/x-gzip"
+	}
+
+	switch contentEncoding {
+	case "gzip":
+		contentType = "application/x-gzip"
+	case "deflate":
+		contentType = "application/x-deflate"
+	case "zlib":
+		contentType = "application/x-zlib"
+	}
+
+	switch contentType {
+	// "application/octet-stream"
+	// "application/x-tar"
+	case "application/x-gzip", "application/gzip":
+
+		// var gr io.ReadCloser
+		gr, _ := gzip.NewReader(bytes.NewBuffer(body))
+		defer gr.Close()
+
+		body, errReader = ioutil.ReadAll(gr)
+		/*
+			// Ignore errors, can be UEOF ?!
+			var gzipCloser io.ReadCloser
+			// body, errReader = ioutil.ReadAll(resp.Body)
+			// var buf *bytes.Buffer = bytes.NewBuffer(body)
+			gzipCloser, errReader = gzip.NewReader(resp.Body)
+			if errReader != nil {
+				log.Fatalln("error.gzipCloser:", contentType, ", msg=", errReader)
+				return colly.Response{}, errReader
+			}
+			defer gzipCloser.Close()
+
+			body, errReader = ioutil.ReadAll(gzipCloser)
+		*/
+
+	case "application/x-deflate", "application/deflate":
+		rdata := flate.NewReader(bytes.NewBuffer(body))
+		// rdata := flate.NewReader(resp.Body)
+		body, errReader = ioutil.ReadAll(rdata)
+
+	case "application/x-zlib", "application/zlib":
+		var readCloser io.ReadCloser
+		readCloser, errReader = zlib.NewReader(bytes.NewBuffer(body))
+		// readCloser, errReader = zlib.NewReader(resp.Body)
+		if errReader != nil {
+			log.Fatalln("readCloser.error:", contentType, ", msg=", errReader)
+			return colly.Response{}, errReader
+		}
+		body, errReader = ioutil.ReadAll(readCloser)
+
+	}
+
+	if errReader != nil {
+		log.Fatalln("error.ReadAll:", contentType, ", msg=", errReader)
+		return colly.Response{}, errReader
+	}
+
+	endTime := time.Now().UTC()
 
 	return colly.Response{
 		Body:        body,
@@ -161,4 +263,47 @@ func readURL(url url.URL) (colly.Response, error) {
 		EndTime:     endTime,
 		ContentType: contentType,
 	}, nil
+}
+
+// String return the string format of the sitemap
+func (s *Sitemap) String() string {
+	var items []string
+	for _, item := range s.URLs {
+		items = append(items, item.String())
+	}
+	return fmt.Sprintf(SitemapXML, strings.Join(items, `
+`))
+}
+
+// ToFile saves a sitemap to a file with either extension .xml or .gz.
+// If extension is .gz, the file will be gzipped.
+func (s *Sitemap) ToFile(path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	ext := filepath.Ext(file.Name())
+	if ext != ".xml" && ext != ".gz" {
+		return fmt.Errorf("filename %s does not have extension .xml or .gz, extension %s given", file.Name(), ext)
+	}
+
+	// Gzip
+	if ext == ".gz" {
+		zip := gzip.NewWriter(file)
+		defer zip.Close()
+
+		_, err = zip.Write([]byte(s.String()))
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = file.Write([]byte(s.String()))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

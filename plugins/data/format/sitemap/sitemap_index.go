@@ -6,23 +6,23 @@ import (
 	"strings"
 )
 
-func getSitemapIndex(xmlSitemapURL url.URL) (SitemapIndex, error) {
+func getSitemapIndex(xmlSitemapURL url.URL) (Indices, error) {
 	response, readErr := readURL(xmlSitemapURL)
 	if readErr != nil {
-		return SitemapIndex{}, readErr
+		return Indices{}, readErr
 	}
 	if !strings.Contains(string(response.GetBody()), "</sitemapindex>") {
-		return SitemapIndex{}, SitemapIndexError{"Invalid content"}
+		return Indices{}, IndexError{"Invalid content"}
 	}
-	var sitemapIndex SitemapIndex
+	var sitemapIndex Indices
 	unmarshalError := xml.Unmarshal(response.GetBody(), &sitemapIndex)
 	if unmarshalError != nil {
-		return SitemapIndex{}, unmarshalError
+		return Indices{}, unmarshalError
 	}
 	return sitemapIndex, nil
 }
 
-func (sitemapIndexError SitemapIndexError) Error() string {
+func (sitemapIndexError IndexError) Error() string {
 	return sitemapIndexError.message
 }
 
