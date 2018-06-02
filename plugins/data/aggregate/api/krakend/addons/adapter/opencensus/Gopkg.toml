@@ -1,0 +1,20 @@
+[[constraint]]
+  name = "github.com/devopsfaith/krakend"
+  branch = "0.5-dev"
+
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "go.opencensus.io"
+  branch = "master"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/kpacha/opencensus-influxdb"
+
+[prune]
+  non-go = true
+  go-tests = true
+  unused-packages = true
