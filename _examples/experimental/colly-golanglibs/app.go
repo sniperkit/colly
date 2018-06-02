@@ -11,12 +11,13 @@ import (
 	proxy "github.com/sniperkit/colly/pkg/proxy/default"
 
 	// experimental addons
-	// onion "github.com/sniperkit/colly/addons/proxy/onion"
-	// morty "github.com/sniperkit/colly/addons/proxy/morty"
+	// onion "github.com/sniperkit/colly/plugins/net/protocol/http/proxy/onion"
+	// morty "github.com/sniperkit/colly/plugins/net/protocol/http/proxy/morty"
 
 	// datastructure helpers
-	tablib "github.com/sniperkit/xutil/plugin/format/convert/tabular"
-	cmap "github.com/sniperkit/xutil/plugin/map/multi"
+	cmmap "github.com/sniperkit/colly/plugins/data/structure/map/multi"
+	tablib "github.com/sniperkit/colly/plugins/data/transform/tabular"
+	// cmap "github.com/sniperkit/xutil/plugin/map/multi"
 )
 
 /*
@@ -33,7 +34,7 @@ var (
 	verbose      bool                       = false
 	sheets       map[string][]interface{}   = make(map[string][]interface{}, 0)
 	datasets     map[string]*tablib.Dataset = make(map[string]*tablib.Dataset, 0) // := NewDataset([]string{"firstName", "lastName"})
-	cds                                     = cmap.NewConcurrentMultiMap()
+	cds                                     = cmmap.NewConcurrentMultiMap()
 )
 
 ///// App ///////////////////////////////////////////////

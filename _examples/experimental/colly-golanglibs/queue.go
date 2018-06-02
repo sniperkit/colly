@@ -15,15 +15,15 @@ import (
 	// "github.com/sniperkit/colly/pkg/storage"
 
 	// queue - addons
-	res "github.com/sniperkit/colly/addons/storage/external/redis"
-	// sq3 "github.com/sniperkit/colly/addons/storage/external/sqlite3"
-	// baq "github.com/sniperkit/colly/addons/storage/external/badger"
-	// stq "github.com/sniperkit/colly/addons/storage/external/storm"
-	// myq "github.com/sniperkit/colly/addons/storage/external/mysql"
-	// moq "github.com/sniperkit/colly/addons/storage/external/mongo"
-	// elq "github.com/sniperkit/colly/addons/storage/external/elastic"
-	// shq "github.com/sniperkit/colly/addons/storage/external/sphinx"
-	// caq "github.com/sniperkit/colly/addons/storage/external/cassandra"
+	res "github.com/sniperkit/colly/plugins/data/storage/backends/redis"
+	// sq3 "github.com/sniperkit/colly/plugins/data/storage/backends/sqlite3"
+	// baq "github.com/sniperkit/colly/plugins/data/storage/backends/badger"
+	// stq "github.com/sniperkit/colly/plugins/data/storage/backends/storm"
+	// myq "github.com/sniperkit/colly/plugins/data/storage/backends/mysql"
+	// moq "github.com/sniperkit/colly/plugins/data/storage/backends/mongo"
+	// elq "github.com/sniperkit/colly/plugins/data/storage/backends/elastic"
+	// shq "github.com/sniperkit/colly/plugins/data/storage/backends/sphinx"
+	// caq "github.com/sniperkit/colly/plugins/data/storage/backends/cassandra"
 )
 
 // collector's queues defaults

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	// concurrent counters
-	"github.com/sniperkit/xtask/plugin/counter"
+	"github.com/sniperkit/colly/plugins/data/collection/metrics/counter/ordered"
 
 	// Logger
 	"github.com/sirupsen/logrus"

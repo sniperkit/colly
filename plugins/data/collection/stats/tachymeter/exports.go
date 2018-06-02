@@ -3,7 +3,7 @@ package tachymeter
 import (
 	"bytes"
 
-	tabular "github.com/sniperkit/colly/addons/convert/tabular"
+	tabular "github.com/sniperkit/colly/plugins/data/transform/tabular"
 	jsoniter "github.com/sniperkit/xutil/plugin/format/json"
 )
 

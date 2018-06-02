@@ -19,11 +19,11 @@ import (
 	colly "github.com/sniperkit/colly/pkg"
 
 	// experimental addons
-	tui "github.com/sniperkit/colly/addons/dashboard/termui"
-	tui_hist "github.com/sniperkit/colly/addons/dashboard/termui/histogram"
-	// dash "github.com/sniperkit/colly/addons/dashboard"
-	// cui "github.com/sniperkit/colly/addons/dashboard/gocui"
-	// tvi "github.com/sniperkit/colly/addons/dashboard/tview"
+	tui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/termui"
+	tui_hist "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/termui/histogram"
+	// dash "github.com/sniperkit/colly/plugins/cmd/dashboard"
+	// cui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/gocui"
+	// tvi "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/tview"
 )
 
 /*

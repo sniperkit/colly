@@ -15,19 +15,19 @@ import (
 	// experimental addons
 
 	//// console UI
-	cui "github.com/sniperkit/colly/addons/dashboard/gocui"
-	tui "github.com/sniperkit/colly/addons/dashboard/termui"
+	cui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/gocui"
+	tui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/termui"
 	// dash "github.com/sniperkit/colly/addons/dashboard"
 	// tvi "github.com/sniperkit/colly/addons/dashboard/tview"
 
 	//// proxies
-	onion "github.com/sniperkit/colly/addons/proxy/onion"
+	onion "github.com/sniperkit/colly/plugins/net/protocol/http/proxy/onion"
 
 	//// sitemaps
-	sm "github.com/sniperkit/colly/addons/sitemap"
+	sm "github.com/sniperkit/colly/plugins/net/protocol/http/sitemap"
 
 	//// stats
-	ta "github.com/sniperkit/colly/addons/stats/tachymeter"
+	ta "github.com/sniperkit/colly/plugins/data/collection/stats/tachymeter"
 )
 
 var version = APP_VERSION
