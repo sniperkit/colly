@@ -3,23 +3,59 @@ package sitemap
 import (
 	"fmt"
 	"net/url"
+	"path"
 )
 
-func getURLs(xmlSitemapURL url.URL) ([]url.URL, error) {
+func getURLs(sitemapURL url.URL) ([]url.URL, error) {
 	var urls []url.URL
 
-	urlsFromIndex, indexError := getURLsFromSitemapIndex(xmlSitemapURL)
-	if indexError == nil {
-		urls = urlsFromIndex
+	pathExtension := path.Ext(sitemapURL.String())
+
+	switch pathExtension {
+	case ".txt":
+		urlsFromSitemap, sitemapError := getURLsFromSitemapTXT(sitemapURL)
+		if sitemapError == nil {
+			urls = append(urls, urlsFromSitemap...)
+		}
+
+		if isInvalidSitemapContent(sitemapError) {
+			return nil, fmt.Errorf("%q is neither a sitemap index nor a XML sitemap", sitemapURL.String())
+		}
+
+	default:
+		urlsFromIndex, indexError := getURLsFromSitemapIndex(sitemapURL)
+		if indexError == nil {
+			urls = urlsFromIndex
+		}
+
+		urlsFromSitemap, sitemapError := getURLsFromSitemap(sitemapURL)
+		if sitemapError == nil {
+			urls = append(urls, urlsFromSitemap...)
+		}
+
+		if isInvalidSitemapIndexContent(indexError) && isInvalidSitemapContent(sitemapError) {
+			return nil, fmt.Errorf("%q is neither a sitemap index nor a XML sitemap", sitemapURL.String())
+		}
+
 	}
 
-	urlsFromSitemap, sitemapError := getURLsFromSitemap(xmlSitemapURL)
-	if sitemapError == nil {
-		urls = append(urls, urlsFromSitemap...)
+	return urls, nil
+}
+
+func getURLsFromSitemapTXT(txtSitemapURL url.URL) ([]url.URL, error) {
+	var urls []url.URL
+
+	sitemap, txtSitemapError := getTXTSitemap(txtSitemapURL)
+	if txtSitemapError != nil {
+		return nil, txtSitemapError
 	}
 
-	if isInvalidSitemapIndexContent(indexError) && isInvalidXMLSitemapContent(sitemapError) {
-		return nil, fmt.Errorf("%q is neither a sitemap index nor a XML sitemap", xmlSitemapURL.String())
+	for _, urlEntry := range sitemap.URLs {
+		parsedURL, parseError := url.Parse(urlEntry.Loc)
+		if parseError != nil {
+			return nil, parseError
+		}
+		urls = append(urls, *parsedURL)
 	}
 
 	return urls, nil

@@ -5,6 +5,7 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
+	// "encoding/csv"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -78,7 +79,7 @@ type XmlSitemapError struct {
 	message string
 }
 
-type TxtSitemap struct {
+type TXTSitemap struct {
 	URLs []URL `csv:"url"`
 }
 
@@ -147,7 +148,25 @@ func (sitemapIndexError XmlSitemapError) Error() string {
 	return sitemapIndexError.message
 }
 
-func isInvalidXMLSitemapContent(err error) bool {
+func getTXTSitemap(txtSitemapURL url.URL) (TXTSitemap, error) {
+	_, readErr := readURL(txtSitemapURL)
+	if readErr != nil {
+		return TXTSitemap{}, readErr
+	}
+
+	var urlSet TXTSitemap
+	//unmarshalError := csv.Unmarshal(response.GetBody(), &urlSet)
+	//if unmarshalError != nil {
+	//	return TXTSitemap{}, unmarshalError
+	//}
+	return urlSet, nil
+}
+
+func (sitemapIndexError TxtSitemapError) Error() string {
+	return sitemapIndexError.message
+}
+
+func isInvalidSitemapContent(err error) bool {
 	if err == nil {
 		return false
 	}
@@ -196,6 +215,8 @@ func readURL(url url.URL) (colly.Response, error) {
 	switch pathExtension {
 	case ".gz":
 		contentType = "application/x-gzip"
+	case ".txt":
+		contentType = "text/plain"
 	}
 
 	switch contentEncoding {
@@ -208,39 +229,20 @@ func readURL(url url.URL) (colly.Response, error) {
 	}
 
 	switch contentType {
-	// "application/octet-stream"
-	// "application/x-tar"
+	// "application/octet-stream", "application/x-tar"
 	case "application/x-gzip", "application/gzip":
-
-		// var gr io.ReadCloser
 		gr, _ := gzip.NewReader(bytes.NewBuffer(body))
 		defer gr.Close()
 
 		body, errReader = ioutil.ReadAll(gr)
-		/*
-			// Ignore errors, can be UEOF ?!
-			var gzipCloser io.ReadCloser
-			// body, errReader = ioutil.ReadAll(resp.Body)
-			// var buf *bytes.Buffer = bytes.NewBuffer(body)
-			gzipCloser, errReader = gzip.NewReader(resp.Body)
-			if errReader != nil {
-				log.Fatalln("error.gzipCloser:", contentType, ", msg=", errReader)
-				return colly.Response{}, errReader
-			}
-			defer gzipCloser.Close()
-
-			body, errReader = ioutil.ReadAll(gzipCloser)
-		*/
 
 	case "application/x-deflate", "application/deflate":
 		rdata := flate.NewReader(bytes.NewBuffer(body))
-		// rdata := flate.NewReader(resp.Body)
 		body, errReader = ioutil.ReadAll(rdata)
 
 	case "application/x-zlib", "application/zlib":
 		var readCloser io.ReadCloser
 		readCloser, errReader = zlib.NewReader(bytes.NewBuffer(body))
-		// readCloser, errReader = zlib.NewReader(resp.Body)
 		if errReader != nil {
 			log.Fatalln("readCloser.error:", contentType, ", msg=", errReader)
 			return colly.Response{}, errReader

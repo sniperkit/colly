@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sniperkit/colly/addons/convert/tabular"
-	"github.com/sniperkit/colly/addons/sitemap"
+	"github.com/sniperkit/colly/plugins/data/convert/tabular"
+	"github.com/sniperkit/colly/plugins/data/format/sitemap"
 )
 
 type convert struct {

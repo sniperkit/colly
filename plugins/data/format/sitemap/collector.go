@@ -82,7 +82,7 @@ func (cs *Sitemap) All() ([]url.URL, error) {
 		cs.URLs = append(cs.URLs, urlsFromSitemap...)
 	}
 
-	if isInvalidSitemapIndexContent(indexError) && isInvalidXMLSitemapContent(sitemapError) {
+	if isInvalidSitemapIndexContent(indexError) && isInvalidSitemapContent(sitemapError) {
 		return nil, fmt.Errorf("%q is neither a sitemap index nor a XML sitemap", cs.href.String())
 	}
 	return urls, nil

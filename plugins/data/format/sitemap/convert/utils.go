@@ -1,7 +1,0 @@
-package convert
-
-/*
-import (
-	"os"
-)
-*/

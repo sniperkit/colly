@@ -10,6 +10,19 @@ import (
 	"github.com/sniperkit/colly/pkg/queue"
 
 	// colly plugins
+
+	//// console UI
+	cui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/gocui"
+	tui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/termui"
+	// dash "github.com/sniperkit/colly/plugins/cmd/dashboard"
+	// cui "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/gocui"
+	// tvi "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/tview"
+
+	//// Stats
+	ta "github.com/sniperkit/colly/plugins/data/collection/stats/tachymeter"
+	// hist "github.com/sniperkit/colly/plugins/cmd/dashboard/tui/termui/histogram"
+
+	//// Sitemap
 	sitemap "github.com/sniperkit/colly/plugins/data/format/sitemap"
 
 	// datastructure helpers
@@ -17,12 +30,25 @@ import (
 	tablib "github.com/sniperkit/colly/plugins/data/transform/tabular"
 )
 
-const (
-	SITEMAP_URL          string = "https://www.shopify.com/sitemap.xml"
-	SITEMAP_URL_GZ       string = "http://www.nytimes.com/sitemaps/sitemap_news/sitemap.xml.gz"
-	SITEMAP_URL_TXT      string = "https://golanglibs.com/sitemap.txt"
-	SITEMAP_INDEX_URL    string = "https://www.coindesk.com/sitemap_index.xml"
-	SITEMAP_INDEX_URL_GZ string = "http://www.lidl.de/sitemap_index.xml.gz"
+const SITEMAP_URL string = "https://www.shopify.com/sitemap.xml"
+
+var (
+	xConsoleUI *cui.TermUI
+	xTermUI    *cui.TermUI
+	xResults   chan tui.WorkResult
+	stopTheUI  chan bool
+)
+
+var (
+	// tachymeter
+	startedAt            time.Time
+	isTachymeter         bool = true
+	isTachymeterParallel bool = false
+	cTachymeter          chan *ta.Tachymeter
+	xTachymeter          *ta.Tachymeter
+	xTachyResults        *ta.Metrics
+	xTachymeterTL        ta.Timeline
+	wallTimeStart        time.Time
 )
 
 var (
