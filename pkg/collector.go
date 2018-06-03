@@ -49,12 +49,14 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/antchfx/htmlquery"
 	"github.com/antchfx/xmlquery"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/kennygrant/sanitize"
 	"github.com/temoto/robotstxt"
 
+	jsoniter "github.com/json-iterator/go"
+
 	cfg "github.com/sniperkit/colly/pkg/config"
 	"github.com/sniperkit/colly/pkg/debug"
+	"github.com/sniperkit/colly/pkg/metric"
 	"github.com/sniperkit/colly/pkg/storage"
 )
 
@@ -62,6 +64,7 @@ var (
 	collectorCounter uint32
 	collectorConfig  *cfg.Config
 	json             = jsoniter.ConfigCompatibleWithStandardLibrary
+	metric           *metric.Snapshot
 )
 
 // Collector provides the scraper instance for a scraping job
