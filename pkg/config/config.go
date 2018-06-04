@@ -71,8 +71,11 @@ type Config struct {
 			// LoadDebug
 			LoadDebug bool `default:"false" json:"load_debug" yaml:"load_debug" toml:"load_debug" xml:"loadDebug" ini:"loadDebug" csv:"LoadDebug"`
 
+			// LoadErrorOnUnmatchedKeys
+			LoadErrorOnUnmatchedKeys bool `default:"false" json:"load_error_on_unmatched_keys" yaml:"load_error_on_unmatched_keys" toml:"load_error_on_unmatched_keys" xml:"loadErrorOnUnmatchedKeys" ini:"loadErrorOnUnmatchedKeys" csv:"LoadErrorOnUnmatchedKeys"`
+
 			// ExportDisabled
-			ExportDisabled bool `default:"true" json:"export_disabled" yaml:"export_disabled" toml:"export_disabled" xml:"exportDisabled" ini:"exportDisabled" csv:"ExportDisabled"`
+			ExportEnabled bool `default:"true" json:"export_enabled" yaml:"export_enabled" toml:"export_enabled" xml:"exportEnabled" ini:"exportEnabled" csv:"ExportEnabled"`
 
 			// ExportSections
 			ExportSections []string `json:"export_sections" yaml:"export_sections" toml:"export_sections" xml:"ExportSections" ini:"ExportSections" csv:"ExportSections"`

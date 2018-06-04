@@ -8,11 +8,11 @@ debug:
   config:
     load_verbose: false
     load_debug: false
-    export_disabled: false
+    export_enabled: true
     export_sections: []
-    export_schema_only: false
-    export_prefix_path: ""
-    export_formats: []
+    export_schema_only: true
+    export_prefix_path: "./shared/exports/config/dump"
+    export_formats: ["yaml","csv","xml","toml"]
   tachymeter:
     disabled: true
     async: false
