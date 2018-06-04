@@ -142,7 +142,7 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 
 	draw := func() {
 		snapshot := stats.LastSnapshot()
-		log.Println("snapshot.Timestamp()=", snapshot.Timestamp().String(), "len(snapshots)=", len(snapshots))
+		// log.Println("snapshot.Timestamp()=", snapshot.Timestamp().String(), "len(snapshots)=", len(snapshots))
 
 		// ignore empty updates
 		if snapshot.Timestamp().IsZero() {
