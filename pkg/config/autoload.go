@@ -1,25 +1,13 @@
 package config
 
+/*
 import (
-	colly "github.com/sniperkit/colly"
-
 	cfgParser "github.com/sniperkit/colly/plugins/cmd/config"
 )
+*/
 
-func NewCollector(async bool, randomUserAgent bool, isDebugMode bool) *colly.Collector {
-	c := &colly.Collector{}
-= randomUserAgent
-	c.DebugMode = isDebugMode
-	return c
-}
-
-func NewCollectorWithConfig(cfg *CollectorConfig) *colly.Collector {
-	c := &colly.Collector{}
-	return c
-}
-
-func ExportConfig(formats []string) map[string]bool {
-	exportResults = make(map[string]bool, 0)
+func DumpConfig(onlySchema bool, formats []string) map[string]bool {
+	exportResults := make(map[string]bool, 0)
 	return exportResults
 }
 
@@ -28,8 +16,6 @@ func (c *CollectorConfig) SetConfigExports(withSchema bool, withAutoLoad bool) *
 	c.AllowExportConfigAutoload = withAutoLoad
 	return c
 }
-
-// userAgent "",
 
 func (c *CollectorConfig) ToFile(formats []string) (ok bool, err error) {
 	return
@@ -48,5 +34,5 @@ func (c *CollectorConfig) Reset() (ok bool) {
 }
 
 func (c *CollectorConfig) Clone() *CollectorConfig {
-	return
+	return c
 }

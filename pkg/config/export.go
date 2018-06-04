@@ -1,4 +1,4 @@
-package models
+package config
 
 type ExportConfig struct {
 	// Disabled sets the status of all export configuration values

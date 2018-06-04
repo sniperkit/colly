@@ -1,4 +1,4 @@
-package models
+package config
 
 type DatasetConfig struct {
 	Disabled     bool             `default:'false' json:'enabled' yaml:'enabled' toml:'enabled' xml:'enabled' ini:'enabled'`

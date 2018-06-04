@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -20,12 +19,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sniperkit/colly/pkg"
-	"github.com/sniperkit/colly/pkg/queue"
-	// "github.com/sniperkit/xutil/plugin/debug/pp"
+	colly "github.com/sniperkit/colly/pkg"
+	queue "github.com/sniperkit/colly/pkg/queue"
 )
 
-type Sitemap struct {
+type SitemapCollector struct {
 	Name         xml.Name `xml:"urlset,sitemapindex"`
 	NS           string   `xml:"xmlns,attr"`
 	Indices      []url.URL
@@ -87,7 +85,7 @@ type TxtSitemapError struct {
 	message string
 }
 
-func New(inputURL string) (*Sitemap, error) {
+func New(inputURL string) (*SitemapCollector, error) {
 	sitemapURL, err := url.Parse(inputURL)
 	if err != nil {
 		return nil, err
@@ -98,7 +96,7 @@ func New(inputURL string) (*Sitemap, error) {
 		return nil, err
 	}
 
-	s := &Sitemap{
+	s := &SitemapCollector{
 		href:         *sitemapURL,
 		content:      ouput.Body,
 		statusCode:   ouput.StatusCode,
@@ -110,19 +108,18 @@ func New(inputURL string) (*Sitemap, error) {
 	}
 
 	s.getURLs()
-	// pp.Println(s)
 	return s, nil
 }
 
-func (s *Sitemap) IsValid() bool {
+func (s *SitemapCollector) IsValid() bool {
 	return s.href.String() != ""
 }
 
-func (s *Sitemap) Read() error {
+func (s *SitemapCollector) Read() error {
 	return errInvalidContent
 }
 
-func (s *Sitemap) Print(format string) error {
+func (s *SitemapCollector) Print(format string) error {
 	return errInvalidContent
 }
 
@@ -195,7 +192,9 @@ func readURL(url url.URL) (colly.Response, error) {
 
 	body, errReader = ioutil.ReadAll(resp.Body)
 	if errReader != nil {
-		log.Fatalln("error.ReadAll:", contentType, ", msg=", errReader)
+		if log != nil {
+			log.Fatalln("error.ReadAll:", contentType, ", msg=", errReader)
+		}
 		return colly.Response{}, errReader
 	}
 
@@ -206,7 +205,9 @@ func readURL(url url.URL) (colly.Response, error) {
 	pathExtension := path.Ext(url.String())
 	contentEncoding := resp.Header.Get("Content-Encoding")
 
-	log.Println("URL:", resp.Request.URL.String(), "Content-Type:", contentType, "StatusCode:", resp.StatusCode)
+	if log != nil {
+		log.Println("URL:", resp.Request.URL.String(), "Content-Type:", contentType, "StatusCode:", resp.StatusCode)
+	}
 
 	if resp.StatusCode == 404 {
 		return colly.Response{}, errReader
@@ -244,7 +245,9 @@ func readURL(url url.URL) (colly.Response, error) {
 		var readCloser io.ReadCloser
 		readCloser, errReader = zlib.NewReader(bytes.NewBuffer(body))
 		if errReader != nil {
-			log.Fatalln("readCloser.error:", contentType, ", msg=", errReader)
+			if log != nil {
+				log.Fatalln("readCloser.error:", contentType, ", msg=", errReader)
+			}
 			return colly.Response{}, errReader
 		}
 		body, errReader = ioutil.ReadAll(readCloser)
@@ -252,7 +255,9 @@ func readURL(url url.URL) (colly.Response, error) {
 	}
 
 	if errReader != nil {
-		log.Fatalln("error.ReadAll:", contentType, ", msg=", errReader)
+		if log != nil {
+			log.Fatalln("error.ReadAll:", contentType, ", msg=", errReader)
+		}
 		return colly.Response{}, errReader
 	}
 
@@ -268,7 +273,7 @@ func readURL(url url.URL) (colly.Response, error) {
 }
 
 // String return the string format of the sitemap
-func (s *Sitemap) String() string {
+func (s *SitemapCollector) String() string {
 	var items []string
 	for _, item := range s.URLs {
 		items = append(items, item.String())
@@ -279,7 +284,7 @@ func (s *Sitemap) String() string {
 
 // ToFile saves a sitemap to a file with either extension .xml or .gz.
 // If extension is .gz, the file will be gzipped.
-func (s *Sitemap) ToFile(path string) error {
+func (s *SitemapCollector) ToFile(path string) error {
 	file, err := os.Create(path)
 	if err != nil {
 		return err

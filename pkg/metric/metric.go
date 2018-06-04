@@ -5,8 +5,12 @@ import (
 )
 
 type MetricCollector struct {
-	Pause   bool `default:'true'`
-	Payload string
+	Pause       bool `default:'true'`
+	DebugMode   bool `default:'true'`
+	VerboseMode bool `default:'true'`
+	Payload     string
+	wg          *sync.WaitGroup
+	lock        *sync.RWMutex
 }
 
 // NewMetricCollector creates a new Collector instance with cfg.Default configuration
@@ -35,41 +39,28 @@ func SetPayload(payload string) func(*MetricCollector) {
 }
 
 // Pause enables ...
-func Pause() func(*Collector) {
-	return func(c *Collector) {
+func Pause() func(*MetricCollector) {
+	return func(c *MetricCollector) {
 		c.Pause = true
 	}
 }
 
+func Resume() func(*MetricCollector) {
+	return func(c *MetricCollector) {
+		c.Pause = false
+	}
+}
+
 // DebugMode enables ...
-func DebugMode() func(*Collector) {
-	return func(c *Collector) {
-		c.DebugMode = cfg.DefaultDebugMode
-		// c.Config.DebugMode = cfg.DebugMode
+func DebugMode(status bool) func(*MetricCollector) {
+	return func(c *MetricCollector) {
+		c.DebugMode = status
 	}
 }
 
 // VerboseMode enables ...
-func VerboseMode() func(*Collector) {
-	return func(c *Collector) {
-		c.VerboseMode = cfg.DefaultVerboseMode
-		// c.Config.VerboseMode = cfg.VerboseMode
-	}
-}
-
-/*
-// ForwardTo enables ...
-func ForwardTo(host string) func(*MetricCollector) {
+func VerboseMode(status bool) func(*MetricCollector) {
 	return func(c *MetricCollector) {
-		c.UserAgent = ua
+		c.VerboseMode = status
 	}
 }
-
-// Debugger sets the debugger used by the Collector.
-func Debugger(d debug.Debugger) func(*Collector) {
-	return func(c *Collector) {
-		d.Init()
-		c.debugger = d
-	}
-}
-*/

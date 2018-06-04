@@ -1,9 +1,5 @@
 package config
 
-import (
-	"regexp"
-)
-
 var (
 	// Default allowed domains
 	DefaultAllowedDomains []string = []string{
@@ -14,6 +10,9 @@ var (
 		"google.com", "bing.com", "yahoo.com",
 	}
 )
+
+// Backend represents a KV Store Backend
+type filterType string
 
 const (
 	REGEXP filterType = "regexp" // Using default golang regexp package (default)
@@ -39,26 +38,26 @@ type Filters struct {
 }
 
 func (fs *Filters) IsEnabled() bool {
-	return fs.enabled
+	return fs.Disabled
 }
 
 func (fs *Filters) Enable() {
-	fs.Enabled = true
+	fs.Disabled = false
 }
 
 func (fs *Filters) Disable() {
-	fs.Enabled = false
+	fs.Disabled = true
 }
 
-func (fs *Filters) ListRules(filterBy string) (errs []string) {
-	for _, e := range fs.rules {
-		errs = append(errs, e.Error())
-	}
+func (fs *Filters) ListRules(filterBy string) (rules []string) {
+	//for _, e := range fs.WhiteListRules {
+	//	errs = append(errs, e.Error())
+	//}
 	return
 }
 
 func (fs *Filters) Status() bool {
-	return fs.Enabled
+	return fs.Disabled
 }
 
 func (fs *Filters) String() string {
@@ -70,9 +69,9 @@ func (fs *Filters) Errors(level string) []*error {
 }
 
 func (fs *Filters) ListErrors(level string) (errs []string) {
-	for _, e := range fs.errs {
-		errs = append(errs, e.Error())
-	}
+	//for _, e := range fs.errs {
+	//	errs = append(errs, e)
+	//}
 	return
 }
 
@@ -87,19 +86,15 @@ type FilterConfig struct {
 	isValid     bool
 }
 
-func (f *Filter) String() string {
+func (f *FilterConfig) String() string {
 	return ""
 }
 
-func (f *Filter) IsValid(pattern string) bool {
+func (f *FilterConfig) IsValid(pattern string) bool {
 	return f.isValid
 }
 
-func (f *Filter) AddRule(pattern string) bool {
-	return false
-}
-
-func (f *Filter) IsValid(pattern string) bool {
+func (f *FilterConfig) AddRule(pattern string) bool {
 	return false
 }
 

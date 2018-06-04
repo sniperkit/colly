@@ -3,8 +3,6 @@ package metric
 import (
 	"fmt"
 	"sort"
-	"strconv"
-	"sync"
 	"time"
 )
 
@@ -66,7 +64,7 @@ func (s Snapshot) RequestsPerSecond() float64 {
 	return s.numberOfRequestsPerSecond
 }
 
-func getLatestLogMessages(messages []string, count int) ([]string, error) {
+func GetLatestLogMessages(messages []string, count int) ([]string, error) {
 	if count < 0 {
 		return nil, fmt.Errorf("The count cannot be negative")
 	}

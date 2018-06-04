@@ -2,16 +2,13 @@ package sitemap
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 
 	"github.com/sniperkit/colly/pkg"
 	"github.com/sniperkit/colly/pkg/queue"
-
-	"github.com/sniperkit/xutil/plugin/debug/pp"
 )
 
-func NewWithCollector(inputURL string, c *colly.Collector) (*Sitemap, error) {
+func NewWithCollector(inputURL string, c *colly.Collector) (*SitemapCollector, error) {
 	cs, err := New(inputURL)
 	if err != nil {
 		return nil, err
@@ -20,11 +17,39 @@ func NewWithCollector(inputURL string, c *colly.Collector) (*Sitemap, error) {
 	return cs, nil
 }
 
-func (cs *Sitemap) Count() int {
+func AttachCollector(inputURL string, c *colly.Collector) (*SitemapCollector, error) {
+	cs, err := New(inputURL)
+	if err != nil {
+		return nil, err
+	}
+	cs.collector = c
+	return cs, nil
+}
+
+func AttachQueue(inputURL string, cqueue *queue.Queue) (*SitemapCollector, error) {
+	cs, err := New(inputURL)
+	if err != nil {
+		return nil, err
+	}
+	cs.cqueue = cqueue
+	return cs, nil
+}
+
+func AttachCollectorWithQueue(inputURL string, collector *colly.Collector, cqueue *queue.Queue) (*SitemapCollector, error) {
+	cs, err := New(inputURL)
+	if err != nil {
+		return nil, err
+	}
+	cs.collector = collector
+	cs.cqueue = cqueue
+	return cs, nil
+}
+
+func (cs *SitemapCollector) Count() int {
 	return len(cs.URLs)
 }
 
-func (cs *Sitemap) List() ([]url.URL, []string) {
+func (cs *SitemapCollector) List() ([]url.URL, []string) {
 	cs.URLs, _ = getURLs(cs.href)
 	var urls []string
 	for _, u := range cs.URLs {
@@ -33,7 +58,7 @@ func (cs *Sitemap) List() ([]url.URL, []string) {
 	return cs.URLs, urls
 }
 
-func (cs *Sitemap) Index() ([]url.URL, []string) {
+func (cs *SitemapCollector) Index() ([]url.URL, []string) {
 	var sitemaps []string
 	for _, sitemap := range cs.Indices {
 		sitemaps = append(sitemaps, sitemap.String())
@@ -41,11 +66,11 @@ func (cs *Sitemap) Index() ([]url.URL, []string) {
 	return cs.Indices, sitemaps
 }
 
-func (cs *Sitemap) Sitemaps() []url.URL {
+func (cs *SitemapCollector) Sitemaps() []url.URL {
 	return cs.Indices
 }
 
-func (cs *Sitemap) getURLs() {
+func (cs *SitemapCollector) getURLs() {
 	if !cs.IsValid() {
 		return
 	}
@@ -65,7 +90,7 @@ func (cs *Sitemap) getURLs() {
 	// }
 }
 
-func (cs *Sitemap) All() ([]url.URL, error) {
+func (cs *SitemapCollector) All() ([]url.URL, error) {
 	if !cs.IsValid() {
 		return nil, fmt.Errorf("sitemap at url='%q' is not reachable", cs.href.String())
 	}
@@ -88,37 +113,50 @@ func (cs *Sitemap) All() ([]url.URL, error) {
 	return urls, nil
 }
 
-func (cs *Sitemap) VisitAll() *colly.Collector {
+func (cs *SitemapCollector) VisitAll() *colly.Collector {
 	if !cs.IsValid() {
 		return cs.collector
 	}
-	pp.Println("sitemapURL=", cs.href.String())
+	if log != nil {
+		log.Println("sitemapURL=", cs.href.String())
+	}
 	links, err := getURLs(cs.href)
 	if err != nil {
-		log.Fatalln("error: ", err)
+		if log != nil {
+			log.Fatalln("error: ", err)
+		}
 		return cs.collector
 	}
-	log.Println("links found:", len(links))
+	if log != nil {
+		log.Println("links found:", len(links))
+	}
 	for _, link := range links {
-		log.Println("add -", link.String())
+		if log != nil {
+			log.Println("add -", link.String())
+		}
 		cs.collector.Visit(fmt.Sprintf("%s", link.String())) // Request visit URL by Collector
 	}
 	return cs.collector
 }
 
-func (cs *Sitemap) EnqueueAll() {
+func (cs *SitemapCollector) EnqueueAll() {
 	if !cs.IsValid() {
 		return
 	}
-	pp.Println("sitemapURL=", cs.href.String())
 	links, err := getURLs(cs.href)
 	if err != nil {
-		log.Fatalln("error: ", err)
+		if log != nil {
+			log.Fatalln("error: ", err)
+		}
 		return
 	}
-	log.Println("links found:", len(links))
+	if log != nil {
+		log.Println("links found:", len(links))
+	}
 	for _, link := range links {
-		log.Println("enqueue -", link.String())
+		if log != nil {
+			log.Println("enqueue -", link.String())
+		}
 		cs.cqueue.AddURL(fmt.Sprintf("%s", link.String())) // Enqueue new URL
 	}
 	return
@@ -127,19 +165,27 @@ func (cs *Sitemap) EnqueueAll() {
 func VisitAll(inputURL string, c *colly.Collector) *colly.Collector {
 	sitemapURL, err := url.Parse(inputURL)
 	if err != nil {
-		log.Fatalln("error: ", err)
+		if log != nil {
+			log.Fatalln("error: ", err)
+		}
 		return c
 	}
 
 	links, err := getURLs(*sitemapURL)
 	if err != nil {
-		log.Fatalln("error: ", err)
+		if log != nil {
+			log.Fatalln("error: ", err)
+		}
 		return c
 	}
-	log.Println("links found:", len(links))
+	if log != nil {
+		log.Println("links found:", len(links))
+	}
 
 	for _, link := range links {
-		log.Println("add -", link.String())
+		if log != nil {
+			log.Println("add -", link.String())
+		}
 		c.Visit(fmt.Sprintf("%s", link.String())) // Request visit URL by Collector
 	}
 	return c
@@ -148,18 +194,28 @@ func VisitAll(inputURL string, c *colly.Collector) *colly.Collector {
 func EnqueueAll(inputURL string, q *queue.Queue) *queue.Queue {
 	sitemapURL, err := url.Parse(inputURL)
 	if err != nil {
-		log.Fatalln("error: ", err)
+		if log != nil {
+			log.Fatalln("error: ", err)
+		}
 		return q
 	}
-	pp.Println("sitemapURL=", sitemapURL)
+	if log != nil {
+		log.Println("sitemapURL=", sitemapURL)
+	}
 	links, err := getURLs(*sitemapURL)
 	if err != nil {
-		log.Fatalln("error: ", err)
+		if log != nil {
+			log.Fatalln("error: ", err)
+		}
 		return q
 	}
-	log.Println("links found:", len(links))
+	if log != nil {
+		log.Println("links found:", len(links))
+	}
 	for _, link := range links {
-		log.Println("enqueue -", link.String())
+		if log != nil {
+			log.Println("enqueue -", link.String())
+		}
 		q.AddURL(fmt.Sprintf("%s", link.String())) // Enqueue new URL
 	}
 	return q

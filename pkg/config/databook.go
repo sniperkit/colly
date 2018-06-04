@@ -1,4 +1,4 @@
-package models
+package config
 
 type DatabookConfig struct {
 	Disabled     bool             `default:'false' json:'disabled' yaml:'disabled' toml:'disabled' xml:'disabled' ini:'disabled'`

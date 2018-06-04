@@ -1,11 +1,14 @@
 package metric
 
 import (
+	"strconv"
 	"sync"
 	"time"
 )
 
-func init() {
+var stats Statistics
+
+func InitStatsCollector() {
 	stats = Statistics{
 		lock: sync.RWMutex{},
 		// counters
@@ -18,7 +21,23 @@ func init() {
 	}
 }
 
-var stats Statistics
+func NewStatsCollector() *Statistics {
+	stats := &Statistics{
+		lock: sync.RWMutex{},
+		// counters
+		numberOfRequestsByStatusCode:  make(map[int]int),
+		numberOfRequestsByContentType: make(map[string]int),
+		// top lists
+		listOfResponsesContentTypes:   make(map[string]int),
+		listOfResponsesStatusCodes:    make(map[string]int),
+		listOfResponsesFiltersMatches: make(map[string]int),
+	}
+	return stats
+}
+
+func (s *Statistics) UpdateStatistics(r Response) {
+	go s.Add(r)
+}
 
 func UpdateStatistics(r Response) {
 	go stats.Add(r)
@@ -163,7 +182,7 @@ func (s *Statistics) LastLogMessages(count int) []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	messages, err := getLatestLogMessages(s.logMessages, count)
+	messages, err := GetLatestLogMessages(s.logMessages, count)
 	if err != nil {
 		panic(err)
 	}

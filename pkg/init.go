@@ -25,7 +25,7 @@ func NewCollector(options ...func(*Collector)) *Collector {
 }
 
 // NewCollector creates a new Collector instance with cfg.Default configuration
-func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
+func NewCollectorWithConfig(cfg *cfg.CollectorConfig) (c *Collector) {
 	c = &Collector{}
 	if cfg != nil {
 
@@ -59,10 +59,9 @@ func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
 		// Advanced features
 		c.DetectTabular = cfg.DetectTabular
 		c.DetectMimeType = cfg.DetectMimeType
-		c.AnalyzeContent = cfg.AnalyzeContent
-		c.SummarizeContent = cfg.SummarizeContent
-
-		c.TopicModelling = cfg.TopicModelling
+		// c.AnalyzeContent = cfg.AnalyzeContent
+		// c.SummarizeContent = cfg.SummarizeContent
+		// c.TopicModelling = cfg.TopicModelling
 		c.DebugMode = cfg.DebugMode
 		c.VerboseMode = cfg.VerboseMode
 
@@ -229,6 +228,7 @@ func DetectTabular() func(*Collector) {
 	}
 }
 
+/*
 // AnalyzeContent enables content classification, ranking and profiling.
 func AnalyzeContent() func(*Collector) {
 	return func(c *Collector) {
@@ -252,6 +252,7 @@ func SummarizeContent() func(*Collector) {
 		// c.Config.SummarizeContent = cfg.DefaultSummarizeContent
 	}
 }
+*/
 
 // DebugMode enables text-based content summarization.
 func DebugMode() func(*Collector) {

@@ -1,0 +1,43 @@
+identifier: 1
+title: colly - dashboard
+user_agent: "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
+random_user_agent: true
+async: false
+max_depth: 0
+allow_url_revisit: false
+ignore_robots_txt: false
+allowed_domains:
+- www.shopify.com
+- shopify.com
+whitelist_domains: []
+blacklist_domains: []
+whitelist_url_filters: []
+blacklist_url_filters: []
+whitelist_body_filters: []
+blacklist_body_filters: []
+whitelist_header_filters: []
+blacklist_header_filters: []
+max_body_size: 0
+parse_http_error_response: false
+detect_charset: true
+detect_mime_type: true
+detect_tabular_data: false
+xdg_base_dir: /Users/lucmichalski/.config
+base_dir: ./shared
+logs_dir: ./shared/logs
+cache_dir: ./shared/storage/cache
+export_dir: ./shared/exports
+force_dir: true
+force_dir_recursive: true
+debug: false
+verbose: false
+dashboard_mode: true
+sitemaps:
+  enqueue: false
+  max_urls: 0
+  url: "https://www.shopify.com/sitemap.xml"
+limits:
+  parallelism: 2
+  domain_glob: "*"
+  random_delay: 0s
+  max_queue: 100000

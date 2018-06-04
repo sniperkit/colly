@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-	Refs:
-	- https://github.com/sniperkit/colly/pkg/pull/148/files
-	- https://github.com/vosmith/colly/tree/http_backend
-	-
-*/
-
 // Package colly implements a HTTP scraping framework
 package colly
 
@@ -62,16 +55,17 @@ import (
 
 var (
 	collectorCounter uint32
-	collectorConfig  *cfg.Config
-	json             = jsoniter.ConfigCompatibleWithStandardLibrary
-	metric           *metric.Snapshot
+	collectorConfig  *cfg.CollectorConfig
+	collectorMetrics *metric.Snapshot
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // Collector provides the scraper instance for a scraping job
 type Collector struct {
 
 	// Collector's settings
-	cfg.Config
+	cfg.CollectorConfig
 
 	// RedirectHandler allows control on how a redirect will be managed
 	RedirectHandler func(req *http.Request, via []*http.Request) error
@@ -110,6 +104,13 @@ func (c *Collector) Init() {
 	c.IgnoreRobotsTxt = true
 	c.ID = atomic.AddUint32(&collectorCounter, 1)
 	c.AllowURLRevisit = false
+}
+
+func (c *Collector) IsDebug() bool {
+	if c.debugger != nil {
+		return true
+	}
+	return false
 }
 
 // Appengine will replace the Collector's backend http.Client
