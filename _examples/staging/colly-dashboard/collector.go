@@ -54,8 +54,7 @@ func newCollector(domain string, async bool) (*colly.Collector, error) {
 func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
 
 	// Enable debug mode or set env `CONFIGOR_DEBUG_MODE` to true when running your application
-
-	collectorConfig, err := config.NewFromFile(true, true, files...)
+	collectorConfig, err := config.NewFromFile(false, false, files...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +79,13 @@ func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
 		enableDebug = true
 	}
 
+	if collectorConfig.Async {
+		collectorMode = "async"
+	}
+
 	if collectorConfig.VerboseMode {
 		enableVerbose = true
+		collector = addCollectorVerboseEvents(collector)
 	}
 
 	if collectorConfig.DashboardMode {
@@ -152,7 +156,7 @@ func newCollectorLimits(domain *string, parallelism *int, delay *time.Duration) 
 	return collectorLimitConfig
 }
 
-func addCollectorDebugEvents(scraper *colly.Collector) *colly.Collector {
+func addCollectorVerboseEvents(scraper *colly.Collector) *colly.Collector {
 	// Set error handler
 	scraper.OnError(func(r *colly.Response, err error) {
 		log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)

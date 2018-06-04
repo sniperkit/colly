@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"os"
 	"os/signal"
 
@@ -29,8 +29,8 @@ var (
 	defaultDomain     string         = "https://www.shopify.com"
 	sitemapURL        string         = "https://www.shopify.com/sitemap.xml"
 	kill              bool           = false
-	enableDebug       bool           = true
-	enableVerbose     bool           = true
+	enableDebug       bool           = false
+	enableVerbose     bool           = false
 	isAutoLoad        bool           = false
 	log               *logrus.Logger = logrus.New()
 )
@@ -49,32 +49,12 @@ func prepareSignalHandler() {
 	signal.Notify(c, os.Interrupt)
 	<-c
 	stopTheCrawler <- true
-	fmt.Println("Handling Keyboard interrupt.")
+	log.Println("Handling Keyboard interrupt.")
 	kill = true
 }
 
 func main() {
-	go prepareSignalHandler()
-
-	/*
-		trigger.On("first-event", func() {
-			// Do Some Task Here.
-			fmt.Println("Done")
-		})
-		trigger.Fire("first-event")
-
-		// trigger.On("second-event", tui.TestFunc)
-		// trigger.Fire("second-event")
-
-		// Call them using
-		trigger.On("third-event", tui.TestFunc)
-		values, err := trigger.Fire("third-event", 5, 6)
-		if err != nil {
-			log.Println("could not trigger third-event.")
-		} else {
-			log.Printf("trigger values=%s \n", values)
-		}
-	*/
+	// go prepareSignalHandler()
 
 	masterCollector, err := newCollectorWithConfig(configFiles...)
 	if err != nil {
@@ -82,7 +62,6 @@ func main() {
 	}
 
 	masterCollector = addCollectorEvents(masterCollector)
-	// masterCollector = addCollectorDebugEvents(masterCollector)
 
 	// Initialize data collections for storing data/pattern extracted
 	// or the sitemap urls by the collector into datasets

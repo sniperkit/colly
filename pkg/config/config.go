@@ -59,6 +59,22 @@ type CollectorConfig struct {
 	///// Collector - crawling parameters
 	//////////////////////////////////////////////////
 
+	// Queue
+	Queue struct {
+		Enabled  bool `default:"true" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
+		Workers  int  `default:"2" json:"workers" yaml:"workers" toml:"workers" xml:"workers" ini:"workers" csv:"Workers"`
+		MaxQueue int  `default:"10000" json:"max_queue" yaml:"max_queue" toml:"max_queue" xml:"maxQueue" ini:"maxQueue" csv:"MaxQueue"`
+	} `json:"queue" yaml:"queue" toml:"queue" xml:"queue" ini:"queue" csv:"queue"`
+
+	// Proxy
+	Proxy struct {
+		Enabled          bool     `default:"true" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
+		FetchRemoteList  bool     `default:"true" json:"fetch_remote_list" yaml:"fetch_remote_list" toml:"fetch_remote_list" xml:"fetchRemoteList" ini:"fetchRemoteList" csv:"FetchRemoteList"`
+		PoolMode         bool     `default:"true" json:"pool_mode" yaml:"pool_mode" toml:"pool_mode" xml:"poolMode" ini:"poolMode" csv:"PoolMode"`
+		AllowedProtocols []string `json:"allowed_protocols" yaml:"allowed_protocols" toml:"allowed_protocols" xml:"allowedProtocols" ini:"allowedProtocols" csv:"AllowedProtocols"`
+		List             []string `json:"list" yaml:"list" toml:"list" xml:"list" ini:"list" csv:"list"`
+	}
+
 	// Async turns on asynchronous network communication. Use Collector.Wait() to be sure all requests have been finished.
 	Async bool `default:"false" json:"async" yaml:"async" toml:"async" xml:"async" ini:"async" csv:"async"`
 
@@ -244,8 +260,8 @@ func NewFromFile(debug, verbose bool, files ...string) (*CollectorConfig, error)
 	configor.New(&configor.Config{Debug: debug, Verbose: verbose}).Load(&collectorConfig, files...)
 
 	// if c.DebugMode {}
-	fmt.Printf("config: %#v", collectorConfig)
-	fmt.Println("XDGBaseDir=", xdgPath)
+	// fmt.Printf("config: %#v", collectorConfig)
+	// fmt.Println("XDGBaseDir=", xdgPath)
 
 	return collectorConfig, nil
 }

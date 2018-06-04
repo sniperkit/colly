@@ -1,7 +1,18 @@
 identifier: 1
 title: colly - dashboard
-user_agent: "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
-random_user_agent: true
+user_agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0
+  Safari/537.36
+random_user_agent: false
+queue:
+  enabled: true
+  workers: 4
+  max_queue: 10000
+proxy:
+  enabled: false
+  fetch_remote_list: false
+  pool_mode: false
+  allowed_protocols: []
+  list: []
 async: false
 max_depth: 0
 allow_url_revisit: false
@@ -35,9 +46,9 @@ dashboard_mode: true
 sitemaps:
   enqueue: false
   max_urls: 0
-  url: "https://www.shopify.com/sitemap.xml"
+  url: https://www.shopify.com/sitemap.xml
 limits:
   parallelism: 2
-  domain_glob: "*"
-  random_delay: 0s
+  domain_glob: '*'
+  random_delay: 5s
   max_queue: 100000
