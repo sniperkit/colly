@@ -1,8 +1,6 @@
 package main
 
 import (
-	// triiger "github.com/sadlil/go-trigger"
-
 	metric "github.com/sniperkit/colly/pkg/metric"
 	tui "github.com/sniperkit/colly/plugins/app/dashboard/tui/termui"
 	// dash "github.com/sniperkit/colly/plugins/app/dashboard"
@@ -21,14 +19,17 @@ var (
 
 func initStatsCollector() {
 	collectorStats = metric.NewStatsCollector()
-	// collectorStats = metric.NewStatsCollector(stopTheUI, stopTheCrawler)
 }
 
 func initDashboard() {
+	collectorStats = metric.NewStatsCollector()
+
 	stopTheUI = make(chan bool)
 	collectorResponseMetrics = make(chan metric.Response)
+
 	go func() {
-		tui.Dashboard(stopTheUI, stopTheCrawler)
+		tui.Dashboard(collectorStats, stopTheUI, stopTheCrawler)
+
 	}()
 }
 
@@ -36,12 +37,12 @@ func updateDashboard() {
 	go func() {
 		for {
 			select {
-			//case <-allURLsHaveBeenVisited:
-			//	allStatisticsHaveBeenUpdated <- true
-			//	return
-
 			case <-stopTheCrawler:
 				stopTheUI <- true
+				return
+
+			case <-stopTheUI:
+				stopTheCrawler <- true
 
 			case snapshot := <-collectorResponseMetrics:
 				if collectorStats != nil {

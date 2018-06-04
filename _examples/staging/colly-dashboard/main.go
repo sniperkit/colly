@@ -23,16 +23,15 @@ import (
 
 // app params
 var (
-	version           string         = "0.0.1-alpha"
-	configFiles       []string       = []string{"colly.yaml"}
-	cacheCollectorDir string         = "./shared/cache/collector"
-	defaultDomain     string         = "https://www.shopify.com"
-	sitemapURL        string         = "https://www.shopify.com/sitemap.xml"
-	kill              bool           = false
-	enableDebug       bool           = false
-	enableVerbose     bool           = false
-	isAutoLoad        bool           = false
-	log               *logrus.Logger = logrus.New()
+	version       string         = "0.0.1-alpha"
+	configFiles   []string       = []string{"colly.yaml"}
+	defaultDomain string         = "https://www.shopify.com"
+	sitemapURL    string         = "https://www.shopify.com/sitemap.xml"
+	kill          bool           = false
+	enableDebug   bool           = false
+	enableVerbose bool           = false
+	isAutoLoad    bool           = false
+	log           *logrus.Logger = logrus.New()
 )
 
 // Initialize default object instances for the application.
@@ -64,101 +63,69 @@ func main() {
 	masterCollector = addCollectorEvents(masterCollector)
 
 	// Initialize data collections for storing data/pattern extracted
-	// or the sitemap urls by the collector into datasets
+	// or the sitemap urls by the collector into custom datasets
 	initDataCollections()
 
-	if enableUI {
+	if appConfig.App.DashboardMode {
 
 		initDashboard()
 		updateDashboard()
-		/*
-			stopTheUI = make(chan bool)
-			collectorResponseMetrics = make(chan metric.Response)
-			go func() {
-				tui.Dashboard(stopTheUI, stopTheCrawler)
-			}()
-
-			go func() {
-				for {
-					select {
-					case <-allURLsHaveBeenVisited:
-						allStatisticsHaveBeenUpdated <- true
-						return
-
-					case <-stopTheCrawler:
-						log.Println("stopTheUI")
-						stopTheUI <- true
-
-					case snapshot := <-collectorResponseMetrics:
-						log.Println("new collectorResponseMetrics")
-						if collectorStats != nil {
-							collectorStats = metric.NewStatsCollector()
-						}
-						collectorStats.UpdateStatistics(snapshot)
-
-					}
-				}
-			}()
-		*/
 	}
 
 	switch collectorMode {
 	case "async":
-
-		// Attach master collector to the sitemap collector
-		sitemapCollector, err := sitemap.AttachCollector(sitemapURL, masterCollector)
-		if err != nil {
-			log.Fatalln("could not instanciate the sitemap collector.")
+		if !appConfig.Crawler.Sitemap.Disabled {
+			// Attach master collector to the sitemap collector
+			sitemapCollector, err := sitemap.AttachCollector(sitemapURL, masterCollector)
+			if err != nil {
+				log.Fatalln("could not instanciate the sitemap collector.")
+			}
+			sitemapCollector.VisitAll()
+			sitemapCollector.Count()
 		}
-		sitemapCollector.VisitAll()
-
-		sitemapCollector.Count()
-
 		masterCollector.Visit(defaultDomain)
-
 		// Consume URLs
 		masterCollector.Wait()
 
 	case "queue":
-
 		// Initialize collector queue
 		collectorQueue, err := initCollectorQueue(collectorQueueWorkers, collectorQueueMaxSize, "InMemory")
 		if err != nil {
 			log.Fatalln("error: ", err)
 		}
 
-		// Attach queue and master collector to the sitemap collector
-		sitemapCollector, err := sitemap.AttachQueue(sitemapURL, collectorQueue)
-		if err != nil {
-			log.Fatalln("could not instanciate the sitemap collector.")
+		if !appConfig.Crawler.Sitemap.Disabled {
+			// Attach queue and master collector to the sitemap collector
+			sitemapCollector, err := sitemap.AttachQueue(sitemapURL, collectorQueue)
+			if err != nil {
+				log.Fatalln("could not instanciate the sitemap collector.")
+			}
+			sitemapCollector.Count()
+			// Enqueue all URLs found in the sitemap.txt
+			sitemapCollector.EnqueueAll()
 		}
-		sitemapCollector.Count()
-
-		// Enqueue all URLs found in the sitemap.txt
-		sitemapCollector.EnqueueAll()
 
 		// Consume URLs
 		collectorQueue.Run(masterCollector)
 
 	default:
-
-		// Initalize new sitemap collector
-		sitemapCollector, err := sitemap.New(sitemapURL)
-		if err != nil {
-			log.Fatalln("could not instanciate the sitemap collector.")
-		}
-
-		sitemapCollector.Count()
-		urls, _ := sitemapCollector.List()
-
-		for _, url := range urls {
-			masterCollector.Visit(url.String())
+		if !appConfig.Crawler.Sitemap.Disabled {
+			// Initalize new sitemap collector
+			sitemapCollector, err := sitemap.New(sitemapURL)
+			if err != nil {
+				log.Fatalln("could not instanciate the sitemap collector.")
+			}
+			sitemapCollector.Count()
+			urls, _ := sitemapCollector.List()
+			for _, url := range urls {
+				masterCollector.Visit(url.String())
+			}
 		}
 
 	}
 
 	// if enableUI && !masterCollector.IsDebug() {
-	if enableUI {
+	if appConfig.App.DashboardMode {
 		stopTheUI <- true
 	}
 
