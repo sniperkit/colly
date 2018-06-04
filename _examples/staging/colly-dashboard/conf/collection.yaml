@@ -1,2 +1,5 @@
 ---
-collections:
+collection:
+  disabled: false
+  databooks: []
+  datasets: []

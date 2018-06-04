@@ -1,20 +1,33 @@
 ---
 debug:
   config:
-    load_debug: false
     load_verbose: false
+    load_debug: false
     export_disabled: false
     export_sections: []
     export_schema_only: false
-    export_prefix_path: "./shared/exports/config/dump"
+    export_prefix_path: ./shared/exports/config/dump
     export_formats:
     - yaml
     - json
     - toml
   tachymeter:
-    disabled: false
+    disabled: true
+    async: false
     sample_size: 50
     histogram_bins: 10
     export:
+      disabled: false
+      backup_mode: false
+      backup_suffix: ""
+      backup_prefix: ""
       overwrite: true
-      prefix_path: "./shared/exports/stats/tachymeter"
+      encoding: ""
+      format: ""
+      basename: ""
+      split_at: 0
+      buffer_size: 0
+      prefix_path: ./shared/exports/stats/tachymeter
+      export_dir: ""
+      ensure_dir: false
+      ensure_dir_recursively: false

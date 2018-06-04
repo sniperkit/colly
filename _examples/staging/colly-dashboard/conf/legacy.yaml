@@ -23,6 +23,6 @@ cache_dir: ./shared/storage/cache
 export_dir: ./shared/exports
 force_dir: false
 force_dir_recursive: false
-debug: false
-verbose: false
-dashboard: true
+debug_mode: false
+verbose_mode: false
+dashboard_mode: true

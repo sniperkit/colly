@@ -12,6 +12,7 @@ collector:
   modes:
     default:
       random_delay: 0s
+
     async:
       parallelism: 4
       domain_glob: ""
@@ -27,19 +28,6 @@ collector:
     backend: "inMemory"
     custom_dir: "./shared/storage/cache/collector/inMemory"
 
-  transport:
-    enabled: false
-    http:
-      cache:
-        disabled: false
-        backend: ""
-        ttl: ""
-        store: []
-      stats:
-        disabled: false
-        client: ""
-        store: []
-
   proxy:
     enabled: false
     fetch_remote_list: false
@@ -48,7 +36,7 @@ collector:
     list: []
 
   sitemap:
-    enabled: true
+    disabled: false
     url: https://golanglibs.com/sitemap.txt
     auto_detect: false
     limit_urls: 0

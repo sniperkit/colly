@@ -14,12 +14,14 @@ var (
 	version     string   = "0.0.1-alpha"
 	configFiles []string = []string{
 		"./conf/app.yaml",
-		"./conf/collector.yaml",
 		"./conf/collection.yaml",
-		"./conf/filters.yaml",
-		"./conf/outputs.yaml",
+		"./conf/collector.yaml",
 		"./conf/debug.yaml",
+		"./conf/filters.yaml",
 		"./conf/legacy.yaml",
+		"./conf/outputs.yaml",
+		"./conf/proxy.yaml",
+		"./conf/transport.yaml",
 	}
 	log *logrus.Logger = logrus.New()
 )
@@ -65,8 +67,9 @@ func main() {
 			}
 			sitemapCollector.VisitAll()
 			sitemapCollector.Count()
+		} else {
+			masterCollector.Visit(appConfig.Collector.RootURL)
 		}
-		masterCollector.Visit(appConfig.Collector.RootURL)
 
 		// Consume URLs
 		masterCollector.Wait()
@@ -87,6 +90,8 @@ func main() {
 			sitemapCollector.Count()
 			// Enqueue all URLs found in the sitemap.txt
 			sitemapCollector.EnqueueAll()
+		} else {
+			collectorQueue.AddURL(appConfig.Collector.RootURL)
 		}
 
 		// Consume URLs
@@ -104,6 +109,8 @@ func main() {
 			for _, url := range urls {
 				masterCollector.Visit(url.String())
 			}
+		} else {
+			masterCollector.Visit(appConfig.Collector.RootURL)
 		}
 
 	}
