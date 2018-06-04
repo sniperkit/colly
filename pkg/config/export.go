@@ -3,8 +3,8 @@ package config
 // ExportConfig
 type ExportConfig struct {
 
-	// Disabled sets the status of all export configuration values
-	Disabled bool `default:"false" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled"`
+	// Enabled
+	Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
 
 	// BackupMode
 	BackupMode bool `default:"true" json:"backup_mode" yaml:"backup_mode" toml:"backupMode" xml:"backupMode" ini:"BackupMode"`
@@ -44,4 +44,6 @@ type ExportConfig struct {
 
 	// ForceDirRecursive specifies that the program will try to create missing storage directories recursively.
 	ForceDirRecursive bool `default:"true" json:"ensure_dir_recursively" yaml:"ensure_dir_recursively" toml:"ensure_dir_recursively" xml:"ensureDirRecursively" ini:"ensureDirRecursively"`
+
+	//- End
 }

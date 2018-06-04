@@ -24,7 +24,10 @@ var (
 		"colly.json",
 		"colly.toml",
 		// ../conf/app.yaml
+		parentDir + "/conf/colly.yaml",
 		parentDir + "/conf/app.yaml",
+		parentDir + "/conf/cache.yaml",
+		parentDir + "/conf/sitemap.yaml",
 		parentDir + "/conf/collection.yaml",
 		parentDir + "/conf/collector.yaml",
 		parentDir + "/conf/debug.yaml",
@@ -34,7 +37,10 @@ var (
 		parentDir + "/conf/proxy.yaml",
 		parentDir + "/conf/transport.yaml",
 		// ./conf/app.yaml
+		workDir + "/conf/colly.yaml",
+		workDir + "/conf/cache.yaml",
 		workDir + "/conf/app.yaml",
+		workDir + "/conf/sitemap.yaml",
 		workDir + "/conf/collection.yaml",
 		workDir + "/conf/collector.yaml",
 		workDir + "/conf/debug.yaml",

@@ -127,8 +127,7 @@ func closeTachymeter(outputFile string) error {
 	return nil
 }
 
-func newStatsTransport(rt http.RoundTripper) http.RoundTripper {
-	defer funcTrack(time.Now())
+func addHttpStatsTransport(rt http.RoundTripper) http.RoundTripper {
 	return httpstats.NewTransport(rt)
 }
 

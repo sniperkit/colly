@@ -100,10 +100,11 @@ collector:
     enabled: true
     fetch_remote_list: true
     pool_mode: false
-    allowed_protocols: ["socks5"]
     list:
-    - socks5://127.0.0.1:1337
-    - socks5://127.0.0.1:1338
+    - address: 'socks5://127.0.0.1:1337'
+      enabled: false
+    - address: 'socks5://127.0.0.1:1338'
+      enabled: false
   sitemap:
     enabled: false
     url: ""
@@ -207,9 +208,9 @@ outputs:
   export_dir: ""
   force_dir: false
   force_dir_recursive: false
-identifier: 0
-title: ""
-user_agent: ""
+identifier: 1
+title: "golanglibs.com collector - dashboard"
+user_agent: "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
 random_user_agent: false
 async: false
 max_depth: 0

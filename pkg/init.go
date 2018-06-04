@@ -25,14 +25,16 @@ func NewCollector(options ...func(*Collector)) *Collector {
 }
 
 // NewCollector creates a new Collector instance with cfg.Default configuration
-func NewCollectorWithConfig(cfg *cfg.CollectorConfig) (c *Collector) {
+func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
 	c = &Collector{}
 	if cfg != nil {
+
+		//// ---
 
 		// Cache Storage
 		c.store = &storage.InMemoryStorage{}
 		c.store.Init()
-		c.MaxBodySize = cfg.MaxBodySize
+		c.MaxBodySize = cfg.Filters.Response.MaxBodySize
 		c.backend = &httpBackend{}
 
 		// Requests
@@ -42,33 +44,42 @@ func NewCollectorWithConfig(cfg *cfg.CollectorConfig) (c *Collector) {
 		c.wg = &sync.WaitGroup{}
 		c.lock = &sync.RWMutex{}
 		c.robotsMap = make(map[string]*robotstxt.RobotsData)
-		c.IgnoreRobotsTxt = cfg.IgnoreRobotsTxt
+		c.IgnoreRobotsTxt = cfg.Collector.IgnoreRobotsTxt
 		c.ID = atomic.AddUint32(&collectorCounter, 1)
 
 		// Filters
-		c.AllowedDomains = cfg.AllowedDomains
-		c.AllowURLRevisit = cfg.AllowURLRevisit
-		c.CacheDir = cfg.CacheDir
-		c.DetectCharset = cfg.DetectCharset
-		c.DisallowedDomains = cfg.DisallowedDomains
-		c.MaxDepth = cfg.MaxDepth
-		c.ParseHTTPErrorResponse = cfg.ParseHTTPErrorResponse
-		c.UserAgent = cfg.UserAgent
-		c.Async = cfg.Async
+		c.AllowedDomains = cfg.Filters.Whitelists.Domains
+		c.DisallowedDomains = cfg.Filters.Blacklists.Domains
+
+		c.AllowURLRevisit = cfg.Collector.AllowURLRevisit
+
+		c.CacheDir = cfg.Collector.Cache.Store.Directory
+
+		// cfg.Blacklists.Domains
+
+		c.MaxDepth = cfg.Collector.MaxDepth
+		c.ParseHTTPErrorResponse = cfg.Filters.Response.ParseHTTPErrorResponse
+		c.UserAgent = cfg.Collector.UserAgent
+
+		if cfg.Collector.CurrentMode == "async" {
+			c.Async = true
+		}
 
 		// Advanced features
-		c.DetectTabular = cfg.DetectTabular
-		c.DetectMimeType = cfg.DetectMimeType
-		// c.AnalyzeContent = cfg.AnalyzeContent
-		// c.SummarizeContent = cfg.SummarizeContent
-		// c.TopicModelling = cfg.TopicModelling
-		c.DebugMode = cfg.DebugMode
-		c.VerboseMode = cfg.VerboseMode
+		c.DetectCharset = cfg.Filters.Response.DetectCharset
+		c.DetectTabular = cfg.Filters.Response.DetectTabular
+		c.DetectMimeType = cfg.Filters.Response.DetectMimeType
+
+		c.DebugMode = cfg.App.DebugMode
+		c.VerboseMode = cfg.App.VerboseMode
 
 	} else {
+
 		c.Init()
 		c.parseSettingsFromEnv()
+
 	}
+
 	return
 }
 

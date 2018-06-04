@@ -60,12 +60,6 @@ collector:
           port: ""
           force_ssl: false
           ssl_verify: false
-  proxy:
-    disabled: false
-    fetch_remote_list: false
-    pool_mode: false
-    allowed_protocols: []
-    list: []
   sitemap:
     enabled: false
     url: "https://golanglibs.com/sitemap.txt"

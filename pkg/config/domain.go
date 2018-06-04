@@ -1,7 +1,7 @@
 package config
 
 type DomainConfig struct {
-	Disabled  bool   `default:"false" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled"`
+	Enabled   bool   `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
 	Domain    string `json:"domain" yaml:"domain" toml:"domain" xml:"domain" ini:"domain"`
 	Protocol  string `json:"protocol" yaml:"protocol" toml:"protocol" xml:"protocol" ini:"protocol"`
 	Host      string `json:"host" yaml:"host" toml:"host" xml:"host" ini:"host"`

@@ -4,11 +4,8 @@ type ClientConfig struct {
 	// Enabled
 	Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
 
-	// Disabled
-	Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
-
-	// Client
-	Address string `default:"" json:"client" yaml:"client" toml:"client" xml:"client" ini:"client" csv:"client"`
+	// Address
+	Address string `default:"" json:"address" yaml:"address" toml:"address" xml:"address" ini:"address" csv:"address"`
 
 	// Domain
 	Domain string `json:"domain" yaml:"domain" toml:"domain" xml:"domain" ini:"domain"`
@@ -39,4 +36,17 @@ type ClientConfig struct {
 
 	// Payload
 	Payload string `json:"payload" yaml:"payload" toml:"payload" xml:"payload" ini:"payload"`
+
+	//-- End
+}
+
+type ProxyConfig struct {
+
+	// Enabled
+	Enabled bool `default:"true" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
+
+	// Address
+	Address string `required:"true" json:"address" yaml:"address" toml:"address" xml:"address" ini:"address" csv:"address"`
+
+	//-- End
 }

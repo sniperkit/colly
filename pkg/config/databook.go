@@ -1,7 +1,7 @@
 package config
 
 type DatabookConfig struct {
-	Disabled     bool            `default:"false" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled"`
+	Enabled      bool            `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
 	IsExportable bool            `default:"true" json:"is_exportable" yaml:"is_exportable" toml:"is_exportable" xml:"is_exportable" ini:"is_exportable"`
 	Datasets     []string        `json:"datasets" yaml:"datasets" toml:"datasets" xml:"datasets" ini:"datasets"`
 	MaxDatasets  int             `default:"5" json:"max_datasets" yaml:"max_datasets" toml:"max_datasets" xml:"maxDatasets" ini:"maxDatasets"`

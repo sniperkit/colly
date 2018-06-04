@@ -29,7 +29,7 @@ const (
 //////////////////////////////////////////////////
 
 type Filters struct {
-	Disabled        bool           `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
+	Enabled         bool           `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
 	WhiteListRules  []FilterConfig `json:"whitelist_rules" yaml:"whitelist_rules" toml:"whitelist_rules" xml:"whitelistRules" ini:"whitelistRules"`
 	BlackListRules  []FilterConfig `json:"blacklist_rules" yaml:"blacklist_rules" toml:"blacklist_rules" xml:"blackListRules" ini:"blackListRules"`
 	WatchListRules  []FilterConfig `json:"watchlist_rules" yaml:"watchlist_rules" toml:"watchlist_rules" xml:"watchListRules" ini:"watchListRules"`
@@ -38,15 +38,15 @@ type Filters struct {
 }
 
 func (fs *Filters) IsEnabled() bool {
-	return fs.Disabled
+	return fs.Enabled
 }
 
 func (fs *Filters) Enable() {
-	fs.Disabled = false
+	fs.Enabled = true
 }
 
 func (fs *Filters) Disable() {
-	fs.Disabled = true
+	fs.Enabled = false
 }
 
 func (fs *Filters) ListRules(filterBy string) (rules []string) {
@@ -57,7 +57,7 @@ func (fs *Filters) ListRules(filterBy string) (rules []string) {
 }
 
 func (fs *Filters) Status() bool {
-	return fs.Disabled
+	return fs.Enabled
 }
 
 func (fs *Filters) String() string {
@@ -80,7 +80,7 @@ func (fs *Filters) ListErrors(level string) (errs []string) {
 //////////////////////////////////////////////////
 
 type DomainFilter struct {
-	Disabled  bool   `default:"false" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled"`
+	Enabled   bool   `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
 	Domain    string `json:"domain" yaml:"domain" toml:"domain" xml:"domain" ini:"domain"`
 	Protocol  string `json:"protocol" yaml:"protocol" toml:"protocol" xml:"protocol" ini:"protocol"`
 	Host      string `json:"host" yaml:"host" toml:"host" xml:"host" ini:"host"`

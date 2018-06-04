@@ -2,8 +2,10 @@ package main
 
 import (
 	"runtime"
-	"strings"
 	"time"
+
+	// helpers
+	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 
 	colly "github.com/sniperkit/colly/pkg"
 	config "github.com/sniperkit/colly/pkg/config"
@@ -11,11 +13,9 @@ import (
 	helper "github.com/sniperkit/colly/pkg/helper"
 	metric "github.com/sniperkit/colly/pkg/metric"
 	proxy "github.com/sniperkit/colly/pkg/proxy"
-	// helpers
-	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
-var appConfig *config.CollectorConfig
+var appConfig *config.Config
 
 // collector
 var (
@@ -33,8 +33,7 @@ func initCollectorHelpers(c *colly.Collector) *colly.Collector {
 }
 
 func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
-
-	log.Printf("configFiles: \n%s\n", strings.Join(configFiles, "\n"))
+	// log.Printf("configFiles: \n%s\n", strings.Join(configFiles, "\n"))
 
 	// Enable debug mode or set env `CONFIGOR_DEBUG_MODE` to true when running your application
 	var err error
@@ -47,7 +46,7 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 	collector := colly.NewCollector()
 
 	// Set User-Agent
-	if appConfig.UserAgent != "" {
+	if appConfig.Collector.UserAgent != "" {
 		collector.UserAgent = `Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36`
 	}
 
@@ -82,7 +81,19 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 
 	collector.AllowURLRevisit = appConfig.Collector.AllowURLRevisit
 	collector.IgnoreRobotsTxt = appConfig.Collector.IgnoreRobotsTxt
-	collector.CacheDir = appConfig.Collector.Cache.Directory
+	collector.CacheDir = appConfig.Collector.Cache.Store.Directory
+
+	/*
+		storage := &sqlite3.Storage{
+			Filename: "./results.db",
+		}
+
+		defer storage.Close()
+		err := c.SetStorage(storage)
+		if err != nil {
+			panic(err)
+		}
+	*/
 
 	if appConfig.Collector.CurrentMode == "async" {
 		collector.Async = true
@@ -99,10 +110,30 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 		collector.Limit(collectorLimits)
 	}
 
+	// Transport
+	// collector =
+
+	if len(appConfig.Collector.Proxy.List) > 0 && appConfig.Collector.Proxy.Enabled {
+		var proxies []string
+		for _, p := range appConfig.Collector.Proxy.List {
+			if p.Enabled {
+				proxies = append(proxies, p.Address)
+			}
+		}
+		if len(proxies) > 0 {
+			rp, err := proxy.RoundRobinProxySwitcher(proxies...)
+			if err != nil {
+				return nil, err
+			}
+			collector.SetProxyFunc(rp)
+		}
+	}
+
 	// Dump config file for dev purpise
 	dumpFormats := []string{"yaml", "json", "toml", "xml"}
 	dumpNodes := []string{}
 	config.Dump(appConfig, dumpFormats, dumpNodes, "./shared/exports/config/dump/colly_dashboard") // use string slices
+	pp.Println(appConfig)
 
 	return collector, nil
 }

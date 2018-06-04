@@ -308,6 +308,13 @@ func encodeFile(config interface{}, node string, format string) ([]byte, error) 
 		// fmt.Println(dataBytes.String())
 		return []byte(dataBytes.String()), nil
 
+	case "xml":
+		data, err := xml.MarshalIndent(config, "", "\t")
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+
 	case "yaml":
 		data, err := yaml.Marshal(config)
 		if err != nil {
