@@ -69,7 +69,7 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 
 	logParser := termui.NewList()
 	logParser.ItemFgColor = termui.ColorYellow
-	logParser.BorderLabel = "Parser"
+	logParser.BorderLabel = "Filters"
 	logParser.Height = 22
 
 	totalBytesDownloaded := termui.NewPar("")

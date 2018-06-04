@@ -1,18 +1,10 @@
 package main
 
 import (
-	// "context"
-
 	// collector - plugins/addons
 	cuckoo "github.com/seiflotfy/cuckoofilter"                         // Important! To fork this package
 	cmap "github.com/sniperkit/colly/plugins/data/structure/map/multi" // Concurrent multi-map helper
 )
-
-func init() {
-	if isAutoLoad {
-		AutoLoad()
-	}
-}
 
 var (
 	// concurrent multi map store
@@ -25,21 +17,7 @@ var (
 	// cuckofilter store
 	collectorCuckooFilterCapacity uint = 20000 // default: 1000000
 	collectorCuckooFilter         *cuckoo.CuckooFilter
-
-	/*
-		// collector store mapping with cli arguments
-		collectorStoreListers = map[string]func(ctx context.Context, args []string){
-			"cmap":         listCollectorConcurrentMap,
-			"cmmap":        listCollectorConcurrentMultiMap,
-			"cuckoofilter": listCollectorCuckooFilter,
-		}
-	*/
 )
-
-// just for test purpose
-// func listCollectorConcurrentMap()      {}
-// func listCollectorConcurrentMultiMap() {}
-// func listlistCollectorCuckooFilter()   {}
 
 func AutoLoad() {
 	// Concurrent map
@@ -95,3 +73,19 @@ func newCuckoofilter(capacity uint) (*cuckoo.CuckooFilter, bool) {
 	c := cuckoo.NewCuckooFilter(capacity)
 	return c, c != nil
 }
+
+/*
+var (
+		// collector store mapping with cli arguments
+		collectorStoreListers = map[string]func(ctx context.Context, args []string){
+			"cmap":         listCollectorConcurrentMap,
+			"cmmap":        listCollectorConcurrentMultiMap,
+			"cuckoofilter": listCollectorCuckooFilter,
+		}
+)
+
+// just for test purpose
+// func listCollectorConcurrentMap()      {}
+// func listCollectorConcurrentMultiMap() {}
+// func listlistCollectorCuckooFilter()   {}
+*/

@@ -15,9 +15,7 @@ var appConfig *config.CollectorConfig
 
 // collector
 var (
-	collectorCacheDir   string             = "./shared/cache/collector"
-	collectorWorkers    int                = 4
-	collectorMode       string             = "queue"
+	// collectorCacheDir   string             = "./shared/cache/collector"
 	collectorStop       chan bool          = make(chan bool)
 	collectorAllVisited chan bool          = make(chan bool)
 	collectorResult     chan error         = make(chan error)
@@ -37,7 +35,7 @@ func newCollector(domain string, async bool) (*colly.Collector, error) {
 		colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
 		colly.AllowedDomains(domain),
 		colly.Async(async),
-		colly.CacheDir(collectorCacheDir), // Cache responses to prevent multiple download of pages even if the collector is restarted
+		colly.CacheDir("./shared/cache/collector"), // Cache responses to prevent multiple download of pages even if the collector is restarted
 	)
 
 	c.Limit(&colly.LimitRule{
@@ -74,12 +72,7 @@ func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
 		collector.AllowedDomains = appConfig.AllowedDomains
 	}
 
-	if appConfig.App.DashboardMode {
-		enableUI = true
-	}
-
 	if appConfig.App.VerboseMode {
-		enableVerbose = true
 		collector = addCollectorVerboseEvents(collector)
 	}
 
@@ -95,26 +88,26 @@ func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
 		collector.IgnoreRobotsTxt = true
 	}
 
-	if appConfig.CacheDir != "" {
-		collector.CacheDir = collectorCacheDir
+	if appConfig.Collector.Cache.Directory != "" {
+		collector.CacheDir = appConfig.Collector.Cache.Directory
 	}
 
-	if appConfig.Crawler.CurrentMode == "async" {
-		collectorMode = "async"
+	if appConfig.Collector.CurrentMode == "async" {
+
 		collector.Async = true
 
 		collectorLimits := &colly.LimitRule{}
-		if appConfig.Crawler.Modes.Async.DomainGlob != "" {
-			collectorLimits.DomainGlob = appConfig.Crawler.Modes.Async.DomainGlob
+		if appConfig.Collector.Modes.Async.DomainGlob != "" {
+			collectorLimits.DomainGlob = appConfig.Collector.Modes.Async.DomainGlob
 		}
-		if appConfig.Crawler.Modes.Async.Parallelism > 0 {
-			collectorLimits.Parallelism = appConfig.Crawler.Modes.Async.Parallelism
+		if appConfig.Collector.Modes.Async.Parallelism > 0 {
+			collectorLimits.Parallelism = appConfig.Collector.Modes.Async.Parallelism
 		} else {
 			collectorLimits.Parallelism = runtime.NumCPU()
 		}
 
-		if appConfig.Crawler.Modes.Async.RandomDelay > 0 {
-			collectorLimits.RandomDelay = appConfig.Crawler.Modes.Async.RandomDelay * time.Second
+		if appConfig.Collector.Modes.Async.RandomDelay > 0 {
+			collectorLimits.RandomDelay = appConfig.Collector.Modes.Async.RandomDelay * time.Second
 		}
 		collector.Limit(collectorLimits)
 	}
@@ -146,9 +139,6 @@ func newCollectorLimits(domain *string, parallelism *int, delay *time.Duration) 
 		}
 	}
 
-	// Limit the number of threads started by colly to two
-	// when visiting links which domains' matches "*httpbin.*" glob
-	// c.Limit(collectorLimitConfig)
 	return collectorLimitConfig
 }
 
@@ -167,13 +157,12 @@ func addCollectorVerboseEvents(scraper *colly.Collector) *colly.Collector {
 
 func addCollectorEvents(scraper *colly.Collector) *colly.Collector {
 	scraper.OnResponse(func(r *colly.Response) {
-		// log.Infoln("[REQUEST] url=", r.Request.URL.String())
-		if !enableUI && scraper.IsDebug() {
+		if !appConfig.App.DashboardMode {
 			log.Infoln("[REQUEST] url=", r.Request.URL.String())
 		} else {
 			collectorResponseMetrics <- metric.Response{
-				URL:             *r.Request.URL, //.String(), //*r.Request.URL,
-				NumberOfWorkers: collectorQueueThreads,
+				URL:             *r.Request.URL,
+				NumberOfWorkers: appConfig.Collector.Modes.Queue.WorkersCount,
 				ResponseSize:    r.GetSize(),
 				StatusCode:      r.GetStatusCode(),
 				StartTime:       r.GetStartTime(),
@@ -184,14 +173,13 @@ func addCollectorEvents(scraper *colly.Collector) *colly.Collector {
 	})
 
 	scraper.OnError(func(r *colly.Response, e error) {
-		// log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
-		if !enableUI && scraper.IsDebug() {
+		if !appConfig.App.DashboardMode {
 			log.Println("[ERROR] msg=", e, ", url=", r.Request.URL, ", body=", string(r.Body))
 		} else {
 			collectorResponseMetrics <- metric.Response{
 				Err:             e,
 				URL:             *r.Request.URL,
-				NumberOfWorkers: collectorQueueThreads,
+				NumberOfWorkers: appConfig.Collector.Modes.Queue.WorkersCount,
 				ResponseSize:    r.GetSize(),
 				StatusCode:      r.GetStatusCode(),
 				StartTime:       r.GetStartTime(),

@@ -4,13 +4,25 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	cmap "github.com/sniperkit/colly/plugins/data/structure/map/multi" // Concurrent multi-map
 )
 
-var stats Statistics
+var (
+	stats                          Statistics
+	statsConcurrentMap             *cmap.ConcurrentMap             // concurrent map
+	statsShardedConcurrentMap      *cmap.ShardedConcurrentMap      // concurrent map with shards. (Default: 16)
+	statsConcurrentMultiMap        *cmap.ConcurrentMultiMap        // concurrent multi-map
+	statsShardedConcurrentMultiMap *cmap.ShardedConcurrentMultiMap // concurrent multi-map with shards
+)
 
 func InitStatsCollector() {
+
 	stats = Statistics{
 		lock: sync.RWMutex{},
+		// concurrent maps
+		cLogMessages: cmap.NewConcurrentMap(),
+		cLogFilters:  cmap.NewConcurrentMap(),
 		// counters
 		numberOfRequestsByStatusCode:  make(map[int]int),
 		numberOfRequestsByContentType: make(map[string]int),
@@ -19,24 +31,6 @@ func InitStatsCollector() {
 		listOfResponsesStatusCodes:    make(map[string]int),
 		listOfResponsesFiltersMatches: make(map[string]int),
 	}
-}
-
-func NewStatsCollector() *Statistics {
-	stats := &Statistics{
-		lock: sync.RWMutex{},
-		// counters
-		numberOfRequestsByStatusCode:  make(map[int]int),
-		numberOfRequestsByContentType: make(map[string]int),
-		// top lists
-		listOfResponsesContentTypes:   make(map[string]int),
-		listOfResponsesStatusCodes:    make(map[string]int),
-		listOfResponsesFiltersMatches: make(map[string]int),
-	}
-	return stats
-}
-
-func (s *Statistics) UpdateStatistics(r Response) {
-	go s.Add(r)
 }
 
 func UpdateStatistics(r Response) {
@@ -49,6 +43,11 @@ type Statistics struct {
 	rawResults  []Response
 	snapShots   []Snapshot
 	logMessages []string
+	logFilters  []string
+
+	// Test
+	cLogMessages *cmap.ConcurrentMap
+	cLogFilters  *cmap.ConcurrentMap
 
 	startTime time.Time
 	endTime   time.Time
@@ -68,6 +67,27 @@ type Statistics struct {
 	listOfResponsesFiltersMatches map[string]int
 
 	totalSizeInBytes int
+}
+
+func NewStatsCollector() *Statistics {
+	stats := &Statistics{
+		lock: sync.RWMutex{},
+		// concurrent maps
+		cLogMessages: cmap.NewConcurrentMap(),
+		cLogFilters:  cmap.NewConcurrentMap(),
+		// counters
+		numberOfRequestsByStatusCode:  make(map[int]int),
+		numberOfRequestsByContentType: make(map[string]int),
+		// top lists
+		listOfResponsesContentTypes:   make(map[string]int),
+		listOfResponsesStatusCodes:    make(map[string]int),
+		listOfResponsesFiltersMatches: make(map[string]int),
+	}
+	return stats
+}
+
+func (s *Statistics) UpdateStatistics(r Response) {
+	go s.Add(r)
 }
 
 func (s *Statistics) Add(r Response) Snapshot {
@@ -140,6 +160,9 @@ func (s *Statistics) Add(r Response) Snapshot {
 
 	// log messages
 	s.logMessages = append(s.logMessages, r.String())
+
+	// filtering messages
+	// s.logFilters = append(s.logFilters, r.String())
 
 	// create a snapshot
 	snapShot := Snapshot{

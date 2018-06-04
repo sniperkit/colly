@@ -41,6 +41,7 @@ type CollectorConfig struct {
 
 	// App
 	App struct {
+
 		// ID is the unique identifier of a collector
 		ID uint32 `default:"colly" json:"identifier" yaml:"identifier" toml:"identifier" xml:"identifier" ini:"identifier" csv:"identifier"`
 
@@ -53,15 +54,66 @@ type CollectorConfig struct {
 		// VerboseMode
 		VerboseMode bool `default:"false" json:"verbose" yaml:"verbose" toml:"verbose" xml:"verboseMode" ini:"verboseMode" csv:"VerboseMode"`
 
-		//////////////////////////////////////////////////
-		///// Dashboard TUI (terminal ui only)
-		//////////////////////////////////////////////////
-
 		// IsDashboard
 		DashboardMode bool `default:"true" json:"dashboard" yaml:"dashboard" toml:"dashboard" xml:"dashboard" ini:"dashboardMode" csv:"dashboardMode"`
 	} `json:"app" yaml:"app" toml:"app" xml:"app" ini:"app" csv:"App"`
 
-	Crawler struct {
+	// Debug
+	Debug struct {
+
+		// Config
+		Config struct {
+
+			// LoadVerbose
+			LoadVerbose bool `default:"false" json:"load_verbose" yaml:"load_verbose" toml:"load_verbose" xml:"loadVerbose" ini:"loadVerbose" csv:"LoadVerbose"`
+
+			// LoadDebug
+			LoadDebug bool `default:"false" json:"load_debug" yaml:"load_debug" toml:"load_debug" xml:"loadDebug" ini:"loadDebug" csv:"LoadDebug"`
+
+			// Disabled
+			ExportDisabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+			// ExportSections
+			ExportSections []string `json:"export_sections" yaml:"export_sections" toml:"export_sections" xml:"ExportSections" ini:"ExportSections" csv:"ExportSections"`
+
+			// ExportSchemaOnly
+			ExportSchemaOnly bool `default:"false" json:"export_schema_only" yaml:"export_schema_only" toml:"export_schema_only" xml:"exportSchemaOnly" ini:"exportSchemaOnly" csv:"ExportSchemaOnly"`
+
+			// ExportPrefixPath
+			ExportPrefixPath string `default:"./shared/exports/config/dump" json:"export_prefix_path" yaml:"export_prefix_path" toml:"export_prefix_path" xml:"exportPrefixPath" ini:"exportPrefixPath" csv:"ExportPrefixPath"`
+
+			// ExportFormat
+			ExportFormat []string `json:"export_formats" yaml:"export_formats" toml:"export_formats" xml:"exportFormats" ini:"exportFormats" csv:"ExportFormats"`
+		} `json:"config" yaml:"config" toml:"config" xml:"config" ini:"config" csv:"Config"`
+
+		// Tachymeter
+		Tachymeter struct {
+
+			// Disabled
+			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+			// Disabled
+			Async bool `default:"false" json:"async" yaml:"async" toml:"async" xml:"async" ini:"async" csv:"Async"`
+
+			// SampleSize
+			SampleSize int `default:"50" json:"sample_size" yaml:"sample_size" toml:"sample_size" xml:"sampleSize" ini:"sampleSize" csv:"SampleSize"`
+
+			// HistogramBins
+			HistogramBins int `default:"10" json:"histogram_bins" yaml:"histogram_bins" toml:"histogram_bins" xml:"histogramBins" ini:"histogramBins" csv:"HistogramBins"`
+
+			// Export
+			Export *ExportConfig `json:"export" yaml:"export" toml:"export" xml:"export" ini:"export" csv:"Export"`
+		}
+	} `json:"debug" yaml:"debug" toml:"debug" xml:"debug" ini:"debug" csv:"Debug"`
+
+	//////////////////////////////////////////////////
+	///// collector params
+	//////////////////////////////////////////////////
+
+	Collector struct {
+
+		// RootURL
+		RootURL string `required:"true" json:"root_url" yaml:"root_url" toml:"root_url" xml:"rootURL" ini:"rootURL" csv:"RootURL"`
 
 		// UserAgent is the User-Agent string used by HTTP requests
 		UserAgent string `default:"colly - https://github.com/sniperkit/colly" json:"user_agent" yaml:"user_agent" toml:"user_agent" xml:"userAgent" ini:"userAgent" csv:"userAgent"`
@@ -85,74 +137,142 @@ type CollectorConfig struct {
 
 		// Modes
 		Modes struct {
+
+			// Default
 			Default struct {
+				// RandomDelay
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`
 			} `json:"default" yaml:"default" toml:"default" xml:"default" ini:"default" csv:"default"`
+
 			// Async
 			Async struct {
-				Parallelism int           `default:"2" json:"parallelism" yaml:"parallelism" toml:"parallelism" xml:"parallelism" ini:"parallelism" csv:"Parallelism"`
-				DomainGlob  string        `default:"*" json:"domain_glob" yaml:"domain_glob" toml:"domain_glob" xml:"domainGlob" ini:"domainGlob" csv:"DomainGlob"`
+
+				// Parallelism
+				Parallelism int `default:"2" json:"parallelism" yaml:"parallelism" toml:"parallelism" xml:"parallelism" ini:"parallelism" csv:"Parallelism"`
+
+				// DomainGlob
+				DomainGlob string `default:"*" json:"domain_glob" yaml:"domain_glob" toml:"domain_glob" xml:"domainGlob" ini:"domainGlob" csv:"DomainGlob"`
+
+				// RandomDelay
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`
-				MaxQueue    int           `default:"10000" json:"max_queue" yaml:"max_queue" toml:"max_queue" xml:"maxQueue" ini:"maxQueue" csv:"MaxQueue"`
+
+				// MaxSize
+				MaxSize int `default:"10000" json:"max_size" yaml:"max_size" toml:"max_size" xml:"maxSize" ini:"maxSize" csv:"MaxSize"`
 			} `json:"async" yaml:"async" toml:"async" xml:"async" ini:"async" csv:"async"`
+
 			// Queue
 			Queue struct {
-				Workers     int           `default:"2" json:"workers" yaml:"workers" toml:"workers" xml:"workers" ini:"workers" csv:"Workers"`
-				MaxQueue    int           `default:"10000" json:"max_queue" yaml:"max_queue" toml:"max_queue" xml:"maxQueue" ini:"maxQueue" csv:"MaxQueue"`
+
+				// Workers
+				WorkersCount int `default:"2" json:"workers_count" yaml:"workers_count" toml:"workers_count" xml:"workersCount" ini:"workersCount" csv:"WorkersCount"`
+
+				// MaxSize
+				MaxSize int `default:"10000" json:"max_size" yaml:"max_size" toml:"max_size" xml:"maxSize" ini:"maxSize" csv:"MaxSize"`
+
+				// RandomDelay
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`
 			} `json:"queue" yaml:"queue" toml:"queue" xml:"queue" ini:"queue" csv:"queue"`
 		} `json:"modes" yaml:"modes" toml:"modes" xml:"modes" ini:"modes" csv:"modes"`
 
 		// Cache
 		Cache struct {
+
 			// Enabled          bool     `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
-			Disabled bool   `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
-			Backend  string `default:"inMemory" json:"backend" yaml:"backend" toml:"backend" xml:"backend" ini:"backend" csv:"backend"`
+			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+			// Backend
+			Backend string `default:"inMemory" json:"backend" yaml:"backend" toml:"backend" xml:"backend" ini:"backend" csv:"backend"`
+
 			// CacheDir specifies a location where GET requests are cached as files.  When it"s not defined, caching is disabled.
-			CustomDir string `default:"./shared/storage/cache/http/backends/internal" json:"custom_dir" yaml:"custom_dir" toml:"custom_dir" xml:"custom_dir" ini:"custom_dir" csv:"custom_dir"`
+			Directory string `default:"./shared/storage/cache/http/backends/internal" json:"dir" yaml:"dir" toml:"dir" xml:"dir" ini:"dir" csv:"dir"`
 		} `json:"cache" yaml:"cache" toml:"cache" xml:"cache" ini:"cache" csv:"cache"`
 
 		// Transport
 		Transport struct {
+
+			// Disabled
 			Disabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
-			Http     struct {
+
+			// Http
+			Http struct {
+
+				// Cache
 				Cache struct {
-					Disabled bool           `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
-					Backend  string         `default:"badger" json:"backend" yaml:"backend" toml:"backend" xml:"backend" ini:"backend" csv:"backend"`
-					TTL      string         `default:"ttl" json:"ttl" yaml:"ttl" toml:"ttl" xml:"ttl" ini:"ttl" csv:"TTL"`
-					Store    []*StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
+
+					// Disabled
+					Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+					// Backend
+					Backend string `default:"badger" json:"backend" yaml:"backend" toml:"backend" xml:"backend" ini:"backend" csv:"backend"`
+
+					// TTL
+					TTL string `default:"ttl" json:"ttl" yaml:"ttl" toml:"ttl" xml:"ttl" ini:"ttl" csv:"TTL"`
+
+					// Store
+					Store StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
 				} `json:"cache" yaml:"cache" toml:"cache" xml:"cache" ini:"cache" csv:"cache"`
+
+				// Stats
 				Stats struct {
-					Disabled bool           `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
-					Client   string         `default:"" json:"client" yaml:"client" toml:"client" xml:"client" ini:"client" csv:"client"`
-					Store    []*StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
+
+					// Disabled
+					Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+					// Client
+					Client string `default:"" json:"client" yaml:"client" toml:"client" xml:"client" ini:"client" csv:"client"`
+
+					// Store
+					Store StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
 				} `json:"stats" yaml:"stats" toml:"stats" xml:"stats" ini:"stats" csv:"stats"`
 			} `json:"http" yaml:"http" toml:"http" xml:"http" ini:"http" csv:"http"`
 		} `json:"transport" yaml:"transport" toml:"transport" xml:"transport" ini:"transport" csv:"transport"`
 
 		// Proxy
 		Proxy struct {
-			// Enabled          bool     `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
-			Disabled         bool     `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
-			FetchRemoteList  bool     `default:"true" json:"fetch_remote_list" yaml:"fetch_remote_list" toml:"fetch_remote_list" xml:"fetchRemoteList" ini:"fetchRemoteList" csv:"FetchRemoteList"`
-			PoolMode         bool     `default:"true" json:"pool_mode" yaml:"pool_mode" toml:"pool_mode" xml:"poolMode" ini:"poolMode" csv:"PoolMode"`
+
+			// Disabled
+			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+			// FetchRemoteList
+			FetchRemoteList bool `default:"true" json:"fetch_remote_list" yaml:"fetch_remote_list" toml:"fetch_remote_list" xml:"fetchRemoteList" ini:"fetchRemoteList" csv:"FetchRemoteList"`
+
+			// PoolMode
+			PoolMode bool `default:"true" json:"pool_mode" yaml:"pool_mode" toml:"pool_mode" xml:"poolMode" ini:"poolMode" csv:"PoolMode"`
+
+			// AllowedProtocols
 			AllowedProtocols []string `json:"allowed_protocols" yaml:"allowed_protocols" toml:"allowed_protocols" xml:"allowedProtocols" ini:"allowedProtocols" csv:"AllowedProtocols"`
-			List             []string `json:"list" yaml:"list" toml:"list" xml:"list" ini:"list" csv:"list"`
+
+			// List
+			List []string `json:"list" yaml:"list" toml:"list" xml:"list" ini:"list" csv:"list"`
 		} `json:"proxy" yaml:"proxy" toml:"proxy" xml:"proxy" ini:"proxy" csv:"proxy"`
 
 		// Sitemap
 		Sitemap struct {
-			// Enabled          bool     `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
-			Disabled   bool   `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
-			URL        string `json:"url" yaml:"url" toml:"url" xml:"url" ini:"URL" csv:"URL"`
-			AutoDetect bool   `default:"false" json:"auto_detect" yaml:"auto_detect" toml:"auto_detect" xml:"autoDetect" ini:"autoDetect" csv:"AutoDetect"`
-			LimitURLs  int    `default:"0" json:"limit_urls" yaml:"limit_urls" toml:"limit_urls" xml:"limitURLs" ini:"limitURLs" csv:"limitURLs"`
+
+			// Disabled
+			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+			// URL
+			URL string `json:"url" yaml:"url" toml:"url" xml:"url" ini:"URL" csv:"URL"`
+
+			// AutoDetect
+			AutoDetect bool `default:"false" json:"auto_detect" yaml:"auto_detect" toml:"auto_detect" xml:"autoDetect" ini:"autoDetect" csv:"AutoDetect"`
+
+			// LimitURLs
+			LimitURLs int `default:"0" json:"limit_urls" yaml:"limit_urls" toml:"limit_urls" xml:"limitURLs" ini:"limitURLs" csv:"limitURLs"`
 		} `json:"sitemap" yaml:"sitemap" toml:"sitemap" xml:"sitemap" ini:"sitemap" csv:"sitemap"`
-	} `json:"crawler" yaml:"crawler" toml:"crawler" xml:"crawler" ini:"crawler" csv:"crawler"`
+	} `json:"collector" yaml:"collector" toml:"collector" xml:"collector" ini:"collector" csv:"collector"`
+
+	//////////////////////////////////////////////////
+	///// response filters
+	//////////////////////////////////////////////////
 
 	// Filters
 	Filters struct {
+
+		// Response
 		Response struct {
+
 			// ParseHTTPErrorResponse allows parsing HTTP responses with non 2xx status codes.
 			// By default, Colly parses only successful HTTP responses. Set ParseHTTPErrorResponse to true to enable it.
 			ParseHTTPErrorResponse bool `default:"true" json:"parse_http_error_response" yaml:"parse_http_error_response" toml:"parse_http_error_response" xml:"parseHTTPErrorResponse" ini:"parseHTTPErrorResponse" csv:"parseHTTPErrorResponse"`
@@ -172,38 +292,77 @@ type CollectorConfig struct {
 			MaxBodySize int `default:"0" json:"max_body_size" yaml:"max_body_size" toml:"max_body_size" xml:"maxBodySize" ini:"maxBodySize" csv:"maxBodySize"`
 		} `json:"response" yaml:"response" toml:"response" xml:"response" ini:"response" csv:"Response"`
 
+		// Blacklists
 		Blacklists struct {
-			Domains    []*DomainConfig `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
-			URLs       []*FilterConfig `json:"urls" yaml:"urls" toml:"urls" xml:"urls" ini:"urls" csv:"urls"`
-			Extensions []string        `json:"extensions" yaml:"extensions" toml:"extensions" xml:"extensions" ini:"extensions" csv:"Extensions"`
-			Headers    []*FilterConfig `json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers" csv:"headers"`
-			MimeTypes  []string        `json:"mime_types" yaml:"mime_types" toml:"mime_types" xml:"mimeTypes" ini:"mimeTypes" csv:"MimeTypes"`
-			Responses  []*FilterConfig `json:"responses" yaml:"responses" toml:"responses" xml:"responses" ini:"responses" csv:"responses"`
+
+			// Domains
+			Domains []*DomainConfig `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
+
+			// URLs
+			URLs []*FilterConfig `json:"urls" yaml:"urls" toml:"urls" xml:"urls" ini:"urls" csv:"urls"`
+
+			// Extensions
+			Extensions []string `json:"extensions" yaml:"extensions" toml:"extensions" xml:"extensions" ini:"extensions" csv:"Extensions"`
+
+			// Headers
+			Headers []*FilterConfig `json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers" csv:"headers"`
+
+			// MimeTypes
+			MimeTypes []string `json:"mime_types" yaml:"mime_types" toml:"mime_types" xml:"mimeTypes" ini:"mimeTypes" csv:"MimeTypes"`
+
+			// Responses
+			Responses []*FilterConfig `json:"responses" yaml:"responses" toml:"responses" xml:"responses" ini:"responses" csv:"responses"`
 		} `json:"blacklists" yaml:"blacklists" toml:"blacklists" xml:"blackLists" ini:"blackLists" csv:"BlackLists"`
 
+		// Whitelists
 		Whitelists struct {
-			Domains    []*DomainConfig `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
-			URLs       []*FilterConfig `json:"urls" yaml:"urls" toml:"urls" xml:"urls" ini:"urls" csv:"urls"`
-			Extensions []string        `json:"extensions" yaml:"extensions" toml:"extensions" xml:"extensions" ini:"extensions" csv:"Extensions"`
-			Headers    []*FilterConfig `json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers" csv:"headers"`
-			MimeTypes  []string        `json:"mime_types" yaml:"mime_types" toml:"mime_types" xml:"mimeTypes" ini:"mimeTypes" csv:"MimeTypes"`
-			Responses  []*FilterConfig `json:"responses" yaml:"responses" toml:"responses" xml:"responses" ini:"responses" csv:"responses"`
+
+			// Domains
+			Domains []*DomainConfig `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
+
+			// URLs
+			URLs []*FilterConfig `json:"urls" yaml:"urls" toml:"urls" xml:"urls" ini:"urls" csv:"urls"`
+
+			// Extensions
+			Extensions []string `json:"extensions" yaml:"extensions" toml:"extensions" xml:"extensions" ini:"extensions" csv:"Extensions"`
+
+			// Headers
+			Headers []*FilterConfig `json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers" csv:"headers"`
+
+			// MimeTypes
+			MimeTypes []string `json:"mime_types" yaml:"mime_types" toml:"mime_types" xml:"mimeTypes" ini:"mimeTypes" csv:"MimeTypes"`
+
+			// Responses
+			Responses []*FilterConfig `json:"responses" yaml:"responses" toml:"responses" xml:"responses" ini:"responses" csv:"responses"`
 		} `json:"whitelists" yaml:"whitelists" toml:"whitelists" xml:"whiteLists" ini:"whiteLists" csv:"Whitelists"`
 	} `json:"filters" yaml:"filters" toml:"filters" xml:"filters" ini:"filters" csv:"filters"`
 
+	//////////////////////////////////////////////////
+	///// data collection
+	//////////////////////////////////////////////////
+
+	// Collection
 	Collection struct {
-		Disabled  bool              `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+		// Disabled
+		Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+
+		// Databooks
 		Databooks []*DatabookConfig `json:"databooks" yaml:"databooks" toml:"databooks" xml:"databooks" ini:"databooks" csv:"databooks"`
-		Datasets  []*DatasetConfig  `json:"datasets" yaml:"datasets" toml:"datasets" xml:"datasets" ini:"datasets" csv:"datasets"`
+
+		// Datasets
+		Datasets []*DatasetConfig `json:"datasets" yaml:"datasets" toml:"datasets" xml:"datasets" ini:"datasets" csv:"datasets"`
 	} `json:"collection" yaml:"collection" toml:"collection" xml:"collection" ini:"collection" csv:"collection"`
 
 	// Stores struct {} `json:"stores" yaml:"stores" toml:"stores" xml:"stores" ini:"stores" csv:"stores"`
 
 	//////////////////////////////////////////////////
-	///// Outputs parameters
+	///// Output directories params
 	//////////////////////////////////////////////////
 
+	// Dirs
 	Dirs struct {
+
 		// XDGBaseDir
 		XDGBaseDir string `json:"xdg_base_dir" yaml:"xdg_base_dir" toml:"xdg_base_dir" xml:"xdgBaseDir" ini:"xdgBaseDir" csv:"XDGBaseDir"`
 

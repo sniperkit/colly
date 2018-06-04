@@ -1,0 +1,48 @@
+---
+filters:
+
+  response:
+    parse_http_error_response: false
+    detect_charset: true
+    detect_mime_type: true
+    detect_tabular_data: false
+    max_body_size: 0
+
+  blacklists:
+    domains: []
+    urls:
+    - "(.*)?sort=$"
+    extensions: []
+    headers: []
+    mime_types: []
+    responses: []
+
+  whitelists:
+    domains:
+    - golanglibs.com
+    - golanglibs.com:443
+    urls:
+    - "^/?page=([0-9])+$"
+    - "^/top$"
+    - "^/categories$"
+    - "^/random$"
+    - "^/active$"
+    - "^/tagged$"
+    - "^/repo/$"
+    - "^/category/$"
+    - "^/tag/$"
+    - "^/similar/$"
+    - "^(.*)/?page=([0-9])+$"
+    - "^(.*)/top$"
+    - "^(.*)/categories$"
+    - "^(.*)/random$"
+    - "^(.*)/active$"
+    - "^(.*)/tagged$"
+    - "^(.*)/repo/$"
+    - "^(.*)/category/$"
+    - "^(.*)/tag/$"
+    - "^(.*)/similar/$"
+    extensions: []
+    headers: []
+    mime_types: []
+    responses: []

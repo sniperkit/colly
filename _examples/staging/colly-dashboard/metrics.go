@@ -25,13 +25,12 @@ import (
 // stats - tachymeter params
 var (
 	startedAt            time.Time
-	isTachymeter         bool = true
-	isTachymeterParallel bool = false
 	wallTimeStart        time.Time
 	cTachymeter          chan *tachymeter.Tachymeter
 	xTachy               *tachymeter.Tachymeter
 	xTachyResults        *tachymeter.Metrics
 	xTachyTimeline       tachymeter.Timeline
+	isTachymeterParallel bool
 )
 
 // stats - dashboard
@@ -56,30 +55,30 @@ var (
 
 func initTachymeter() {
 	// Create a Tachymeter
-	if isTachymeter {
+	if !appConfig.Debug.Tachymeter.Disabled {
 		cTachymeter = make(chan *tachymeter.Tachymeter)
 		xTachyTimeline = tachymeter.Timeline{}
 		xTachy = tachymeter.New(
 			&tachymeter.Config{
 				// Tachymeter
-				SafeMode:   true, // deprecated
-				SampleSize: 50,
-				HBins:      10,
+				SampleSize: appConfig.Debug.Tachymeter.SampleSize,
+				HBins:      appConfig.Debug.Tachymeter.HistogramBins,
 				Export: &tachymeter.Export{
 					// Exports
-					Encoding:   "tsv",
-					Basename:   "golanglibs_tachymter_%d",
-					PrefixPath: "./shared/exports/stats/tachymeter/",
-					SplitLimit: 2500,
-					BufferSize: 20000,
-					Overwrite:  true,
-					BackupMode: true,
+					Encoding:   appConfig.Debug.Tachymeter.Export.Encoding,
+					Basename:   appConfig.Debug.Tachymeter.Export.Basename,
+					PrefixPath: appConfig.Debug.Tachymeter.Export.PrefixPath,
+					SplitLimit: appConfig.Debug.Tachymeter.Export.SplitAt,
+					BufferSize: appConfig.Debug.Tachymeter.Export.BufferSize,
+					Overwrite:  appConfig.Debug.Tachymeter.Export.Overwrite,
+					BackupMode: appConfig.Debug.Tachymeter.Export.BackupMode,
 				},
 			},
 		)
-		if collectorMode == "async" || collectorMode == "queue" {
+		if appConfig.Collector.CurrentMode == "async" || appConfig.Collector.CurrentMode == "queue" {
+			appConfig.Debug.Tachymeter.Async = true
 			wallTimeStart = time.Now()
-			isTachymeterParallel = true
+			// isTachymeterParallel = true
 		}
 	}
 }
@@ -104,9 +103,9 @@ func newTachymeterWithConfig(cfg *tachymeter.Config) *tachymeter.Tachymeter {
 			},
 		},
 	)
-	if collectorMode == "async" || collectorMode == "queue" {
+	if appConfig.Collector.CurrentMode == "async" || appConfig.Collector.CurrentMode == "queue" {
 		wallTimeStart = time.Now()
-		isTachymeterParallel = true
+		appConfig.Debug.Tachymeter.Async = true
 	}
 	return newTachymeter
 }

@@ -9,7 +9,6 @@ import (
 )
 
 var (
-	enableUI                     bool = false
 	stopTheUI                    chan bool
 	stopTheCrawler               chan bool
 	allURLsHaveBeenVisited       chan bool

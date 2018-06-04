@@ -5,9 +5,9 @@ import (
 )
 
 type MetricCollector struct {
-	Pause       bool `default:'true'`
-	DebugMode   bool `default:'true'`
-	VerboseMode bool `default:'true'`
+	Pause       bool `default:"true"`
+	DebugMode   bool `default:"true"`
+	VerboseMode bool `default:"true"`
 	Payload     string
 	wg          *sync.WaitGroup
 	lock        *sync.RWMutex
