@@ -14,7 +14,8 @@ import (
 
 	toml "github.com/BurntSushi/toml"
 	ini "github.com/go-ini/ini"
-	yaml "gopkg.in/yaml.v2"
+	// yaml "gopkg.in/yaml.v2"
+	yaml "github.com/go-yaml/yaml"
 
 	pp "github.com/sniperkit/xutil/plugin/debug/pp"
 )
@@ -104,8 +105,10 @@ func processFile(config interface{}, file string, errorOnUnmatchedKeys bool) err
 	switch {
 	case strings.HasSuffix(file, ".yaml") || strings.HasSuffix(file, ".yml"):
 		if errorOnUnmatchedKeys {
+			fmt.Println("switch.yaml.UnmarshalStrict().errorOnUnmatchedKeys=", errorOnUnmatchedKeys)
 			return yaml.UnmarshalStrict(data, config)
 		}
+		fmt.Println("switch.yaml.Unmarshal().errorOnUnmatchedKeys=", errorOnUnmatchedKeys)
 		return yaml.Unmarshal(data, config)
 
 	case strings.HasSuffix(file, ".toml"):
@@ -133,6 +136,8 @@ func processFile(config interface{}, file string, errorOnUnmatchedKeys bool) err
 		if errorOnUnmatchedKeys {
 			yamlError = yaml.UnmarshalStrict(data, config)
 		} else {
+			fmt.Println("default.yaml.UnmarshalStrict().errorOnUnmatchedKeys=", errorOnUnmatchedKeys)
+			fmt.Println("default.yaml.Unmarshal().errorOnUnmatchedKeys=", errorOnUnmatchedKeys)
 			yamlError = yaml.Unmarshal(data, config)
 		}
 

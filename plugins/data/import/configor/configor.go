@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+
+	// helpers
+	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 type Configor struct {
@@ -68,8 +71,9 @@ func (configor *Configor) GetErrorOnUnmatchedKeys() bool {
 // Load will unmarshal configurations to struct from files that you provide
 func (configor *Configor) Load(config interface{}, files ...string) error {
 	defer func() {
-		if configor.Config.Debug || configor.Config.Verbose {
-			fmt.Printf("Configuration:\n  %#v\n", config)
+		if configor.Config.Debug {
+			pp.Println("Configuration:", config)
+			// fmt.Printf("Configuration:\n  %#v\n", config)
 		}
 	}()
 
@@ -78,6 +82,7 @@ func (configor *Configor) Load(config interface{}, files ...string) error {
 			fmt.Printf("Loading configurations from file '%v'...\n", file)
 		}
 		if err := processFile(config, file, configor.GetErrorOnUnmatchedKeys()); err != nil {
+			fmt.Println("error: ", err, "file:", file, "unmatchedKeys:", configor.GetErrorOnUnmatchedKeys())
 			return err
 		}
 	}

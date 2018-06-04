@@ -54,33 +54,36 @@ var (
 )
 
 func initTachymeter() {
+
 	// Create a Tachymeter
-	if !appConfig.Debug.Tachymeter.Disabled {
-		cTachymeter = make(chan *tachymeter.Tachymeter)
-		xTachyTimeline = tachymeter.Timeline{}
-		xTachy = tachymeter.New(
-			&tachymeter.Config{
-				// Tachymeter
-				SampleSize: appConfig.Debug.Tachymeter.SampleSize,
-				HBins:      appConfig.Debug.Tachymeter.HistogramBins,
-				Export: &tachymeter.Export{
-					// Exports
-					Encoding:   appConfig.Debug.Tachymeter.Export.Encoding,
-					Basename:   appConfig.Debug.Tachymeter.Export.Basename,
-					PrefixPath: appConfig.Debug.Tachymeter.Export.PrefixPath,
-					SplitLimit: appConfig.Debug.Tachymeter.Export.SplitAt,
-					BufferSize: appConfig.Debug.Tachymeter.Export.BufferSize,
-					Overwrite:  appConfig.Debug.Tachymeter.Export.Overwrite,
-					BackupMode: appConfig.Debug.Tachymeter.Export.BackupMode,
-				},
+	cTachymeter = make(chan *tachymeter.Tachymeter)
+	xTachyTimeline = tachymeter.Timeline{}
+	xTachy = tachymeter.New(
+		&tachymeter.Config{
+			// Tachymeter
+			SampleSize: appConfig.Debug.Tachymeter.SampleSize,
+			HBins:      appConfig.Debug.Tachymeter.HistogramBins,
+			Export: &tachymeter.Export{
+				// Exports
+				Encoding:   appConfig.Debug.Tachymeter.Export.Encoding,
+				Basename:   appConfig.Debug.Tachymeter.Export.Basename,
+				PrefixPath: appConfig.Debug.Tachymeter.Export.PrefixPath,
+				SplitLimit: appConfig.Debug.Tachymeter.Export.SplitAt,
+				BufferSize: appConfig.Debug.Tachymeter.Export.BufferSize,
+				Overwrite:  appConfig.Debug.Tachymeter.Export.Overwrite,
+				BackupMode: appConfig.Debug.Tachymeter.Export.BackupMode,
 			},
-		)
-		if appConfig.Collector.CurrentMode == "async" || appConfig.Collector.CurrentMode == "queue" {
-			appConfig.Debug.Tachymeter.Async = true
-			wallTimeStart = time.Now()
-			// isTachymeterParallel = true
-		}
+		},
+	)
+
+	switch appConfig.Collector.CurrentMode {
+	case "async":
+		fallthrough
+	case "queue":
+		appConfig.Debug.Tachymeter.Async = true
+		wallTimeStart = time.Now()
 	}
+
 }
 
 func newTachymeterWithConfig(cfg *tachymeter.Config) *tachymeter.Tachymeter {
@@ -103,10 +106,15 @@ func newTachymeterWithConfig(cfg *tachymeter.Config) *tachymeter.Tachymeter {
 			},
 		},
 	)
-	if appConfig.Collector.CurrentMode == "async" || appConfig.Collector.CurrentMode == "queue" {
-		wallTimeStart = time.Now()
+
+	switch appConfig.Collector.CurrentMode {
+	case "async":
+		fallthrough
+	case "queue":
 		appConfig.Debug.Tachymeter.Async = true
+		wallTimeStart = time.Now()
 	}
+
 	return newTachymeter
 }
 

@@ -3,9 +3,9 @@ package main
 import (
 	metric "github.com/sniperkit/colly/pkg/metric"
 	tui "github.com/sniperkit/colly/plugins/app/dashboard/tui/termui"
-	// dash "github.com/sniperkit/colly/plugins/app/dashboard"
-	// cui "github.com/sniperkit/colly/plugins/app/dashboard/tui/gocui"
-	// tvi "github.com/sniperkit/colly/plugins/app/dashboard/tui/tview"
+	// dash "github.com/sniperkit/colly/plugins/app/dashboard" 			// not ready yet
+	// cui "github.com/sniperkit/colly/plugins/app/dashboard/tui/gocui" // not ready yet
+	// tvi "github.com/sniperkit/colly/plugins/app/dashboard/tui/tview" // not ready yet
 )
 
 var (

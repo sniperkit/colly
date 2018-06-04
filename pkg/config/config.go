@@ -22,7 +22,7 @@ var (
 
 // Public variables
 var (
-	AutoLoad bool = true
+	AutoLoad bool = false
 )
 
 func init() {
@@ -56,6 +56,8 @@ type CollectorConfig struct {
 
 		// IsDashboard
 		DashboardMode bool `default:"true" json:"dashboard" yaml:"dashboard" toml:"dashboard" xml:"dashboard" ini:"dashboardMode" csv:"dashboardMode"`
+
+		//-- END
 	} `json:"app" yaml:"app" toml:"app" xml:"app" ini:"app" csv:"App"`
 
 	// Debug
@@ -84,13 +86,15 @@ type CollectorConfig struct {
 
 			// ExportFormat
 			ExportFormat []string `json:"export_formats" yaml:"export_formats" toml:"export_formats" xml:"exportFormats" ini:"exportFormats" csv:"ExportFormats"`
+
+			//-- END
 		} `json:"config" yaml:"config" toml:"config" xml:"config" ini:"config" csv:"Config"`
 
 		// Tachymeter
 		Tachymeter struct {
 
-			// Disabled
-			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+			// Enabled
+			Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
 
 			// Disabled
 			Async bool `default:"false" json:"async" yaml:"async" toml:"async" xml:"async" ini:"async" csv:"Async"`
@@ -103,7 +107,11 @@ type CollectorConfig struct {
 
 			// Export
 			Export ExportConfig `json:"export" yaml:"export" toml:"export" xml:"export" ini:"export" csv:"Export"`
+
+			//-- END
 		}
+
+		//-- END
 	} `json:"debug" yaml:"debug" toml:"debug" xml:"debug" ini:"debug" csv:"Debug"`
 
 	//////////////////////////////////////////////////
@@ -171,7 +179,11 @@ type CollectorConfig struct {
 
 				// RandomDelay
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`
+
+				//-- END
 			} `json:"queue" yaml:"queue" toml:"queue" xml:"queue" ini:"queue" csv:"queue"`
+
+			//-- END
 		} `json:"modes" yaml:"modes" toml:"modes" xml:"modes" ini:"modes" csv:"modes"`
 
 		// Cache
@@ -188,6 +200,8 @@ type CollectorConfig struct {
 
 			// CacheDir specifies a location where GET requests are cached as files.  When it"s not defined, caching is disabled.
 			Directory string `default:"./shared/storage/cache/http/backends/internal" json:"dir" yaml:"dir" toml:"dir" xml:"dir" ini:"dir" csv:"dir"`
+
+			//-- END
 		} `json:"cache" yaml:"cache" toml:"cache" xml:"cache" ini:"cache" csv:"cache"`
 
 		// Transport
@@ -210,6 +224,8 @@ type CollectorConfig struct {
 
 					// Store
 					Store StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
+
+					//-- END
 				} `json:"cache" yaml:"cache" toml:"cache" xml:"cache" ini:"cache" csv:"cache"`
 
 				// Stats
@@ -223,8 +239,14 @@ type CollectorConfig struct {
 
 					// Store
 					Store StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
+
+					//-- END
 				} `json:"stats" yaml:"stats" toml:"stats" xml:"stats" ini:"stats" csv:"stats"`
+
+				//-- END
 			} `json:"http" yaml:"http" toml:"http" xml:"http" ini:"http" csv:"http"`
+
+			//-- END
 		} `json:"transport" yaml:"transport" toml:"transport" xml:"transport" ini:"transport" csv:"transport"`
 
 		// Proxy
@@ -244,13 +266,15 @@ type CollectorConfig struct {
 
 			// List
 			List []string `json:"list" yaml:"list" toml:"list" xml:"list" ini:"list" csv:"list"`
+
+			//-- END
 		} `json:"proxy" yaml:"proxy" toml:"proxy" xml:"proxy" ini:"proxy" csv:"proxy"`
 
 		// Sitemap
 		Sitemap struct {
 
-			// Disabled
-			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+			// Enabled
+			Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
 
 			// URL
 			URL string `json:"url" yaml:"url" toml:"url" xml:"url" ini:"URL" csv:"URL"`
@@ -260,7 +284,11 @@ type CollectorConfig struct {
 
 			// LimitURLs
 			LimitURLs int `default:"0" json:"limit_urls" yaml:"limit_urls" toml:"limit_urls" xml:"limitURLs" ini:"limitURLs" csv:"limitURLs"`
+
+			//-- END
 		} `json:"sitemap" yaml:"sitemap" toml:"sitemap" xml:"sitemap" ini:"sitemap" csv:"sitemap"`
+
+		//-- END
 	} `json:"collector" yaml:"collector" toml:"collector" xml:"collector" ini:"collector" csv:"collector"`
 
 	//////////////////////////////////////////////////
@@ -286,10 +314,13 @@ type CollectorConfig struct {
 
 			// DetectTabular
 			DetectTabular bool `default:"true" json:"detect_tabular_data" yaml:"detect_tabular_data" toml:"detect_tabular_data" xml:"detectTabularData" ini:"detectTabularData" csv:"DetectTabularData"`
+
 			// MaxBodySize is the limit of the retrieved response body in bytes.
 			// 0 means unlimited.
 			// The default value for MaxBodySize is 10MB (10 * 1024 * 1024 bytes).
 			MaxBodySize int `default:"0" json:"max_body_size" yaml:"max_body_size" toml:"max_body_size" xml:"maxBodySize" ini:"maxBodySize" csv:"maxBodySize"`
+
+			//-- END
 		} `json:"response" yaml:"response" toml:"response" xml:"response" ini:"response" csv:"Response"`
 
 		// Blacklists
@@ -334,7 +365,11 @@ type CollectorConfig struct {
 
 			// Responses
 			Responses []FilterConfig `json:"responses" yaml:"responses" toml:"responses" xml:"responses" ini:"responses" csv:"responses"`
+
+			//-- END
 		} `json:"whitelists" yaml:"whitelists" toml:"whitelists" xml:"whiteLists" ini:"whiteLists" csv:"Whitelists"`
+
+		//-- END
 	} `json:"filters" yaml:"filters" toml:"filters" xml:"filters" ini:"filters" csv:"filters"`
 
 	//////////////////////////////////////////////////
@@ -344,14 +379,16 @@ type CollectorConfig struct {
 	// Collection
 	Collection struct {
 
-		// Disabled
-		Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+		// Enabled
+		Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
 
 		// Databooks
 		Databooks []DatabookConfig `json:"databooks" yaml:"databooks" toml:"databooks" xml:"databooks" ini:"databooks" csv:"databooks"`
 
 		// Datasets
 		Datasets []DatasetConfig `json:"datasets" yaml:"datasets" toml:"datasets" xml:"datasets" ini:"datasets" csv:"datasets"`
+
+		//-- END
 	} `json:"collection" yaml:"collection" toml:"collection" xml:"collection" ini:"collection" csv:"collection"`
 
 	// Stores struct {} `json:"stores" yaml:"stores" toml:"stores" xml:"stores" ini:"stores" csv:"stores"`
@@ -384,6 +421,8 @@ type CollectorConfig struct {
 
 		// ForceDirRecursive specifies that the program will try to create missing storage directories recursively.
 		ForceDirRecursive bool `default:"true" json:"force_dir_recursive" yaml:"force_dir_recursive" toml:"force_dir_recursive" xml:"forceDirRecursive" ini:"forceDirRecursive" csv:"ForceDirRecursive"`
+
+		//-- END
 	} `json:"outputs" yaml:"outputs" toml:"outputs" xml:"outputs" ini:"outputs" csv:"outputs"`
 
 	//////////////////////////////////////////////////
@@ -446,36 +485,6 @@ type CollectorConfig struct {
 	// be evaluated before URLFilters
 	// Important: Leave it blank to allow any URLs to be visited
 	URLFilters []*regexp.Regexp `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
-
-	////// Exportable attributes
-
-	// WhitelistDomains is a domain whitelist.
-	// WhitelistDomains []*DomainConfig `json:"whitelist_domains" yaml:"whitelist_domains" toml:"whitelist_domains" xml:"whitelistDomains" ini:"whitelistDomains" csv:"whitelistDomains"`
-
-	// DisallowedDomains is a domain blacklist.
-	// BlacklistDomains []*DomainConfig `json:"blacklist_domains" yaml:"blacklist_domains" toml:"blacklist_domains" xml:"blacklistDomains" ini:"blacklistDomains" csv:"blacklistDomains"`
-
-	// WhitelistURLFilters is a list...
-	// WhitelistURLFilters []*FilterConfig `json:"whitelist_url_filters" yaml:"whitelist_url_filters" toml:"whitelist_url_filters" xml:"whitelistURLFilters" ini:"whitelistURLFilters" csv:"whitelistURLFilters"`
-
-	// BlacklistURLFilters is a list...
-	// BlacklistURLFilters []*FilterConfig `json:"blacklist_url_filters" yaml:"blacklist_url_filters" toml:"blacklist_url_filters" xml:"blacklistURLFilters" ini:"blacklistURLFilters" csv:"blacklistURLFilters"`
-
-	//////////////////////////////////////////////////
-	///// Request - Filtering parameters
-	//////////////////////////////////////////////////
-
-	// WhitelistBodyFilters  is a list...
-	// WhitelistBodyFilters []*FilterConfig `json:"whitelist_body_filters" yaml:"whitelist_body_filters" toml:"whitelist_body_filters" xml:"whitelistBodyFilters" ini:"whitelistBodyFilters" csv:"whitelistBodyFilters"`
-
-	// BlacklistBodyFilters  is a list...
-	// BlacklistBodyFilters []*FilterConfig `json:"blacklist_body_filters" yaml:"blacklist_body_filters" toml:"blacklist_body_filters" xml:"blacklistBodyFilters" ini:"blacklistBodyFilters" csv:"blacklistBodyFilters"`
-
-	// WhitelistBodyFilters  is a list...
-	// WhitelisHeaderFilters []*FilterConfig `json:"whitelist_header_filters" yaml:"whitelist_header_filters" toml:"whitelist_header_filters" xml:"whitelisHeaderFilters" ini:"whitelisHeaderFilters" csv:"whitelisHeaderFilters"`
-
-	// BlacklistBodyFilters  is a list...
-	// BlacklistHeaderFilters []*FilterConfig `json:"blacklist_header_filters" yaml:"blacklist_header_filters" toml:"blacklist_header_filters" xml:"blacklistHeaderFilters" ini:"blacklistHeaderFilters" csv:"blacklistHeaderFilters"`
 
 	// MaxBodySize is the limit of the retrieved response body in bytes.
 	// 0 means unlimited.
@@ -564,7 +573,7 @@ type LimitConfig struct {
 
 //	configor.New(&configor.Config{Debug: true, Verbose: true}).Load(&Config, "config.json")
 
-func NewFromFile(debug, verbose bool, files ...string) (*CollectorConfig, error) {
+func NewFromFile(verbose, debug bool, files ...string) (*CollectorConfig, error) {
 	collectorConfig := &CollectorConfig{}
 	xdgPath, err := getDefaultXDGBaseDirectory()
 	if err != nil {
@@ -572,7 +581,8 @@ func NewFromFile(debug, verbose bool, files ...string) (*CollectorConfig, error)
 	}
 	collectorConfig.XDGBaseDir = xdgPath
 	// configor.Load(&collectorConfig, files...)
-	configor.New(&configor.Config{Debug: debug, Verbose: verbose}).Load(&collectorConfig, files...)
+	// configor.New(&configor.Config{Debug: debug, Verbose: verbose}).Load(&collectorConfig, files...)
+	configor.New(&configor.Config{Debug: debug, Verbose: verbose, ErrorOnUnmatchedKeys: false}).Load(&collectorConfig, files...)
 
 	// if c.DebugMode {}
 	// fmt.Printf("config: %#v", collectorConfig)

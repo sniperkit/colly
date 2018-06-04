@@ -1,0 +1,232 @@
+app:
+  identifier: 1
+  title: "golanglibs.com collector - dashboard"
+  debug: false
+  verbose: false
+  dashboard: true
+debug:
+  config:
+    load_verbose: false
+    load_debug: false
+    export_disabled: false
+    export_sections: []
+    export_schema_only: false
+    export_prefix_path: ""
+    export_formats: []
+  tachymeter:
+    disabled: true
+    async: false
+    sample_size: 0
+    histogram_bins: 0
+    export:
+      disabled: false
+      backup_mode: false
+      backup_suffix: ""
+      backup_prefix: ""
+      overwrite: false
+      encoding: ""
+      format: ""
+      basename: ""
+      split_at: 0
+      buffer_size: 0
+      prefix_path: ""
+      export_dir: ""
+      ensure_dir: false
+      ensure_dir_recursively: false
+collector:
+  root_url: "https://golanglibs.com"
+  user_agent: "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
+  random_user_agent: false
+  max_depth: 0
+  allow_url_revisit: false
+  ignore_robots_txt: false
+  current_mode: "queue"
+  modes:
+    default:
+      random_delay: 0s
+    async:
+      parallelism: 3
+      domain_glob: "*"
+      random_delay: 0s
+      max_size: 0
+    queue:
+      workers_count: 3
+      max_size: 0
+      random_delay: 0s
+  cache:
+    enabled: true
+    disabled: false
+    backend: "inMemory"
+    dir: "./shared/store/cache/inMemory"
+  transport:
+    http:
+      cache:
+        enabled: false
+        backend: ""
+        ttl: ""
+        store:
+          enabled: false
+          domain: ""
+          protocol: ""
+          host: ""
+          port: ""
+          force_ssl: false
+          ssl_verify: false
+      stats:
+        enabled: false
+        client:
+          enabled: false
+          disabled: false
+          client: ""
+          domain: ""
+          protocol: ""
+          host: ""
+          port: ""
+          force_ssl: false
+          ssl_verify: false
+          reconnect: false
+          reconnect_max: 0
+          buffer_size: ""
+          payload: ""
+        store:
+          enabled: false
+          domain: ""
+          protocol: ""
+          host: ""
+          port: ""
+          force_ssl: false
+          ssl_verify: false
+  proxy:
+    enabled: false
+    fetch_remote_list: false
+    pool_mode: false
+    allowed_protocols: []
+    list: []
+  sitemap:
+    enabled: false
+    url: ""
+    auto_detect: false
+    limit_urls: 0
+filters:
+  response:
+    parse_http_error_response: false
+    detect_charset: true
+    detect_mime_type: true
+    detect_tabular_data: false
+    max_body_size: 0
+  blacklists:
+    domains: []
+    urls:
+    - enabled: true
+      rule: (.*)?sort=$
+      scanner: regex
+    file_extensions: []
+    headers: []
+    mime_types: []
+    responses: []
+  whitelists:
+    domains:
+    - golanglibs.com
+    - golanglibs.com:443
+    urls:
+    - enabled: true
+      rule: ^/?page=([0-9])+$
+      scanner: regex
+    - enabled: true
+      rule: ^/top$
+      scanner: regex
+    - enabled: true
+      rule: ^/categories$
+      scanner: regex
+    - enabled: true
+      rule: ^/random$
+      scanner: regex
+    - enabled: true
+      rule: ^/active$
+      scanner: regex
+    - enabled: true
+      rule: ^/tagged$
+      scanner: regex
+    - enabled: true
+      rule: ^/repo/$
+      scanner: regex
+    - enabled: true
+      rule: ^/category/$
+      scanner: regex
+    - enabled: true
+      rule: ^/tag/$
+      scanner: regex
+    - enabled: true
+      rule: ^/similar/$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/?page=([0-9])+$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/top$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/categories$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/random$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/active$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/tagged$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/repo/$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/category/$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/tag/$
+      scanner: regex
+    - enabled: true
+      rule: ^(.*)/similar/$
+      scanner: regex
+    file_extensions: []
+    headers: []
+    mime_types: []
+    responses: []
+collection:
+  disabled: false
+  databooks: []
+  datasets: []
+outputs:
+  xdg_base_dir: ""
+  base_dir: ""
+  logs_dir: ""
+  cache_dir: ""
+  export_dir: ""
+  force_dir: false
+  force_dir_recursive: false
+identifier: 0
+title: ""
+user_agent: ""
+random_user_agent: false
+async: false
+max_depth: 0
+allow_url_revisit: false
+ignore_robots_txt: false
+allowed_domains: []
+disallowed_domains: []
+max_body_size: 0
+parse_http_error_response: false
+detect_charset: false
+detect_mime_type: false
+detect_tabular_data: false
+xdg_base_dir: /Users/lucmichalski/.config
+base_dir: ""
+logs_dir: ""
+cache_dir: ""
+export_dir: ""
+force_dir: false
+force_dir_recursive: false
+debug_mode: false
+verbose_mode: false
+dashboard_mode: false

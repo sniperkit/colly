@@ -29,12 +29,12 @@ const (
 //////////////////////////////////////////////////
 
 type Filters struct {
-	Disabled        bool            `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
-	WhiteListRules  []*FilterConfig `json:"whitelist_rules" yaml:"whitelist_rules" toml:"whitelist_rules" xml:"whitelistRules" ini:"whitelistRules"`
-	BlackListRules  []*FilterConfig `json:"blacklist_rules" yaml:"blacklist_rules" toml:"blacklist_rules" xml:"blackListRules" ini:"blackListRules"`
-	WatchListRules  []*FilterConfig `json:"watchlist_rules" yaml:"watchlist_rules" toml:"watchlist_rules" xml:"watchListRules" ini:"watchListRules"`
-	NotifyListRules []*FilterConfig `json:"notifylist_rules" yaml:"notifylist_rules" toml:"notifylist_rules" xml:"notifyListRules" ini:"notifyListRules"`
-	errs            []*error        `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
+	Disabled        bool           `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
+	WhiteListRules  []FilterConfig `json:"whitelist_rules" yaml:"whitelist_rules" toml:"whitelist_rules" xml:"whitelistRules" ini:"whitelistRules"`
+	BlackListRules  []FilterConfig `json:"blacklist_rules" yaml:"blacklist_rules" toml:"blacklist_rules" xml:"blackListRules" ini:"blackListRules"`
+	WatchListRules  []FilterConfig `json:"watchlist_rules" yaml:"watchlist_rules" toml:"watchlist_rules" xml:"watchListRules" ini:"watchListRules"`
+	NotifyListRules []FilterConfig `json:"notifylist_rules" yaml:"notifylist_rules" toml:"notifylist_rules" xml:"notifyListRules" ini:"notifyListRules"`
+	errs            []*error       `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 }
 
 func (fs *Filters) IsEnabled() bool {
@@ -97,10 +97,10 @@ type DomainFilter struct {
 //////////////////////////////////////////////////
 
 type FilterConfig struct {
-	Disabled    bool       `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
-	Rule        string     `default:"" json:"rule" yaml:"rule" toml:"rule" xml:"rule" ini:"rule"`
-	ScannerType filterType `default:"regexp" json:"scanner_type" yaml:"scanner_type" toml:"scanner_type" xml:"ScannerType" ini:"ScannerType"`
-	isValid     bool
+	Enabled     bool   `default:"true" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled"`
+	Rule        string `default:"" json:"rule" yaml:"rule" toml:"rule" xml:"rule" ini:"rule"`
+	ScannerType string `default:"regex" json:"scanner" yaml:"scanner" toml:"scanner" xml:"scanner" ini:"scanner"`
+	isValid     bool   `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 }
 
 func (f *FilterConfig) String() string {

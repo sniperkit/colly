@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+
 	// Logger
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -12,24 +15,42 @@ import (
 // app params
 var (
 	version     string   = "0.0.1-alpha"
+	workDir     string   = "."
 	configFiles []string = []string{
-		"./conf/app.yaml",
-		"./conf/collection.yaml",
-		"./conf/collector.yaml",
-		"./conf/debug.yaml",
-		"./conf/filters.yaml",
-		"./conf/legacy.yaml",
-		"./conf/outputs.yaml",
-		"./conf/proxy.yaml",
-		"./conf/transport.yaml",
+		"colly.yml",
+		"colly.yaml",
+		"colly.json",
+		"colly.toml",
+		workDir + "/conf/app.yaml",
+		workDir + "/conf/collection.yaml",
+		workDir + "/conf/collector.yaml",
+		workDir + "/conf/debug.yaml",
+		workDir + "/conf/filters.yaml",
+		workDir + "/conf/legacy.yaml",
+		workDir + "/conf/outputs.yaml",
+		workDir + "/conf/proxy.yaml",
+		workDir + "/conf/transport.yaml",
 	}
-	log *logrus.Logger = logrus.New()
+	log *logrus.Logger
 )
 
 // Initialize collector and other components
 func init() {
+
+	// Set the logger
+	log = logrus.New()
 	log.Formatter = new(prefixed.TextFormatter)
 	log.Level = logrus.DebugLevel
+
+}
+
+func getWorkDir() string {
+	// Get the current workdir
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(ex)
 }
 
 func main() {
@@ -52,14 +73,14 @@ func main() {
 		updateDashboard()
 	}
 
-	if !appConfig.Debug.Tachymeter.Disabled {
+	if appConfig.Debug.Tachymeter.Enabled {
 		initTachymeter()
 	}
 
 	switch appConfig.Collector.CurrentMode {
 	case "async":
 
-		if !appConfig.Collector.Sitemap.Disabled && appConfig.Collector.Sitemap.URL != "" {
+		if appConfig.Collector.Sitemap.Enabled && appConfig.Collector.Sitemap.URL != "" {
 			// Attach master collector to the sitemap collector
 			sitemapCollector, err := sitemap.AttachCollector(appConfig.Collector.Sitemap.URL, masterCollector)
 			if err != nil {
@@ -75,13 +96,14 @@ func main() {
 		masterCollector.Wait()
 
 	case "queue":
+
 		// Initialize collector queue
 		collectorQueue, err := initCollectorQueue(appConfig.Collector.Modes.Queue.WorkersCount, appConfig.Collector.Modes.Queue.MaxSize, "InMemory")
 		if err != nil {
 			log.Fatalln("error: ", err)
 		}
 
-		if !appConfig.Collector.Sitemap.Disabled && appConfig.Collector.Sitemap.URL != "" {
+		if appConfig.Collector.Sitemap.Enabled && appConfig.Collector.Sitemap.URL != "" {
 			// Attach queue and master collector to the sitemap collector
 			sitemapCollector, err := sitemap.AttachQueue(appConfig.Collector.Sitemap.URL, collectorQueue)
 			if err != nil {
@@ -98,7 +120,8 @@ func main() {
 		collectorQueue.Run(masterCollector)
 
 	default:
-		if !appConfig.Collector.Sitemap.Disabled && appConfig.Collector.Sitemap.URL != "" {
+
+		if appConfig.Collector.Sitemap.Enabled && appConfig.Collector.Sitemap.URL != "" {
 			// Initalize new sitemap collector
 			sitemapCollector, err := sitemap.New(appConfig.Collector.Sitemap.URL)
 			if err != nil {
@@ -120,7 +143,7 @@ func main() {
 		stopTheUI <- true
 	}
 
-	if !appConfig.Debug.Tachymeter.Disabled {
+	if appConfig.Debug.Tachymeter.Enabled {
 		err := closeTachymeter("./shared/exports/stats/tachymeter")
 		if err != nil {
 			log.Fatalln("error: ", err)

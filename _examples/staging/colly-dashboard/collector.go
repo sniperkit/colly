@@ -2,6 +2,7 @@ package main
 
 import (
 	"runtime"
+	"strings"
 	"time"
 
 	colly "github.com/sniperkit/colly/pkg"
@@ -9,11 +10,8 @@ import (
 	debug "github.com/sniperkit/colly/pkg/debug"
 	helper "github.com/sniperkit/colly/pkg/helper"
 	metric "github.com/sniperkit/colly/pkg/metric"
-
 	// helpers
-	// "github.com/davecgh/go-spew/spew"
-	// "github.com/k0kubun/pp"
-	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 var appConfig *config.CollectorConfig
@@ -33,23 +31,26 @@ func initCollectorHelpers(c *colly.Collector) *colly.Collector {
 	return c
 }
 
-func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
+func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
+
+	log.Printf("configFiles: \n%s\n", strings.Join(configFiles, "\n"))
 
 	// Enable debug mode or set env `CONFIGOR_DEBUG_MODE` to true when running your application
 	var err error
-	appConfig, err = config.NewFromFile(false, false, files...)
+	appConfig, err = config.NewFromFile(true, false, configFiles...)
 	if err != nil {
+		// log.Fatalln("err=", err)
 		return nil, err
 	}
+
+	// if appConfig.App.VerboseMode {
+	// pp.Println("Config=", appConfig)
+	//}
 
 	// Dump config file for dev purpise
 	dumpFormats := []string{"yaml", "json", "toml", "xml"} // "ini"
 	dumpNodes := []string{}
 	config.Dump(appConfig, dumpFormats, dumpNodes, "./shared/exports/config/dump/colly_dashboard") // use string slices
-
-	// pp.WithLineInfo = false
-	// spew.Sdump(appConfig)
-	pp.Println("Config=", appConfig)
 
 	// Create a Collector
 	collector := colly.NewCollector()

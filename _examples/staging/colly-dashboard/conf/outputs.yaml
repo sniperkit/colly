@@ -1,4 +1,3 @@
----
 outputs:
   xdg_base_dir: /Users/lucmichalski/.config
   base_dir: ./shared
