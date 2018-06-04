@@ -148,15 +148,18 @@ type CollectorConfig struct {
 
 			// Default
 			Default struct {
+
 				// RandomDelay
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`
+
+				//-- END
 			} `json:"default" yaml:"default" toml:"default" xml:"default" ini:"default" csv:"default"`
 
 			// Async
 			Async struct {
 
 				// Parallelism
-				Parallelism int `default:"2" json:"parallelism" yaml:"parallelism" toml:"parallelism" xml:"parallelism" ini:"parallelism" csv:"Parallelism"`
+				Parallelism int `default:"3" json:"parallelism" yaml:"parallelism" toml:"parallelism" xml:"parallelism" ini:"parallelism" csv:"Parallelism"`
 
 				// DomainGlob
 				DomainGlob string `default:"*" json:"domain_glob" yaml:"domain_glob" toml:"domain_glob" xml:"domainGlob" ini:"domainGlob" csv:"DomainGlob"`
@@ -165,17 +168,19 @@ type CollectorConfig struct {
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`
 
 				// MaxSize
-				MaxSize int `default:"10000" json:"max_size" yaml:"max_size" toml:"max_size" xml:"maxSize" ini:"maxSize" csv:"MaxSize"`
+				MaxSize int `default:"100000" json:"max_size" yaml:"max_size" toml:"max_size" xml:"maxSize" ini:"maxSize" csv:"MaxSize"`
+
+				//-- END
 			} `json:"async" yaml:"async" toml:"async" xml:"async" ini:"async" csv:"async"`
 
 			// Queue
 			Queue struct {
 
 				// Workers
-				WorkersCount int `default:"2" json:"workers_count" yaml:"workers_count" toml:"workers_count" xml:"workersCount" ini:"workersCount" csv:"WorkersCount"`
+				WorkersCount int `default:"3" json:"workers_count" yaml:"workers_count" toml:"workers_count" xml:"workersCount" ini:"workersCount" csv:"WorkersCount"`
 
 				// MaxSize
-				MaxSize int `default:"10000" json:"max_size" yaml:"max_size" toml:"max_size" xml:"maxSize" ini:"maxSize" csv:"MaxSize"`
+				MaxSize int `default:"100000" json:"max_size" yaml:"max_size" toml:"max_size" xml:"maxSize" ini:"maxSize" csv:"MaxSize"`
 
 				// RandomDelay
 				RandomDelay time.Duration `default:"5" json:"random_delay" yaml:"random_delay" toml:"random_delay" xml:"randomDelay" ini:"randomDelay" csv:"RandomDelay"`

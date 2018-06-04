@@ -81,6 +81,7 @@ func main() {
 	case "async":
 
 		if appConfig.Collector.Sitemap.Enabled && appConfig.Collector.Sitemap.URL != "" {
+
 			// Attach master collector to the sitemap collector
 			sitemapCollector, err := sitemap.AttachCollector(appConfig.Collector.Sitemap.URL, masterCollector)
 			if err != nil {
@@ -88,8 +89,11 @@ func main() {
 			}
 			sitemapCollector.VisitAll()
 			sitemapCollector.Count()
+
 		} else {
+
 			masterCollector.Visit(appConfig.Collector.RootURL)
+
 		}
 
 		// Consume URLs
@@ -104,6 +108,7 @@ func main() {
 		}
 
 		if appConfig.Collector.Sitemap.Enabled && appConfig.Collector.Sitemap.URL != "" {
+
 			// Attach queue and master collector to the sitemap collector
 			sitemapCollector, err := sitemap.AttachQueue(appConfig.Collector.Sitemap.URL, collectorQueue)
 			if err != nil {
@@ -112,8 +117,11 @@ func main() {
 			sitemapCollector.Count()
 			// Enqueue all URLs found in the sitemap.txt
 			sitemapCollector.EnqueueAll()
+
 		} else {
+
 			collectorQueue.AddURL(appConfig.Collector.RootURL)
+
 		}
 
 		// Consume URLs
@@ -122,6 +130,7 @@ func main() {
 	default:
 
 		if appConfig.Collector.Sitemap.Enabled && appConfig.Collector.Sitemap.URL != "" {
+
 			// Initalize new sitemap collector
 			sitemapCollector, err := sitemap.New(appConfig.Collector.Sitemap.URL)
 			if err != nil {
@@ -132,11 +141,16 @@ func main() {
 			for _, url := range urls {
 				masterCollector.Visit(url.String())
 			}
+
 		} else {
+
 			masterCollector.Visit(appConfig.Collector.RootURL)
+
 		}
 
 	}
+
+	uiWaitGroup.Wait()
 
 	// if enableUI && !masterCollector.IsDebug() {
 	if appConfig.App.DashboardMode {

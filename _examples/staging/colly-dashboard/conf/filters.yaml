@@ -10,7 +10,7 @@ filters:
     urls:
     - enabled: true
       rule: (.*)?sort=$
-      scanner: regex
+      scanner: regexp
     file_extensions: []
     headers: []
     mime_types: []
@@ -22,64 +22,64 @@ filters:
     urls:
     - enabled: true
       rule: ^/?page=([0-9])+$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/top$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/categories$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/random$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/active$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/tagged$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/repo/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/category/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/tag/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^/similar/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/?page=([0-9])+$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/top$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/categories$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/random$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/active$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/tagged$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/repo/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/category/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/tag/$
-      scanner: regex
+      scanner: regexp
     - enabled: true
       rule: ^(.*)/similar/$
-      scanner: regex
+      scanner: regexp
     file_extensions: []
     headers: []
     mime_types: []

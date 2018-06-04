@@ -1,11 +1,10 @@
 package main
 
 import (
+	"sync"
+
 	metric "github.com/sniperkit/colly/pkg/metric"
 	tui "github.com/sniperkit/colly/plugins/app/dashboard/tui/termui"
-	// dash "github.com/sniperkit/colly/plugins/app/dashboard" 			// not ready yet
-	// cui "github.com/sniperkit/colly/plugins/app/dashboard/tui/gocui" // not ready yet
-	// tvi "github.com/sniperkit/colly/plugins/app/dashboard/tui/tview" // not ready yet
 )
 
 var (
@@ -13,7 +12,7 @@ var (
 	stopTheCrawler               chan bool
 	allURLsHaveBeenVisited       chan bool
 	allStatisticsHaveBeenUpdated chan bool
-	// termUI                       *tui.TermUI
+	uiWaitGroup                  = &sync.WaitGroup{}
 )
 
 func initStatsCollector() {
@@ -26,10 +25,13 @@ func initDashboard() {
 	stopTheUI = make(chan bool)
 	collectorResponseMetrics = make(chan metric.Response)
 
+	uiWaitGroup.Add(1)
 	go func() {
 		tui.Dashboard(collectorStats, stopTheUI, stopTheCrawler)
-
+		uiWaitGroup.Done()
 	}()
+	uiWaitGroup.Wait()
+
 }
 
 func updateDashboard() {
