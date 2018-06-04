@@ -224,7 +224,7 @@ type Config struct {
 					Backend string `default:"badger" json:"backend" yaml:"backend" toml:"backend" xml:"backend" ini:"backend" csv:"backend"`
 
 					// TTL
-					TTL string `default:"ttl" json:"ttl" yaml:"ttl" toml:"ttl" xml:"ttl" ini:"ttl" csv:"TTL"`
+					TTL time.Duration `default:"3600s" json:"ttl" yaml:"ttl" toml:"ttl" xml:"ttl" ini:"ttl" csv:"TTL"`
 
 					// Store
 					Store StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`

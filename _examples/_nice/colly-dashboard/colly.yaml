@@ -17,23 +17,23 @@ debug:
   tachymeter:
     enabled: true
     async: false
-    sample_size: 0
-    histogram_bins: 0
+    sample_size: 50
+    histogram_bins: 10
     export:
-      disabled: false
+      enabled: false
       backup_mode: false
       backup_suffix: ""
-      backup_prefix: ""
-      overwrite: false
+      backup_prefix: "_test"
+      overwrite: true
       encoding: ""
-      format: ""
-      basename: ""
-      split_at: 0
-      buffer_size: 0
+      format: "html"
+      basename: "colly_golanglibs"
+      split_at: 2500
+      buffer_size: 20000
       prefix_path: ""
       export_dir: ""
-      ensure_dir: false
-      ensure_dir_recursively: false
+      ensure_dir: true
+      ensure_dir_recursively: true
 collector:
   root_url: "https://golanglibs.com"
   user_agent: "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
