@@ -25,12 +25,12 @@ func initDashboard() {
 	stopTheUI = make(chan bool)
 	collectorResponseMetrics = make(chan metric.Response)
 
-	uiWaitGroup.Add(1)
+	// uiWaitGroup.Add(1)
 	go func() {
 		tui.Dashboard(collectorStats, stopTheUI, stopTheCrawler)
-		uiWaitGroup.Done()
+		// uiWaitGroup.Done()
 	}()
-	uiWaitGroup.Wait()
+	// uiWaitGroup.Wait()
 
 }
 

@@ -10,6 +10,7 @@ import (
 	debug "github.com/sniperkit/colly/pkg/debug"
 	helper "github.com/sniperkit/colly/pkg/helper"
 	metric "github.com/sniperkit/colly/pkg/metric"
+	proxy "github.com/sniperkit/colly/pkg/proxy"
 	// helpers
 	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
@@ -37,20 +38,10 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 
 	// Enable debug mode or set env `CONFIGOR_DEBUG_MODE` to true when running your application
 	var err error
-	appConfig, err = config.NewFromFile(true, false, configFiles...)
+	appConfig, err = config.NewFromFile(false, false, false, configFiles...)
 	if err != nil {
-		// log.Fatalln("err=", err)
 		return nil, err
 	}
-
-	// if appConfig.App.VerboseMode {
-	// pp.Println("Config=", appConfig)
-	//}
-
-	// Dump config file for dev purpise
-	dumpFormats := []string{"yaml", "json", "toml", "xml"} // "ini"
-	dumpNodes := []string{}
-	config.Dump(appConfig, dumpFormats, dumpNodes, "./shared/exports/config/dump/colly_dashboard") // use string slices
 
 	// Create a Collector
 	collector := colly.NewCollector()
@@ -97,18 +88,41 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 		collector.Async = true
 		collectorLimits := &colly.LimitRule{}
 		collectorLimits.DomainGlob = appConfig.Collector.Modes.Async.DomainGlob
-		if appConfig.Collector.Modes.Async.Parallelism > 0 {
-			collectorLimits.Parallelism = appConfig.Collector.Modes.Async.Parallelism
-		} else {
-			collectorLimits.Parallelism = runtime.NumCPU() - 1
+		if appConfig.Collector.Modes.Async.Parallelism <= 0 {
+			appConfig.Collector.Modes.Async.Parallelism = runtime.NumCPU() - 1
 		}
+
+		collectorLimits.Parallelism = appConfig.Collector.Modes.Async.Parallelism
 		if appConfig.Collector.Modes.Async.RandomDelay > 0 {
 			collectorLimits.RandomDelay = appConfig.Collector.Modes.Async.RandomDelay * time.Second
 		}
 		collector.Limit(collectorLimits)
 	}
 
+	// Dump config file for dev purpise
+	dumpFormats := []string{"yaml", "json", "toml", "xml"}
+	dumpNodes := []string{}
+	config.Dump(appConfig, dumpFormats, dumpNodes, "./shared/exports/config/dump/colly_dashboard") // use string slices
+
 	return collector, nil
+}
+
+func addCollectorProxy(c *colly.Collector, proxies ...string) (*colly.Collector, error) {
+	// Rotate two socks5 proxies (Add Tor Proxies for example)
+	rp, err := proxy.RoundRobinProxySwitcher(proxies...)
+	if err != nil {
+		return c, err
+	}
+	c.SetProxyFunc(rp)
+	return c, nil
+}
+
+func newProxySwitcher(proxies ...string) (colly.ProxyFunc, error) {
+	rp, err := proxy.RoundRobinProxySwitcher(proxies...)
+	if err != nil {
+		return nil, err
+	}
+	return rp, nil
 }
 
 func newCollectorLimits(domain *string, parallelism *int, delay *time.Duration) *colly.LimitRule {

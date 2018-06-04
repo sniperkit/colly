@@ -16,11 +16,24 @@ import (
 var (
 	version     string   = "0.0.1-alpha"
 	workDir     string   = "."
+	parentDir   string   = ".."
 	configFiles []string = []string{
+		// ./colly.yml
 		"colly.yml",
 		"colly.yaml",
 		"colly.json",
 		"colly.toml",
+		// ../conf/app.yaml
+		parentDir + "/conf/app.yaml",
+		parentDir + "/conf/collection.yaml",
+		parentDir + "/conf/collector.yaml",
+		parentDir + "/conf/debug.yaml",
+		parentDir + "/conf/filters.yaml",
+		parentDir + "/conf/legacy.yaml",
+		parentDir + "/conf/outputs.yaml",
+		parentDir + "/conf/proxy.yaml",
+		parentDir + "/conf/transport.yaml",
+		// ./conf/app.yaml
 		workDir + "/conf/app.yaml",
 		workDir + "/conf/collection.yaml",
 		workDir + "/conf/collector.yaml",

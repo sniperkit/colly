@@ -97,11 +97,13 @@ collector:
           force_ssl: false
           ssl_verify: false
   proxy:
-    enabled: false
-    fetch_remote_list: false
+    enabled: true
+    fetch_remote_list: true
     pool_mode: false
-    allowed_protocols: []
-    list: []
+    allowed_protocols: ["socks5"]
+    list:
+    - socks5://127.0.0.1:1337
+    - socks5://127.0.0.1:1338
   sitemap:
     enabled: false
     url: ""

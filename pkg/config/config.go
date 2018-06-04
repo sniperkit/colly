@@ -578,20 +578,14 @@ type LimitConfig struct {
 
 //	configor.New(&configor.Config{Debug: true, Verbose: true}).Load(&Config, "config.json")
 
-func NewFromFile(verbose, debug bool, files ...string) (*CollectorConfig, error) {
+func NewFromFile(verbose, debug, esrrorOnUnmatchedKeys bool, files ...string) (*CollectorConfig, error) {
 	collectorConfig := &CollectorConfig{}
 	xdgPath, err := getDefaultXDGBaseDirectory()
 	if err != nil {
 		return nil, err
 	}
 	collectorConfig.XDGBaseDir = xdgPath
-	// configor.Load(&collectorConfig, files...)
-	// configor.New(&configor.Config{Debug: debug, Verbose: verbose}).Load(&collectorConfig, files...)
 	configor.New(&configor.Config{Debug: debug, Verbose: verbose, ErrorOnUnmatchedKeys: false}).Load(&collectorConfig, files...)
-
-	// if c.DebugMode {}
-	// fmt.Printf("config: %#v", collectorConfig)
-	// fmt.Println("XDGBaseDir=", xdgPath)
 
 	return collectorConfig, nil
 }
