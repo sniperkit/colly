@@ -106,8 +106,8 @@ collector:
     - address: 'socks5://127.0.0.1:1338'
       enabled: false
   sitemap:
-    enabled: false
-    url: ""
+    enabled: true
+    url: "https://golanglibs.com/sitemap.txt"
     auto_detect: false
     limit_urls: 0
 filters:

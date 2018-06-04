@@ -5,7 +5,7 @@ import (
 	"time"
 
 	// helpers
-	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 
 	colly "github.com/sniperkit/colly/pkg"
 	config "github.com/sniperkit/colly/pkg/config"
@@ -47,7 +47,7 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 
 	// Set User-Agent
 	if appConfig.Collector.UserAgent != "" {
-		collector.UserAgent = `Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36`
+		collector.UserAgent = appConfig.Collector.UserAgent // `Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36`
 	}
 
 	// Set Allowed Domains
@@ -133,7 +133,7 @@ func newCollectorWithConfig(configFiles ...string) (*colly.Collector, error) {
 	dumpFormats := []string{"yaml", "json", "toml", "xml"}
 	dumpNodes := []string{}
 	config.Dump(appConfig, dumpFormats, dumpNodes, "./shared/exports/config/dump/colly_dashboard") // use string slices
-	pp.Println(appConfig)
+	// pp.Println(appConfig)
 
 	return collector, nil
 }

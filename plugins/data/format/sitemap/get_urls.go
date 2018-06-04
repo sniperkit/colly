@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	// helpers
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 func getURLs(sitemapURL url.URL) ([]url.URL, error) {
@@ -51,12 +53,17 @@ func getURLsFromSitemapTXT(txtSitemapURL url.URL) ([]url.URL, error) {
 	}
 
 	for _, urlEntry := range sitemap.URLs {
-		parsedURL, parseError := url.Parse(urlEntry.Loc)
-		if parseError != nil {
-			return nil, parseError
-		}
-		urls = append(urls, *parsedURL)
+		/*
+			parsedURL, parseError := url.Parse(urlEntry.Loc)
+			if parseError != nil {
+				return nil, parseError
+			}
+		*/
+		urls = append(urls, urlEntry.href)
+		// urls = append(urls, *parsedURL)
 	}
+
+	// pp.Println("urls=", urls)
 
 	return urls, nil
 }

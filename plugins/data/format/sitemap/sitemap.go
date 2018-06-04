@@ -5,7 +5,7 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
-	// "encoding/csv"
+	"encoding/csv"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+
 	"path/filepath"
 	"strings"
 	"sync"
@@ -50,10 +51,10 @@ type SitemapCollector struct {
 
 type URL struct {
 	href       url.URL
-	Loc        string `json:"loc" xml:"loc"`
-	LastMod    string `json:"lastmod" xml:"lastmod"`
-	ChangeFreq string `json:"changefreq" xml:"changefreq"`
-	Priority   string `json:"priority" xml:"priority"`
+	Loc        string `json:"loc" xml:"loc" csv:"loc"`
+	LastMod    string `json:"lastmod" xml:"lastmod" csv:"lastmod"`
+	ChangeFreq string `default:"weekly" json:"changefreq" xml:"changefreq" csv:"changefreq"`
+	Priority   string `default:"1.0" json:"priority" xml:"priority" csv:"priority"`
 }
 
 type Index struct {
@@ -142,24 +143,6 @@ func getXMLSitemap(xmlSitemapURL url.URL) (XMLSitemap, error) {
 }
 
 func (sitemapIndexError XmlSitemapError) Error() string {
-	return sitemapIndexError.message
-}
-
-func getTXTSitemap(txtSitemapURL url.URL) (TXTSitemap, error) {
-	_, readErr := readURL(txtSitemapURL)
-	if readErr != nil {
-		return TXTSitemap{}, readErr
-	}
-
-	var urlSet TXTSitemap
-	//unmarshalError := csv.Unmarshal(response.GetBody(), &urlSet)
-	//if unmarshalError != nil {
-	//	return TXTSitemap{}, unmarshalError
-	//}
-	return urlSet, nil
-}
-
-func (sitemapIndexError TxtSitemapError) Error() string {
 	return sitemapIndexError.message
 }
 
@@ -313,4 +296,209 @@ func (s *SitemapCollector) ToFile(path string) error {
 	}
 
 	return nil
+}
+
+func (sitemapIndexError TxtSitemapError) Error() string {
+	return sitemapIndexError.message
+}
+
+/*
+func getTXTSitemap(txtSitemapURL url.URL) (TXTSitemap, error) {
+	_, readErr := readURL(txtSitemapURL)
+	if readErr != nil {
+		return TXTSitemap{}, readErr
+	}
+
+	var urlSet TXTSitemap
+	//unmarshalError := csv.Unmarshal(response.GetBody(), &urlSet)
+	//if unmarshalError != nil {
+	//	return TXTSitemap{}, unmarshalError
+	//}
+	return urlSet, nil
+}
+*/
+
+func isRemoteURL(url string) bool {
+	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
+}
+
+// Streams a CSV Reader into a returned channel.  Each CSV row is streamed along with the header.
+// "true" is sent to the `done` channel when the file is finished.
+
+var (
+	SitemapTXT_SplitAt             int = 2500
+	SitemapTXT_ReaderBuffer        int = 20000
+	SitemapTXT_StreamBuffer        int = 20000
+	SitemapTXT_StreamOuputMaxLines int = 1000
+	// csvStreamOuputColumns  []string = []string{"domain", "loc", "created_at", "duration", "duration_time", "finished_at"}
+)
+
+type sitemapTXT_Line struct {
+	header []string
+	line   []string
+}
+
+func (s *sitemapTXT_Line) GetByKey(k int) (value string) {
+	return strings.TrimSpace(s.line[k])
+}
+
+func (s *sitemapTXT_Line) GetByName(key string) (value string) {
+	x := -1
+	for i, value := range s.header {
+		if value == key {
+			x = i
+			break
+		}
+	}
+	if x == -1 {
+		return ""
+	}
+	return strings.TrimSpace(s.line[x])
+}
+
+type sitemapTXT_Stream struct {
+	path         string   `required:'true'` // Filepath to Local CSV File
+	splitAt      int      `default:'2500'`
+	buffer       int      `default:'20000'`
+	selectorType string   `default:'name'` // column selector type, availble: by_key, by_name (default: column_name)
+	columnsKeys  []int    // default: 0
+	columnsNames []string // default: "url"
+	debug        bool
+	isRemote     bool
+	reader       *csv.Reader
+	lock         *sync.Mutex
+	wg           *sync.WaitGroup
+	*sitemapTXT_Line
+}
+
+type sitemapTXT_FlowTable []*sitemapTXT_FlowLine
+
+type sitemapTXT_FlowLine struct {
+	loc        string
+	priority   string `default:"1.0"`
+	changefreq string `default:"weekly"`
+}
+
+func getTXTSitemap(txtSitemapURL url.URL) (TXTSitemap, error) {
+
+	var urlSet TXTSitemap
+	var reader *csv.Reader
+
+	txtSitemapLink := txtSitemapURL.String()
+	if !isRemoteURL(txtSitemapLink) {
+		if _, err := os.Stat(txtSitemapLink); os.IsNotExist(err) {
+			return urlSet, err
+		}
+		file, err := os.Open(txtSitemapLink)
+		if err != nil {
+			return urlSet, err
+		}
+		defer file.Close()
+		reader = csv.NewReader(file)
+
+	} else {
+
+		resp, err := http.Get(txtSitemapLink)
+		if err != nil {
+			return urlSet, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+			return urlSet, err
+		}
+		reader = csv.NewReader(resp.Body)
+
+	}
+
+	// urlSet = make(TXTSitemap, 0)
+	lines := streamSitemapTXT(reader, SitemapTXT_StreamBuffer)
+	for line := range lines {
+		if loc := line.GetByKey(0); loc != "" {
+			href, err := url.Parse(loc)
+			if err == nil {
+				// fmt.Println("url=", href.String())
+				urlSet.URLs = append(urlSet.URLs, URL{href: *href, Loc: loc})
+			}
+		}
+	}
+
+	return urlSet, nil
+}
+
+// Args
+//  csv    - The csv.Reader that will be read from.
+//  buffer - The "lines" buffer factor.  Send "0" for an unbuffered channel.
+func streamSitemapTXT(csv *csv.Reader, buffer int) (lines chan *sitemapTXT_Line) {
+	lines = make(chan *sitemapTXT_Line, buffer)
+	go func() {
+		header, err := csv.Read()
+		if err != nil {
+			close(lines)
+			return
+		}
+		i := 0
+		for {
+			line, err := csv.Read()
+			if len(line) > 0 {
+				i++
+				lines <- &sitemapTXT_Line{
+					header: header,
+					line:   line,
+				}
+			}
+			if err != nil {
+				close(lines)
+				return
+			}
+		}
+	}()
+	return
+}
+
+func printSitemapTXT_FlowTable(lines chan *sitemapTXT_FlowLine) (done chan int) {
+	done = make(chan int)
+	go func() {
+		table := sitemapTXT_FlowTable{}
+		i := 0
+		for line := range lines {
+			i++
+			table = append(table, line)
+			if len(table) >= SitemapTXT_StreamOuputMaxLines {
+				table.Send()
+				table = sitemapTXT_FlowTable{}
+			}
+		}
+		if len(table) > 0 {
+			table.Send()
+		}
+		done <- i
+	}()
+	return
+}
+
+func printSitemapTXT_Entry(txtLines chan *sitemapTXT_Line) (lines chan *sitemapTXT_FlowLine) {
+	lines = make(chan *sitemapTXT_FlowLine, SitemapTXT_ReaderBuffer)
+	go func() {
+		var flowLine *sitemapTXT_FlowLine
+		for line := range txtLines {
+			flowLine, _ = streamSitemapTXT_Entry(line)
+			lines <- flowLine
+		}
+		close(lines)
+	}()
+	return
+}
+
+func streamSitemapTXT_Entry(line *sitemapTXT_Line) (*sitemapTXT_FlowLine, error) {
+	sfl := sitemapTXT_FlowLine{}
+	sfl.priority = line.GetByName("priority")
+	sfl.changefreq = line.GetByName("changefreq")
+	sfl.loc = line.GetByName("loc")
+	return &sfl, nil
+}
+
+func (sft *sitemapTXT_FlowTable) Send() {
+	// code to send to the database here.
+	fmt.Printf("----\nSending %d lines\n%s", len(*sft), *sft)
 }

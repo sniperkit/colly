@@ -59,7 +59,12 @@ func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
 
 		c.MaxDepth = cfg.Collector.MaxDepth
 		c.ParseHTTPErrorResponse = cfg.Filters.Response.ParseHTTPErrorResponse
-		c.UserAgent = cfg.Collector.UserAgent
+
+		if cfg.Collector.UserAgent != "" {
+			c.UserAgent = cfg.Collector.UserAgent
+		} else {
+			c.UserAgent = `Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36`
+		}
 
 		if cfg.Collector.CurrentMode == "async" {
 			c.Async = true
