@@ -9,6 +9,11 @@ import (
 	debug "github.com/sniperkit/colly/pkg/debug"
 	helper "github.com/sniperkit/colly/pkg/helper"
 	metric "github.com/sniperkit/colly/pkg/metric"
+
+	// helpers
+	// "github.com/davecgh/go-spew/spew"
+	// "github.com/k0kubun/pp"
+	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 var appConfig *config.CollectorConfig
@@ -28,25 +33,6 @@ func initCollectorHelpers(c *colly.Collector) *colly.Collector {
 	return c
 }
 
-func newCollector(domain string, async bool) (*colly.Collector, error) {
-
-	// Create a Collector
-	c := colly.NewCollector(
-		colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
-		colly.AllowedDomains(domain),
-		colly.Async(async),
-		colly.CacheDir("./shared/cache/collector"), // Cache responses to prevent multiple download of pages even if the collector is restarted
-	)
-
-	c.Limit(&colly.LimitRule{
-		Parallelism: 4,
-		DomainGlob:  "*",
-		RandomDelay: 5 * time.Second,
-	})
-
-	return c, nil
-}
-
 func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
 
 	// Enable debug mode or set env `CONFIGOR_DEBUG_MODE` to true when running your application
@@ -61,51 +47,60 @@ func newCollectorWithConfig(files ...string) (*colly.Collector, error) {
 	dumpNodes := []string{}
 	config.Dump(appConfig, dumpFormats, dumpNodes, "./shared/exports/config/dump/colly_dashboard") // use string slices
 
+	// pp.WithLineInfo = false
+	// spew.Sdump(appConfig)
+	pp.Println("Config=", appConfig)
+
 	// Create a Collector
 	collector := colly.NewCollector()
 
+	// Set User-Agent
 	if appConfig.UserAgent != "" {
 		collector.UserAgent = `Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36`
 	}
 
-	if len(appConfig.AllowedDomains) > 0 {
-		collector.AllowedDomains = appConfig.AllowedDomains
+	// Set Allowed Domains
+	if len(appConfig.Filters.Whitelists.Domains) > 0 {
+		collector.AllowedDomains = appConfig.Filters.Whitelists.Domains
 	}
 
-	if appConfig.App.VerboseMode {
-		collector = addCollectorVerboseEvents(collector)
+	if len(appConfig.Filters.Blacklists.Domains) > 0 {
+		collector.DisallowedDomains = appConfig.Filters.Whitelists.Domains
 	}
 
+	// Set Verbose Mode components
+	/*
+		if appConfig.App.VerboseMode {
+			collector = addCollectorVerboseEvents(collector)
+		}
+	*/
+
+	// Set Debugger
 	if appConfig.App.DebugMode {
 		collector.SetDebugger(&debug.LogDebugger{})
 	}
 
-	if appConfig.AllowURLRevisit {
-		collector.AllowURLRevisit = true
-	}
+	// Set Custom HttpCache Transport
+	// if appConfig.Collector.Transport.Http.Cache.Enabled {
+	// }
 
-	if appConfig.IgnoreRobotsTxt {
-		collector.IgnoreRobotsTxt = true
-	}
+	// Set Custom HttpStats Transport
+	// if appConfig.Collector.Transport.Http.Stats.Enabled {
+	// }
 
-	if appConfig.Collector.Cache.Directory != "" {
-		collector.CacheDir = appConfig.Collector.Cache.Directory
-	}
+	collector.AllowURLRevisit = appConfig.Collector.AllowURLRevisit
+	collector.IgnoreRobotsTxt = appConfig.Collector.IgnoreRobotsTxt
+	collector.CacheDir = appConfig.Collector.Cache.Directory
 
 	if appConfig.Collector.CurrentMode == "async" {
-
 		collector.Async = true
-
 		collectorLimits := &colly.LimitRule{}
-		if appConfig.Collector.Modes.Async.DomainGlob != "" {
-			collectorLimits.DomainGlob = appConfig.Collector.Modes.Async.DomainGlob
-		}
+		collectorLimits.DomainGlob = appConfig.Collector.Modes.Async.DomainGlob
 		if appConfig.Collector.Modes.Async.Parallelism > 0 {
 			collectorLimits.Parallelism = appConfig.Collector.Modes.Async.Parallelism
 		} else {
-			collectorLimits.Parallelism = runtime.NumCPU()
+			collectorLimits.Parallelism = runtime.NumCPU() - 1
 		}
-
 		if appConfig.Collector.Modes.Async.RandomDelay > 0 {
 			collectorLimits.RandomDelay = appConfig.Collector.Modes.Async.RandomDelay * time.Second
 		}

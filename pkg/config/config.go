@@ -177,7 +177,10 @@ type CollectorConfig struct {
 		// Cache
 		Cache struct {
 
-			// Enabled          bool     `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
+			// Enabled
+			Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
+
+			// Disabled
 			Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
 
 			// Backend
@@ -190,17 +193,14 @@ type CollectorConfig struct {
 		// Transport
 		Transport struct {
 
-			// Disabled
-			Disabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
-
 			// Http
 			Http struct {
 
 				// Cache
 				Cache struct {
 
-					// Disabled
-					Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+					// Enabled
+					Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
 
 					// Backend
 					Backend string `default:"badger" json:"backend" yaml:"backend" toml:"backend" xml:"backend" ini:"backend" csv:"backend"`
@@ -215,11 +215,11 @@ type CollectorConfig struct {
 				// Stats
 				Stats struct {
 
-					// Disabled
-					Disabled bool `default:"true" json:"disabled" yaml:"disabled" toml:"disabled" xml:"disabled" ini:"disabled" csv:"disabled"`
+					// Enabled
+					Enabled bool `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"Enabled"`
 
 					// Client
-					Client string `default:"" json:"client" yaml:"client" toml:"client" xml:"client" ini:"client" csv:"client"`
+					Client ClientConfig `default:"" json:"client" yaml:"client" toml:"client" xml:"client" ini:"client" csv:"client"`
 
 					// Store
 					Store StoreConfig `json:"store" yaml:"store" toml:"store" xml:"store" ini:"store" csv:"store"`
@@ -296,13 +296,13 @@ type CollectorConfig struct {
 		Blacklists struct {
 
 			// Domains
-			Domains []DomainConfig `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
+			Domains []string `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
 
 			// URLs
 			URLs []FilterConfig `json:"urls" yaml:"urls" toml:"urls" xml:"urls" ini:"urls" csv:"urls"`
 
-			// Extensions
-			Extensions []string `json:"extensions" yaml:"extensions" toml:"extensions" xml:"extensions" ini:"extensions" csv:"Extensions"`
+			// FileExtensions
+			FileExtensions []string `json:"file_extensions" yaml:"file_extensions" toml:"file_extensions" xml:"fileExtensions" ini:"fileExtensions" csv:"FileExtensions"`
 
 			// Headers
 			Headers []FilterConfig `json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers" csv:"headers"`
@@ -318,13 +318,13 @@ type CollectorConfig struct {
 		Whitelists struct {
 
 			// Domains
-			Domains []DomainConfig `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
+			Domains []string `json:"domains" yaml:"domains" toml:"domains" xml:"domains" ini:"domains" csv:"Domains"`
 
 			// URLs
 			URLs []FilterConfig `json:"urls" yaml:"urls" toml:"urls" xml:"urls" ini:"urls" csv:"urls"`
 
-			// Extensions
-			Extensions []string `json:"extensions" yaml:"extensions" toml:"extensions" xml:"extensions" ini:"extensions" csv:"Extensions"`
+			// FileExtensions
+			FileExtensions []string `json:"file_extensions" yaml:"file_extensions" toml:"file_extensions" xml:"fileExtensions" ini:"fileExtensions" csv:"FileExtensions"`
 
 			// Headers
 			Headers []FilterConfig `json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers" csv:"headers"`

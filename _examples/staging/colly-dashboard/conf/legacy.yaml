@@ -9,8 +9,8 @@ allow_url_revisit: false
 ignore_robots_txt: false
 disallowed_domains: []
 allowed_domains:
-- www.shopify.com
-- shopify.com
+- golanglibs.com
+- golanglibs.com:443
 max_body_size: 0
 parse_http_error_response: false
 detect_charset: true
