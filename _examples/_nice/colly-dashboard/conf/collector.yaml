@@ -1,5 +1,6 @@
+---
 collector:
-  root_url:  "https://golanglibs.com"
+  root_url: "https://golanglibs.com"
   user_agent: "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
   random_user_agent: false
   max_depth: 0
@@ -16,52 +17,20 @@ collector:
       max_size: 0
     queue:
       workers_count: 3
-      max_size: 100000
+      max_size: 0
       random_delay: 0s
   cache:
     enabled: true
     backend: "inMemory"
-    custom_dir: "./shared/storage/cache/collector/inMemory"
+    dir: "./shared/store/cache/inMemory"
   transport:
     http:
       cache:
-        enabled: false
-        backend: ""
-        ttl: ""
+        enabled: true
+        backend: "badger"
+        ttl: 3600s
         store:
-          enabled: false
-          domain: ""
-          protocol: ""
-          host: ""
-          port: ""
-          force_ssl: false
-          ssl_verify: false
+          enabled: true
+          dir: "./shared/storage/cache/http"
       stats:
-        enabled: false
-        client:
-          enabled: false
-          disabled: false
-          client: ""
-          domain: ""
-          protocol: ""
-          host: ""
-          port: ""
-          force_ssl: false
-          ssl_verify: false
-          reconnect: false
-          reconnect_max: 0
-          buffer_size: ""
-          payload: ""
-        store:
-          enabled: false
-          domain: ""
-          protocol: ""
-          host: ""
-          port: ""
-          force_ssl: false
-          ssl_verify: false
-  sitemap:
-    enabled: false
-    url: "https://golanglibs.com/sitemap.txt"
-    auto_detect: false
-    limit_urls: 0
+        enabled: true

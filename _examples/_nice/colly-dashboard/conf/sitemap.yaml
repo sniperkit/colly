@@ -1,6 +1,6 @@
 collector:
   sitemap:
-    enabled: false
+    enabled: true
     url: "https://golanglibs.com/sitemap.txt"
     auto_detect: false
     limit_urls: 0

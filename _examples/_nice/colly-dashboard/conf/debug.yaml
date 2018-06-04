@@ -1,32 +1,31 @@
+---
 debug:
   config:
     load_verbose: false
     load_debug: false
-    export_disabled: false
+    load_error_on_unmatched_keys: false
+    export_enabled: true
     export_sections: []
-    export_schema_only: false
-    export_prefix_path: ./shared/exports/config/dump
-    export_formats:
-    - yaml
-    - json
-    - toml
+    export_schema_only: true
+    export_prefix_path: "./shared/exports/config/dump/golanglibs.com"
+    export_formats: ["yaml","csv","xml","toml"]
   tachymeter:
-    disabled: true
+    enabled: true
     async: false
     sample_size: 50
     histogram_bins: 10
     export:
-      disabled: false
+      enabled: false
       backup_mode: false
       backup_suffix: ""
-      backup_prefix: ""
+      backup_prefix: "_test"
       overwrite: true
       encoding: ""
-      format: ""
-      basename: ""
-      split_at: 0
-      buffer_size: 0
-      prefix_path: ./shared/exports/stats/tachymeter
+      format: "html"
+      basename: "colly_golanglibs"
+      split_at: 2500
+      buffer_size: 20000
+      prefix_path: ""
       export_dir: ""
-      ensure_dir: false
-      ensure_dir_recursively: false
+      ensure_dir: true
+      ensure_dir_recursively: true
