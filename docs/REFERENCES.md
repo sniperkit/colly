@@ -29,8 +29,19 @@
 - https://github.com/mattn/go-shellwords
 - https://github.com/mattn/anko
 - https://github.com/tinrab/go-tensorflow-image-recognition
-- https://github.com/sniperkit/colly/golanglibs/plugins/data/structure/jq"
-- 
-- 
-- 
-- 
+- https://github.com/sniperkit/colly/golanglibs/plugins/data/structure/jq
+- https://github.com/tinrab/go-tensorflow-image-recognition
+- https://github.com/tinrab/go-elasticsearch-example
+- https://github.com/tinrab/go-realtime-collaborative-drawing-app
+- https://outcrawl.com/realtime-collaborative-drawing-go/
+- https://github.com/tinrab/spidey/blob/master/account/app.dockerfile
+- https://github.com/tinrab/drdock
+- https://github.com/tinrab/meower
+- https://github.com/jgillich/go-opencl
+- https://github.com/gobuffalo/packr
+- https://github.com/jgillich/packr-demo
+- https://github.com/jgillich/go-opencl
+- https://github.com/koron/iferr
+- https://github.com/hybridgroup/gocv
+- https://github.com/mattn/go-redmine
+- https://github.com/krallin/tini

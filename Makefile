@@ -16,11 +16,6 @@ else
   PLATFORM := Linux
 endif
 
-ifeq ($(PLATFORM), OSX)
-	# to do
-else
-	# to do
-endif
 
 PLATFORM_VERSION ?= $(shell uname -r)
 PLATFORM_ARCH ?= $(shell uname -m)

@@ -24,3 +24,4 @@ services:
     - APP_ETCD_HOSTS=http://etcd:2379/
     depends_on:
     - etcd_v2
+
