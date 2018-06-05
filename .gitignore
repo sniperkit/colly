@@ -11,7 +11,14 @@ examples/experimental/golanglibs/shared
 Icon
 
 _staging
+_staging/
+_staging/*
+_staging/**
+
 _projects
+_projects/
+_projects/*
+_projects/**
 
 # Thumbnails
 ._*
