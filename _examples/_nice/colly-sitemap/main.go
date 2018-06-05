@@ -56,11 +56,8 @@ func main() {
 		colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
 		colly.AllowedDomains("www.shopify.com"),
 		colly.Debugger(&debug.LogDebugger{}), // Attach a debugger to the collector
-		// colly.IgnoreRobotsTxt(),
 		colly.Async(true),
 		colly.CacheDir(cacheCollectorDir), // Cache responses to prevent multiple download of pages even if the collector is restarted
-		// colly.Debugger(&debug.LogDebugger{}),
-		// colly.Async(true),
 	)
 
 	// Limit the number of threads started by colly to two
@@ -68,7 +65,6 @@ func main() {
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Parallelism: 2,
-		// Delay:      5 * time.Second,
 	})
 
 	helper.RandomUserAgent(c)

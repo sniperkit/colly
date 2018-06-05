@@ -70,16 +70,13 @@ func new_cache_store(engine, prefixPath string) (backend httpcache.Cache, err er
 	engine = strings.ToLower(engine)
 	switch engine {
 	case "diskv":
-
 		appConfig.Collector.Transport.Http.Cache.Store.Directory = filepath.Join(prefixPath, "httpcache.diskv")
 		fsutil.EnsureDir(appConfig.Collector.Transport.Http.Cache.Store.Directory)
 		backend = diskcache.New(appConfig.Collector.Transport.Http.Cache.Store.Directory)
 
 	case "badger":
-
 		appConfig.Collector.Transport.Http.Cache.Store.Directory = filepath.Join(prefixPath, "httpcache.badger")
 		fsutil.EnsureDir(appConfig.Collector.Transport.Http.Cache.Store.Directory)
-
 		backend, err = badgercache.New(
 			&badgercache.Config{
 				ValueDir:    "golanglibs.com",

@@ -1,0 +1,36 @@
+# REFERENCES
+- https://github.com/raviqqe/hamt
+- https://github.com/raviqqe/liche
+- https://github.com/raviqqe/muffet/blob/bd3ff3cd424a6b16bff26b42cf1c623993ffee25/url_inspector.go
+- https://github.com/yterajima/go-sitemap
+- https://github.com/sHesl/crawler/blob/82dd13f3f7fedb072e654bfb5162dc164f607ed2/cmd/sadako/robots.go
+- https://github.com/rimiti/robotstxt
+- https://github.com/PuerkitoBio/rehttp
+- https://github.com/PuerkitoBio/purell
+- https://github.com/temoto/robotstxt
+- https://github.com/sittipongwork/GoRobottxt
+- https://github.com/sittipongwork/GoSitemapxml/blob/master/gositemap.go
+- https://github.com/schollz/listfiles/blob/master/listfiles.go
+- https://github.com/schollz/stringsizer/blob/master/sizer.go
+- https://github.com/schollz/utils/blob/master/compress.go
+- https://github.com/schollz/versionedtext/blob/master/versionedtext.go
+- https://github.com/schollz/crawdad/blob/master/src/crawler.go
+- https://github.com/schollz/crawdad/blob/master/src/crawler.go#L484
+- https://github.com/ShoshinNikita/boltBrowser
+- github.com/ShoshinNikita/boltBrowser
+- https://github.com/francoispqt/gojay # json stream
+- https://github.com/maxim2266/csvplus
+- https://github.com/maxim2266/strit
+- https://github.com/gophersgang/go-rivers
+- https://github.com/gophersgang/go-rivers/blob/master/go/crawler/main.go
+- https://github.com/gophersgang/go-rivers/blob/master/go/downloader/main.go
+- https://github.com/mh-cbon/plumber
+- https://github.com/ikawaha/kagome/tree/master/tokenizer
+- https://github.com/mattn/go-shellwords
+- https://github.com/mattn/anko
+- https://github.com/tinrab/go-tensorflow-image-recognition
+- https://github.com/sniperkit/colly/golanglibs/plugins/data/structure/jq"
+- 
+- 
+- 
+- 
