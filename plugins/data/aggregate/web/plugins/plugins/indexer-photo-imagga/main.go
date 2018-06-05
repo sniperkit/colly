@@ -1,8 +1,8 @@
 package main
 
 import (
-	imagga "github.com/feedlabs/elasticfeed-plugin/indexer/photo-imagga"
-	"github.com/feedlabs/elasticfeed/plugin"
+	imagga "github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/indexer/photo-imagga"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
 )
 
 func main() {

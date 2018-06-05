@@ -15,8 +15,8 @@ Create directory for your **plugin server instance** definition e.g. `plugins/se
 package main
 
 import (
-  "github.com/feedlabs/elasticfeed/plugin"
-  sensor "github.com/feedlabs/elasticfeed-plugin/sensor/weather-on-mars"
+  "github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
+  sensor "github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/sensor/weather-on-mars"
 )
 
 func main() {
@@ -34,7 +34,7 @@ Build
 -----
 You need to get the latest version of `elasticfeed` to build plugin.
 ```
-  go get github.com/feedlabs/elasticfeed
+  go get github.com/sniperkit/colly/plugins/data/aggregate/web/service
 ```
 
 Future goals

@@ -2,7 +2,7 @@ package stream
 
 import (
 	"errors"
-	"github.com/feedlabs/feedify/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
 )
 
 type StreamMessage struct {

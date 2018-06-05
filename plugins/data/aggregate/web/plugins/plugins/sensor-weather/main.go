@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/feedlabs/elasticfeed-plugin/sensor/weather"
-	"github.com/feedlabs/elasticfeed/plugin"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/sensor/weather"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
 )
 
 func main() {

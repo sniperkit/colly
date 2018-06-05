@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/feedlabs/feedify/stream"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/stream"
 )
 
 type StreamService struct {

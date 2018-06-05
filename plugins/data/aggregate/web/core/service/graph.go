@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/feedlabs/feedify/graph"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph"
 )
 
 type GraphService struct {

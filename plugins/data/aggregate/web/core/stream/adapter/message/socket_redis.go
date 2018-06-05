@@ -1,8 +1,8 @@
 package message
 
 import (
-	"github.com/feedlabs/feedify/redis"
-	"github.com/feedlabs/feedify/stream"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/redis"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/stream"
 )
 
 func init() {

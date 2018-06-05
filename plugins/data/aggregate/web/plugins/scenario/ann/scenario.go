@@ -1,9 +1,9 @@
 package ann
 
 import (
-	"github.com/feedlabs/elasticfeed/common"
-	"github.com/feedlabs/elasticfeed/workflow"
-//	"github.com/feedlabs/elasticfeed/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/workflow"
+	//	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 type config struct {

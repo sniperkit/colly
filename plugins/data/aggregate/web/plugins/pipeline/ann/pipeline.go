@@ -1,12 +1,12 @@
 package ann
 
 import (
-	"time"
 	"math/rand"
+	"time"
 
-	"github.com/feedlabs/elasticfeed/common"
-	"github.com/feedlabs/elasticfeed/workflow"
-	//	"github.com/feedlabs/elasticfeed/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/workflow"
+	//	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 type DataA struct {
@@ -40,7 +40,7 @@ func RandomAnimator(data interface{}) interface{} {
 	_data := make(map[int64]int64, len(data.(map[interface{}]interface{})))
 
 	for i, v := range data.(map[interface{}]interface{}) {
-		_data[i.(int64)] = v.(int64)*100
+		_data[i.(int64)] = v.(int64) * 100
 	}
 
 	// PIPE DELAY SIMULATION

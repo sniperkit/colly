@@ -1,7 +1,7 @@
 package tui
 
 import (
-	ui "github.com/sasile/termui"
+	ui "github.com/gizak/termui"
 	"github.com/v3io/http_blaster/httpblaster/config"
 	"runtime"
 	"strconv"

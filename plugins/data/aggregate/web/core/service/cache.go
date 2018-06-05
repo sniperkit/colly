@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/feedlabs/feedify/memcache"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/memcache"
 )
 
 func NewCache() *memcache.MemcacheClient {

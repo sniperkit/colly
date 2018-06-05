@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sasile/termui"
+	"github.com/gizak/termui"
 
 	"github.com/sniperkit/colly/pkg/metric"
 )

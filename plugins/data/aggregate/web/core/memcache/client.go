@@ -3,13 +3,13 @@ package memcache
 import (
 	"github.com/bradfitz/gomemcache/memcache"
 
-	"github.com/feedlabs/feedify/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
 )
 
 type MemcacheClient struct {
-	host	string
-	port	string
-	conn	*memcache.Client
+	host string
+	port string
+	conn *memcache.Client
 }
 
 func (m *MemcacheClient) Connect() {
@@ -30,7 +30,7 @@ func (m *MemcacheClient) GetMulti(keys []string) map[string]string {
 
 	items := make(map[string]string, len(_items))
 
-	for _, key := range(keys)  {
+	for _, key := range keys {
 		items[key] = string(_items[key].Value)
 	}
 

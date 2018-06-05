@@ -3,7 +3,7 @@ package graph
 import (
 	"errors"
 	"github.com/barakmich/glog"
-	"github.com/feedlabs/feedify/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph/entity"
 )
 
 // A Props is a set of key/value properties.
@@ -18,17 +18,17 @@ type GraphAdapterStore interface {
 	Database(string) *entity.GraphDatabase
 
 	Node(int) (*entity.GraphNode, error)
-	DeleteNode(int) (error)
-	SetPropertyNode(int, string, string) (error)
+	DeleteNode(int) error
+	SetPropertyNode(int, string, string) error
 	NewNode(Props, string) (*entity.GraphNode, error)
 	RelateNodes(int, int, string, Props) (*entity.GraphRelation, error)
 	RelationshipsNode(int, ...string) ([]*entity.GraphRelation, error)
 
 	Relation(int) *entity.GraphRelation
 	NewRelation() *entity.GraphRelation
-	DeleteRelation(int) (error)
+	DeleteRelation(int) error
 
-	FindNodes(map[string]string) (*entity.GraphNode)
+	FindNodes(map[string]string) *entity.GraphNode
 	FindNodesByLabel(string) ([]*entity.GraphNode, error)
 
 	FindRelations(map[string]string) *entity.GraphRelation

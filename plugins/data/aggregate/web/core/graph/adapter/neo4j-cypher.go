@@ -5,9 +5,9 @@ import (
 
 	"github.com/jmcvetta/neoism"
 
-	"github.com/feedlabs/feedify/neo4j"
-	"github.com/feedlabs/feedify/graph"
-	"github.com/feedlabs/feedify/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/neo4j"
 )
 
 const (
@@ -28,8 +28,8 @@ func newAdapterStore(options graph.Options) (graph.GraphAdapterStore, error) {
 }
 
 type GraphAdapterStore struct {
-	client	*neo4j.Neo4jClient
-	db		*neoism.Database
+	client *neo4j.Neo4jClient
+	db     *neoism.Database
 
 	isConnected bool
 }
@@ -40,11 +40,11 @@ func (n *GraphAdapterStore) Query(statement string) *entity.GraphQuery {
 	}
 
 	cq := neoism.CypherQuery{
-		Statement: statement,
+		Statement:  statement,
 		Parameters: neoism.Props{},
 		Result: &[]struct {
-			N   map[string]string `json:"n"`
-//			N   string `json:"n.data"`
+			N map[string]string `json:"n"`
+			//			N   string `json:"n.data"`
 		}{},
 	}
 
@@ -103,7 +103,7 @@ func (n *GraphAdapterStore) NewNode(p graph.Props, label string) (*entity.GraphN
 	return ConvertNeoismNodeToNode(_n), nil
 }
 
-func (n *GraphAdapterStore) DeleteNode(id int) (error) {
+func (n *GraphAdapterStore) DeleteNode(id int) error {
 	if !n.isConnected {
 		n.Connect()
 	}
@@ -117,7 +117,7 @@ func (n *GraphAdapterStore) DeleteNode(id int) (error) {
 	return _n.Delete()
 }
 
-func (n *GraphAdapterStore) SetPropertyNode(id int, key string, value string) (error) {
+func (n *GraphAdapterStore) SetPropertyNode(id int, key string, value string) error {
 	if !n.isConnected {
 		n.Connect()
 	}
@@ -195,7 +195,7 @@ func (n *GraphAdapterStore) NewRelation() *entity.GraphRelation {
 	return &entity.GraphRelation{}
 }
 
-func (n *GraphAdapterStore) DeleteRelation(id int) (error) {
+func (n *GraphAdapterStore) DeleteRelation(id int) error {
 	if !n.isConnected {
 		n.Connect()
 	}

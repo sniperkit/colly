@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/feedlabs/elasticfeed-plugin/scenario/ann"
-	"github.com/feedlabs/elasticfeed/plugin"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/scenario/ann"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
 )
 
 func main() {

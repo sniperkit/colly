@@ -5,13 +5,13 @@ import (
 
 	"github.com/jmcvetta/neoism"
 
-	"github.com/feedlabs/feedify/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
 )
 
 type Neo4jClient struct {
-	host	string
-	port	string
-	db		string
+	host string
+	port string
+	db   string
 }
 
 func (n *Neo4jClient) Connect() (*neoism.Database, error) {

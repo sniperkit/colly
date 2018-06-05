@@ -2,8 +2,8 @@ package graph
 
 import (
 	"errors"
-	"github.com/feedlabs/feedify/config"
-	"github.com/feedlabs/feedify/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph/entity"
 )
 
 type GraphStorage struct {
@@ -18,11 +18,11 @@ func (g *GraphStorage) Node(id int) (*entity.GraphNode, error) {
 	return g.adapter.Node(id)
 }
 
-func (g *GraphStorage) DeleteNode(id int) (error) {
+func (g *GraphStorage) DeleteNode(id int) error {
 	return g.adapter.DeleteNode(id)
 }
 
-func (g *GraphStorage) SetPropertyNode(id int, key string, value string) (error) {
+func (g *GraphStorage) SetPropertyNode(id int, key string, value string) error {
 	return g.adapter.SetPropertyNode(id, key, value)
 }
 
@@ -38,7 +38,7 @@ func (g *GraphStorage) RelationshipsNode(id int, name ...string) ([]*entity.Grap
 	return g.adapter.RelationshipsNode(id, name...)
 }
 
-func (g *GraphStorage) DeleteRelation(id int) (error) {
+func (g *GraphStorage) DeleteRelation(id int) error {
 	return g.adapter.DeleteRelation(id)
 }
 
