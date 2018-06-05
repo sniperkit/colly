@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/sniperkit/colly/pkg"
+	colly "github.com/sniperkit/colly/pkg"
 )
 
 type ProxyPool interface {

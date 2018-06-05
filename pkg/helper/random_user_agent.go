@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/sniperkit/colly/pkg"
+	colly "github.com/sniperkit/colly/pkg"
 )
 
 var uaGens = []func() string{

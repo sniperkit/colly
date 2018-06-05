@@ -15,11 +15,14 @@
 package debug
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // WebDebugger is a web based debuging frontend for colly
 type WebDebugger struct {

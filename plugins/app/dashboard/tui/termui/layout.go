@@ -54,23 +54,24 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 	defer termui.Close()
 
 	var snapshots []metric.Snapshot
-	// stats = collectorMetrics.NewStatsCollector()
 
 	body := termui.NewGrid()
-	body.X = 0
-	body.Y = 0
+	body.X = 2
+	body.Y = 2
 	body.BgColor = termui.ThemeAttr("bg")
 	body.Width = termui.TermWidth()
 
 	logWindow := termui.NewList()
 	logWindow.ItemFgColor = termui.ColorYellow
 	logWindow.BorderLabel = "Logs"
-	logWindow.Height = 22
+	logWindow.Height = 20
+	logWindow.BorderFg = termui.ColorCyan
 
 	logParser := termui.NewList()
 	logParser.ItemFgColor = termui.ColorYellow
-	logParser.BorderLabel = "Filters"
-	logParser.Height = 22
+	logParser.BorderLabel = "Whitelist body filters"
+	logParser.Height = 20
+	logParser.BorderFg = termui.ColorCyan
 
 	totalBytesDownloaded := termui.NewPar("")
 	totalBytesDownloaded.Height = 3
@@ -83,6 +84,12 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 	totalNumberOfRequests.TextFgColor = termui.ColorWhite
 	totalNumberOfRequests.BorderLabel = "URLs crawled"
 	totalNumberOfRequests.BorderFg = termui.ColorCyan
+
+	countQueueSize := termui.NewPar("")
+	countQueueSize.Height = 3
+	countQueueSize.TextFgColor = termui.ColorWhite
+	countQueueSize.BorderLabel = "URLs enqueue"
+	countQueueSize.BorderFg = termui.ColorCyan
 
 	requestsPerSecond := termui.NewPar("")
 	requestsPerSecond.Height = 3
@@ -114,30 +121,88 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 	numberOfErrors.BorderLabel = "Number of 4xx errors"
 	numberOfErrors.BorderFg = termui.ColorCyan
 
+	cacheInfo := termui.NewPar("")
+	cacheInfo.Height = 7
+	cacheInfo.TextFgColor = termui.ColorWhite
+	cacheInfo.BorderLabel = "Cache Info"
+	cacheInfo.BorderFg = termui.ColorCyan
+
+	transportInfo := termui.NewPar("")
+	transportInfo.Height = 7
+	transportInfo.TextFgColor = termui.ColorWhite
+	transportInfo.BorderLabel = "Transport Info"
+	transportInfo.BorderFg = termui.ColorCyan
+
+	queueInfo := termui.NewPar("")
+	queueInfo.Height = 7
+	queueInfo.TextFgColor = termui.ColorWhite
+	queueInfo.BorderLabel = "Queue Info"
+	queueInfo.BorderFg = termui.ColorCyan
+
+	proxyInfo := termui.NewPar("")
+	proxyInfo.Height = 7
+	proxyInfo.TextFgColor = termui.ColorWhite
+	proxyInfo.BorderLabel = "Proxy Info"
+	proxyInfo.BorderFg = termui.ColorCyan
+
+	cacheHitList := termui.NewList()
+	cacheHitList.ItemFgColor = termui.ColorYellow
+	cacheHitList.BorderLabel = "Cache-Hit"
+	cacheHitList.Height = 10
+	cacheHitList.BorderFg = termui.ColorCyan
+
+	cacheSetList := termui.NewList()
+	cacheSetList.ItemFgColor = termui.ColorYellow
+	cacheSetList.BorderLabel = "Cache-Set"
+	cacheSetList.Height = 10
+	cacheSetList.BorderFg = termui.ColorCyan
+
+	proxyPoolList := termui.NewList()
+	proxyPoolList.ItemFgColor = termui.ColorYellow
+	proxyPoolList.BorderLabel = "Proxy List"
+	proxyPoolList.Height = 10
+	proxyPoolList.BorderFg = termui.ColorCyan
+
 	topRequestsContentTypes := termui.NewList()
 	topRequestsContentTypes.ItemFgColor = termui.ColorYellow
-	topRequestsContentTypes.BorderLabel = "Top10 Resp. Content-Types"
-	topRequestsContentTypes.Height = 12
+	topRequestsContentTypes.BorderLabel = "Mime Types"
+	topRequestsContentTypes.Height = 10
+	topRequestsContentTypes.BorderFg = termui.ColorCyan
 
 	topRequestsStatusCodes := termui.NewList()
 	topRequestsStatusCodes.ItemFgColor = termui.ColorYellow
-	topRequestsStatusCodes.BorderLabel = "Top10 Resp. Status Codes"
-	topRequestsStatusCodes.Height = 12
+	topRequestsStatusCodes.BorderLabel = "Status"
+	topRequestsStatusCodes.Height = 10
+	topRequestsStatusCodes.BorderFg = termui.ColorCyan
 
 	topRequestsWhitelistMatches := termui.NewList()
 	topRequestsWhitelistMatches.ItemFgColor = termui.ColorYellow
-	topRequestsWhitelistMatches.BorderLabel = "Top10 Whitelist match(es)"
-	topRequestsWhitelistMatches.Height = 12
+	topRequestsWhitelistMatches.BorderLabel = " Whitelist URLs filters "
+	topRequestsWhitelistMatches.Height = 10
+	topRequestsWhitelistMatches.BorderFg = termui.ColorCyan
 
 	topRequestsBlacklistMatches := termui.NewList()
 	topRequestsBlacklistMatches.ItemFgColor = termui.ColorYellow
-	topRequestsBlacklistMatches.BorderLabel = "Top10 Blacklist match(es)"
-	topRequestsBlacklistMatches.Height = 12
+	topRequestsBlacklistMatches.BorderLabel = " Blacklist URLs filters "
+	topRequestsBlacklistMatches.Height = 20
+	topRequestsBlacklistMatches.BorderFg = termui.ColorCyan
+
+	topWhitelistBody := termui.NewList()
+	topWhitelistBody.ItemFgColor = termui.ColorYellow
+	topWhitelistBody.BorderLabel = " Whitelist Body filters "
+	topWhitelistBody.Height = 20
+	topWhitelistBody.BorderFg = termui.ColorCyan
+
+	topBlacklistBody := termui.NewList()
+	topBlacklistBody.ItemFgColor = termui.ColorYellow
+	topBlacklistBody.BorderLabel = " Blacklist Body filters "
+	topBlacklistBody.Height = 20
+	topBlacklistBody.BorderFg = termui.ColorCyan
 
 	elapsedTime := termui.NewPar("")
 	elapsedTime.Height = 3
 	elapsedTime.TextFgColor = termui.ColorWhite
-	elapsedTime.BorderLabel = "Elapsed time:"
+	elapsedTime.BorderLabel = " Elapsed time "
 	elapsedTime.BorderFg = termui.ColorCyan
 
 	draw := func() {
@@ -205,8 +270,17 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 
 	termui.Body.AddRows(
 		termui.NewRow(
-			termui.NewCol(7, 0, logWindow),
-			termui.NewCol(5, 0, logParser),
+			termui.NewCol(6, 0, logWindow),
+			termui.NewCol(2, 0, logParser),
+			termui.NewCol(2, 0, topRequestsBlacklistMatches),
+			termui.NewCol(2, 0, topBlacklistBody),
+		),
+		termui.NewRow(
+			termui.NewCol(3, 0, numberOfWorkers),
+			termui.NewCol(3, 0, numberOfErrors),
+			// termui.NewCol(3, 0, countQueueSize),
+			termui.NewCol(3, 0, averageSizeInBytes),
+			termui.NewCol(3, 0, elapsedTime),
 		),
 		termui.NewRow(
 			termui.NewCol(3, 0, totalBytesDownloaded),
@@ -215,16 +289,17 @@ func Dashboard(stats *metric.Statistics, stopTheUI, stopTheCrawler chan bool) {
 			termui.NewCol(3, 0, averageResponseTime),
 		),
 		termui.NewRow(
-			termui.NewCol(3, 0, numberOfWorkers),
-			termui.NewCol(3, 0, numberOfErrors),
-			termui.NewCol(3, 0, averageSizeInBytes),
-			termui.NewCol(3, 0, elapsedTime),
+			termui.NewCol(3, 0, queueInfo),
+			termui.NewCol(3, 0, proxyInfo),
+			termui.NewCol(3, 0, cacheInfo),
+			termui.NewCol(3, 0, transportInfo),
 		),
 		termui.NewRow(
-			termui.NewCol(3, 0, topRequestsContentTypes),
-			termui.NewCol(3, 0, topRequestsStatusCodes),
-			termui.NewCol(3, 0, topRequestsWhitelistMatches),
-			termui.NewCol(3, 0, topRequestsBlacklistMatches),
+			termui.NewCol(2, 0, topRequestsContentTypes),
+			termui.NewCol(1, 0, topRequestsStatusCodes),
+			termui.NewCol(3, 0, proxyPoolList),
+			termui.NewCol(3, 0, cacheHitList),
+			termui.NewCol(3, 0, cacheSetList),
 		),
 	)
 

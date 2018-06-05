@@ -1,7 +1,7 @@
 package helper
 
 import (
-	"github.com/sniperkit/colly/pkg"
+	colly "github.com/sniperkit/colly/pkg"
 )
 
 // Referrer sets valid Referrer HTTP header to requests.

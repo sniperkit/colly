@@ -5,7 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/sniperkit/colly/pkg"
+	colly "github.com/sniperkit/colly/pkg"
 )
 
 const stop = true
@@ -136,7 +136,9 @@ func (q *Queue) Run(c *colly.Collector) error {
 						break
 					}
 				}
+				q.lock.Lock()
 				atomic.AddInt32(&q.activeThreadCount, 1)
+				q.lock.Unlock()
 				rb, err := q.storage.GetRequest()
 				if err != nil || rb == nil {
 					q.finish()
@@ -156,14 +158,29 @@ func (q *Queue) Run(c *colly.Collector) error {
 	return nil
 }
 
-func (q *Queue) finish() {
-	atomic.AddInt32(&q.activeThreadCount, -1)
+func (q *Queue) setActiveThreadCount(count int32) {
 	q.lock.Lock()
+	switch count {
+	case 1:
+		q.activeThreadCount++
+	case -1:
+		q.activeThreadCount--
+	default:
+		q.activeThreadCount = q.activeThreadCount - count
+	}
+	q.lock.Unlock()
+}
+
+func (q *Queue) finish() {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+	// q.setActiveThreadCount(-1)
+	q.activeThreadCount--
 	for _, c := range q.threadChans {
 		c <- stop
 	}
 	q.threadChans = make([]chan bool, 0, q.Threads)
-	q.lock.Unlock()
+	// q.lock.Unlock()
 }
 
 // Init implements Storage.Init() function
@@ -206,5 +223,7 @@ func (q *InMemoryQueueStorage) GetRequest() ([]byte, error) {
 
 // QueueSize implements Storage.QueueSize() function
 func (q *InMemoryQueueStorage) QueueSize() (int, error) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
 	return q.size, nil
 }
