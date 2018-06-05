@@ -1,0 +1,10 @@
+protobuf/
+*.gos
+*.key
+*.cert
+gcli
+gsvc
+traefik
+consul
+*/debug
+data/
