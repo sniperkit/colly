@@ -46,6 +46,7 @@ ENV APP_OWNER=${APP_OWNER:-"sniperkit"} \
 	APP_PROJECT=${APP_PROJECT:-"colly"} \
 	APP_NAME=${APP_NAME:-"colly-dashboard"}
 	APP_WORKDIR=${APP_WORKDIR:-"/app"} \
+	APP_SUFFIX_CMD=${APP_SUFFIX_CMD:-"tini -g --"}
 
 # app - build args
 ARG APP_EXECUTABLE_FILEPATH="${APP_EXECUTABLE_DIR}/${APP_NAME}"
