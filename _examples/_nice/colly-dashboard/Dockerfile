@@ -44,7 +44,7 @@ ARG APK_RUNTIME=${APK_RUNTIME:="ca-certificates libssh2 openssl"}
 # app - env vars
 ENV APP_OWNER=${APP_OWNER:-"sniperkit"} \
 	APP_PROJECT=${APP_PROJECT:-"colly"} \
-	APP_NAME=${APP_NAME:-"colly-dashboard"}
+	APP_NAME=${APP_NAME:-"colly-dashboard"} \
 	APP_WORKDIR=${APP_WORKDIR:-"/app"} \
 	APP_SUFFIX_CMD=${APP_SUFFIX_CMD:-"tini -g --"}
 
