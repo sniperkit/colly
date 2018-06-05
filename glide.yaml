@@ -8,7 +8,11 @@ ignore:
 - github.com/sniperkit/xstats
 - github.com/ghetzel/go-stockutil
 - github.com/Sirupsen/logrus
+- code.google.com/p/go.net
+- goCF/bayesianFilter
+- github.com/jimsmart/bufrr
 import:
+- package: github.com/SteelSeries/bufrr
 - package: code.google.com/p/go.net
   subpackages:
   - html
@@ -247,7 +251,7 @@ import:
   - dynamic
   - dynamic/grpcdynamic
   - grpcreflect
-- package: github.com/jimsmart/bufrr
+- package: github.com/SteelSeries/bufrr
 - package: github.com/jinzhu/gorm
   subpackages:
   - dialects/mssql

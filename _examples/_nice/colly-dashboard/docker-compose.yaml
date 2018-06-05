@@ -25,3 +25,7 @@ services:
     depends_on:
     - etcd_v2
 
+  influxdb:
+    image: influxdb:alpine
+    ports:
+      - 8086:8086

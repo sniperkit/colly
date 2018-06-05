@@ -44,7 +44,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"github.com/jimsmart/bufrr"
+	"github.com/SteelSeries/bufrr"
 	"hash/crc32"
 	"io"
 	"os"

@@ -45,3 +45,7 @@
 - https://github.com/hybridgroup/gocv
 - https://github.com/mattn/go-redmine
 - https://github.com/krallin/tini
+- https://github.com/rothso/isqool/blob/refactor/isqool.go
+- https://github.com/gocarina/gocsv
+- https://github.com/go-gorp/gorp
+- https://github.com/imwyl/novelCrawler/blob/f5bfed85fdb8ff7180f712d2617df5291dec40f1/crwaler/crawler.go

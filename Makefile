@@ -16,6 +16,12 @@ else
   PLATFORM := Linux
 endif
 
+# dep 
+# dep init
+
+## glide
+# yes no | glide create
+# glide install --strip-vendor
 
 PLATFORM_VERSION ?= $(shell uname -r)
 PLATFORM_ARCH ?= $(shell uname -m)

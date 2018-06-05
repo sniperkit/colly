@@ -1,6 +1,6 @@
 package collection
 
 import (
-	_ "github.com/segmentio/stats/datadog"
-	_ "github.com/segmentio/stats/influxdb"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/datadog"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/influxdb"
 )

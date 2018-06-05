@@ -8,15 +8,15 @@ import (
 	"time"
 
 	// stats - core
-	"github.com/segmentio/stats"
+	"github.com/sniperkit/colly/plugins/data/collection/stats"
 
 	// stats - collectors
-	"github.com/segmentio/stats/httpstats"
+	"github.com/sniperkit/colly/plugins/data/collection/stats/httpstats"
 
 	// stats - remote clients
-	"github.com/segmentio/stats/datadog"
-	"github.com/segmentio/stats/influxdb"
-	// "github.com/segmentio/stats/prometheus"
+	"github.com/sniperkit/colly/plugins/data/collection/stats/datadog"
+	"github.com/sniperkit/colly/plugins/data/collection/stats/influxdb"
+	// "github.com/sniperkit/colly/plugins/data/collection/stats/prometheus"
 
 	metric "github.com/sniperkit/colly/pkg/metric"
 	tachymeter "github.com/sniperkit/colly/plugins/data/collection/stats/tachymeter"

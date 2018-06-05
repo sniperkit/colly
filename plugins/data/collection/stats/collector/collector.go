@@ -1,9 +1,9 @@
 package collection
 
 import (
-	_ "github.com/segmentio/stats/httpstats"
-	_ "github.com/segmentio/stats/iostats"
-	_ "github.com/segmentio/stats/netstats"
-	_ "github.com/segmentio/stats/procstats"
-	_ "github.com/segmentio/stats/redisstats"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/httpstats"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/iostats"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/netstats"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/procstats"
+	_ "github.com/sniperkit/colly/plugins/data/collection/stats/redisstats"
 )
