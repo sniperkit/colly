@@ -8,7 +8,7 @@ import (
 	"net/rpc"
 	"sync/atomic"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 var endpointId uint64

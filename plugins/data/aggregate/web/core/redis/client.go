@@ -6,7 +6,7 @@ import (
 	"github.com/fzzy/radix/extra/pubsub"
 	"github.com/fzzy/radix/redis"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/config"
 )
 
 type RedisClient struct {

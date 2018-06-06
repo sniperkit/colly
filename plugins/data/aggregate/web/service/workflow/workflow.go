@@ -7,16 +7,16 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/population"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/population"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
 
 	"github.com/mitchellh/mapstructure"
 	jsonutil "github.com/mitchellh/packer/common/json"
 
-	smodel "github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/model"
+	smodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/model"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/controller/room"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/controller/room"
 )
 
 /*

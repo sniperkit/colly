@@ -1,7 +1,7 @@
 package system
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/system/v1/router"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/system/v1/router"
 )
 
 type SystemService struct{}

@@ -21,7 +21,7 @@ func main() {
 package main
 
 import "fmt"
-import "github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg"
+import "github.com/sniperkit/colly/plugins/data/transform/mxj"
 
 func main() {
 	m, err := mxj.NewMapJson(s)

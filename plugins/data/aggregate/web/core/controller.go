@@ -2,7 +2,7 @@ package feedify
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/context"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/context"
 )
 
 type Controller struct {

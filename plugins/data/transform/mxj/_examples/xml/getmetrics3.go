@@ -40,7 +40,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj"
 	"log"
 	"os"
 	"sort"

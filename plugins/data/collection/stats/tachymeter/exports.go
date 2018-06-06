@@ -16,7 +16,7 @@ var (
 /*
 	Refs:
 	- https://github.com/agrison/go-tablib
-	- github.com/sniperkit/colly/addons/convert/tabular
+	- github.com/sniperkit/colly/plugins/data/transform/tabular
 	- github.com/sniperkit/xtask/plugin
 */
 

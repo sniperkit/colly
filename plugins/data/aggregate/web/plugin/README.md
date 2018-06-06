@@ -16,7 +16,7 @@ package main
 
 import (
   "github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
-  sensor "github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/sensor/weather-on-mars"
+  sensor "github.com/sniperkit/colly/plugins/data/aggregate/web/plugin/sensor/weather-on-mars"
 )
 
 func main() {

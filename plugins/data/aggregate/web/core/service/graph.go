@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/graph"
 )
 
 type GraphService struct {

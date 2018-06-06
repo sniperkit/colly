@@ -7,7 +7,7 @@ import (
 )
 
 // XLSX exports the Dataset as a byte array representing the .xlsx format.
-func (d *Dataset) XLSX() (*Exportable, error) {
+func (d *Dataset) XLSX() (*Export, error) {
 	file := xlsx.NewFile()
 	if err := d.addXlsxSheetToFile(file, "Sheet 1"); err != nil {
 		return nil, err
@@ -15,11 +15,11 @@ func (d *Dataset) XLSX() (*Exportable, error) {
 
 	b := newBuffer()
 	file.Write(b)
-	return newExportable(b), nil
+	return newExport(b), nil
 }
 
 // XLSX returns a XLSX representation of the Databook as an exportable.
-func (d *Databook) XLSX() (*Exportable, error) {
+func (d *Databook) XLSX() (*Export, error) {
 	file := xlsx.NewFile()
 
 	for _, s := range d.sheets {
@@ -28,7 +28,7 @@ func (d *Databook) XLSX() (*Exportable, error) {
 
 	b := newBuffer()
 	file.Write(b)
-	return newExportable(b), nil
+	return newExport(b), nil
 }
 
 func (d *Dataset) addXlsxSheetToFile(file *xlsx.File, sheetName string) error {

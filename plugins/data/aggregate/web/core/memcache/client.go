@@ -3,7 +3,7 @@ package memcache
 import (
 	"github.com/bradfitz/gomemcache/memcache"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/config"
 )
 
 type MemcacheClient struct {

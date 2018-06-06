@@ -2,8 +2,8 @@ package tablib
 
 // import "sync"
 
-// HTML returns the HTML representation of the Dataset as an Exportable.
-func (d *Dataset) HTML() *Exportable {
+// HTML returns the HTML representation of the Dataset as an Export.
+func (d *Dataset) HTML() *Export {
 	back := d.Records()
 	b := newBuffer()
 
@@ -26,11 +26,11 @@ func (d *Dataset) HTML() *Exportable {
 	}
 	b.WriteString("\n\t</tbody>\n</table>")
 
-	return newExportable(b)
+	return newExport(b)
 }
 
-// HTML returns a HTML representation of the Databook as an Exportable.
-func (d *Databook) HTML() *Exportable {
+// HTML returns a HTML representation of the Databook as an Export.
+func (d *Databook) HTML() *Export {
 	b := newBuffer()
 
 	for _, s := range d.sheets {
@@ -39,5 +39,5 @@ func (d *Databook) HTML() *Exportable {
 		b.WriteString("\n\n")
 	}
 
-	return newExportable(b)
+	return newExport(b)
 }

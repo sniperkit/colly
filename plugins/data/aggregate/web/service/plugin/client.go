@@ -16,7 +16,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 // If this is true, then the "unexpected EOF" panic will not be

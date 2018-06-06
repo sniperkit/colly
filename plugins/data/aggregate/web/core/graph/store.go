@@ -3,7 +3,7 @@ package graph
 import (
 	"errors"
 	"github.com/barakmich/glog"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/graph/entity"
 )
 
 // A Props is a set of key/value properties.

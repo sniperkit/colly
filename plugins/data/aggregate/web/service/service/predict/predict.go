@@ -1,7 +1,7 @@
 package predict
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/predict/v1/router"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/predict/v1/router"
 )
 
 /*

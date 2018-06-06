@@ -3,8 +3,8 @@ package controller
 import (
 	"encoding/json"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
-	template "github.com/sniperkit/colly/plugins/data/aggregate/service/service/store/v1/template/workflow"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
+	template "github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/store/v1/template/workflow"
 )
 
 type WorkflowController struct {

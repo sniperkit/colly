@@ -3,7 +3,7 @@ package morty
 import (
 	"regexp"
 
-	"github.com/sniperkit/colly/addons/content/contenttype"
+	"github.com/sniperkit/colly/plugins/data/encoding/html/contenttype"
 )
 
 var (

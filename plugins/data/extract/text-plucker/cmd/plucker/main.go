@@ -9,8 +9,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/sniperkit/colly/addons/content/striphtml"
-	"github.com/sniperkit/colly/addons/content/text-extraction/pluck"
+	"github.com/sniperkit/colly/plugins/data/encoding/html/striphtml"
+	"github.com/sniperkit/colly/plugins/data/extract/text-plucker"
 )
 
 var version string

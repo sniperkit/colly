@@ -7,7 +7,7 @@ import (
 	"github.com/feedlabs/feedify"
 	"github.com/gorilla/websocket"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/controller/room"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/controller/room"
 )
 
 type WebSocketController struct {

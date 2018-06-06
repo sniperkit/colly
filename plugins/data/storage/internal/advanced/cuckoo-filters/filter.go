@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/sniperkit/colly/addons/content/concurrent-counter"
+	"github.com/sniperkit/colly/plugins/data/counter/ordered"
 )
 
 // Filter is an implementation of a cuckoo filter.

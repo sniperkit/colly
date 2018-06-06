@@ -5,9 +5,9 @@ import (
 	"github.com/astaxie/beego/context"
 
 	"github.com/feedlabs/feedify"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/store/v1/template"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/store/v1/template"
 )
 
 type DefaultController struct {

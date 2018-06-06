@@ -8,13 +8,13 @@ import (
 	// "github.com/clbanning/mxj"
 )
 
-// XML returns a XML representation of the Dataset as an Exportable.
-func (d *Dataset) XML() (*Exportable, error) {
+// XML returns a XML representation of the Dataset as an Export.
+func (d *Dataset) XML() (*Export, error) {
 	return d.XMLWithTagNamePrefixIndent("row", "  ", "  ")
 }
 
-// XML returns a XML representation of the Databook as an Exportable.
-func (d *Databook) XML() (*Exportable, error) {
+// XML returns a XML representation of the Databook as an Export.
+func (d *Databook) XML() (*Export, error) {
 	b := newBuffer()
 	b.WriteString("<databook>\n")
 	for _, s := range d.sheets {
@@ -27,14 +27,14 @@ func (d *Databook) XML() (*Exportable, error) {
 		b.WriteString("\n  </sheet>")
 	}
 	b.WriteString("\n</databook>")
-	return newExportable(b), nil
+	return newExport(b), nil
 }
 
 // XMLWithTagNamePrefixIndent returns a XML representation with custom tag, prefix and indent.
-func (d *Dataset) XMLWithTagNamePrefixIndent(tagName, prefix, indent string) (*Exportable, error) {
+func (d *Dataset) XMLWithTagNamePrefixIndent(tagName, prefix, indent string) (*Export, error) {
 	back := d.Dict()
 
-	exportable := newExportable(newBuffer())
+	exportable := newExport(newBuffer())
 	exportable.buffer.WriteString("<dataset>\n")
 	for _, r := range back {
 		m := mxj.Map(r.(map[string]interface{}))

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/feedlabs/feedify/graph"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/controller/room"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/controller/room"
 )
 
 func GetEntryList(FeedId string, ApplicationId string, OrgId string) (feedEntries []*Entry, err error) {

@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/feedlabs/feedify/graph"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/config"
 )
 
 func (this *Admin) IsSuperUser() bool {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/scenario/ann"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/plugin/scenario/ann"
 	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
 )
 

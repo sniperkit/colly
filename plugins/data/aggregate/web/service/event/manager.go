@@ -3,7 +3,7 @@ package event
 import (
 	"github.com/astaxie/beego/toolbox"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
 )
 
 const (

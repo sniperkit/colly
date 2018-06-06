@@ -1,14 +1,14 @@
 package elasticfeed
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/event"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/population"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/workflow"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/event"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/population"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/workflow"
 
 	"github.com/feedlabs/feedify"
 )

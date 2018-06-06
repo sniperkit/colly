@@ -2,7 +2,7 @@ package stream
 
 import (
 	"errors"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/config"
 )
 
 type StreamMessage struct {

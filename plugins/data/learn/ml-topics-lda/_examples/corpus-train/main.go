@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	topics "github.com/sniperkit/colly/addons/mlearn/lda-topics"
+	topics "github.com/sniperkit/colly/plugins/mlearn/lda-topics"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/rpc"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 // An implementation of Indexer where the builder is actually executed

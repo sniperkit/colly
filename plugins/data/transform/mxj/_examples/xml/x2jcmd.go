@@ -1,11 +1,11 @@
-// Per: https://github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg/issues/24
-// Per: https://github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg/issues/25
+// Per: https://github.com/sniperkit/colly/plugins/data/transform/mxj/issues/24
+// Per: https://github.com/sniperkit/colly/plugins/data/transform/mxj/issues/25
 
 package main
 
 import (
 	"fmt"
-	"github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg/x2j"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj/x2j"
 	"io"
 	"os"
 )

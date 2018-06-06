@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/config"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 
 	"github.com/mitchellh/osext"
 
-	emodel "github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
+	emodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
 )
 
 type PluginManager struct {

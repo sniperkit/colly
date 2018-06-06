@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/rpc"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 // RpcClient is the client end that communicates with a Packer RPC server.

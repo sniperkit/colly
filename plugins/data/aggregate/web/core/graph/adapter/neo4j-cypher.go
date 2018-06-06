@@ -5,9 +5,9 @@ import (
 
 	"github.com/jmcvetta/neoism"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph/entity"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/neo4j"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/graph"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/neo4j"
 )
 
 const (

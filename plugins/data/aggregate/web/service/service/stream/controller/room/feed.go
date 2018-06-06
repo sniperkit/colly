@@ -11,7 +11,7 @@ import (
 
 	"github.com/astaxie/beego/session"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/model"
 )
 
 const (

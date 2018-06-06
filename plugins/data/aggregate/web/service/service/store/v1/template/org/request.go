@@ -3,7 +3,7 @@ package org
 import (
 	"errors"
 	"github.com/feedlabs/feedify/context"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/store/v1/template"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/store/v1/template"
 )
 
 func CheckRequiredParams() {

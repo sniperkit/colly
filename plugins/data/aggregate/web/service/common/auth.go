@@ -3,8 +3,8 @@ package common
 import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/astaxie/beego/context"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/config"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
 )
 
 var (

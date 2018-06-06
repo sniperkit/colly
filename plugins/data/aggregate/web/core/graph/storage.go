@@ -2,8 +2,8 @@ package graph
 
 import (
 	"errors"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/graph/entity"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/graph/entity"
 )
 
 type GraphStorage struct {

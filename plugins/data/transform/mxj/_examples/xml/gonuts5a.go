@@ -5,7 +5,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj"
 )
 
 var xmlData = []byte(`<?xml version="1.0" encoding="UTF-8"?>

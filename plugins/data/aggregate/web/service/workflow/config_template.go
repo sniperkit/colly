@@ -9,7 +9,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/uuid"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/uuid"
 )
 
 // InitTime is the UTC time when this package was initialized. It is

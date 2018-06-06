@@ -11,7 +11,7 @@ Create symbolic link from you directory to `GOPATH`
 ```
 cd to-your-project
 mkdir -p $GOPATH/src/github.com/feedlabs
-ln -s $(pwd) $GOPATH/src/github.com/sniperkit/colly/plugins/data/aggregate/service
+ln -s $(pwd) $GOPATH/src/github.com/sniperkit/colly/plugins/data/aggregate/web/service
 ```
 
 #### Developing Elasticfeed

@@ -9,7 +9,7 @@ NOTE: Currently only the ReCaptchaV2 endpoint is supported.
 ## Installation
 
 ```
-go get -u github.com/sniperkit/colly/addons/captcha/provider/twocaptcha
+go get -u github.com/sniperkit/colly/plugins/captcha/provider/twocaptcha
 ```
 
 

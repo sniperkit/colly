@@ -24,14 +24,14 @@ var (
 	TabularMarkdown = "markdown"
 )
 
-// Markdown returns a Markdown table Exportable representation of the Dataset.
-func (d *Dataset) Markdown() *Exportable {
+// Markdown returns a Markdown table Export representation of the Dataset.
+func (d *Dataset) Markdown() *Export {
 	return d.Tabular(TabularMarkdown)
 }
 
-// Tabular returns a tabular Exportable representation of the Dataset.
+// Tabular returns a tabular Export representation of the Dataset.
 // format is either grid, simple, condensed or markdown.
-func (d *Dataset) Tabular(format string) *Exportable {
+func (d *Dataset) Tabular(format string) *Export {
 	back := d.Records()
 	t := gotabulate.Create(back)
 
@@ -66,9 +66,9 @@ func (d *Dataset) Tabular(format string) *Exportable {
 				}
 				b.WriteString(" | \n")
 			}
-			return newExportable(b)
+			return newExport(b)
 		}
-		return newExportableFromString(rendered)
+		return newExportFromString(rendered)
 	}
-	return newExportableFromString(t.Render(format))
+	return newExportFromString(t.Render(format))
 }

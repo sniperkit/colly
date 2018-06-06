@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/web/service-plugin/pipeline/ann"
+	imagga "github.com/sniperkit/colly/plugins/data/aggregate/web/plugin/indexer/photo-imagga"
 	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin"
 )
 
@@ -10,6 +10,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterPipeline(new(ann.Pipeline))
+	server.RegisterPipeline(new(imagga.Indexer))
 	server.Serve()
 }

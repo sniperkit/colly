@@ -9,9 +9,9 @@ import (
 	"github.com/astaxie/beego"
 
 	// feedify packages
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
-	_ "github.com/sniperkit/colly/plugins/data/aggregate/core/graph/adapter"
-	_ "github.com/sniperkit/colly/plugins/data/aggregate/core/stream/adapter/message"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/config"
+	_ "github.com/sniperkit/colly/plugins/data/aggregate/web/core/graph/adapter"
+	_ "github.com/sniperkit/colly/plugins/data/aggregate/web/core/stream/adapter/message"
 )
 
 func GetConfigKey(key string) string {

@@ -1,7 +1,7 @@
 package model
 
 import (
-	pmodel "github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
+	pmodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
 )
 
 type PluginManager interface {

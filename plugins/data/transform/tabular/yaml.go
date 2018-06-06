@@ -42,8 +42,8 @@ func LoadDatabookYAML(yamlContent []byte) (*Databook, error) {
 	return db, nil
 }
 
-// YAML returns a YAML representation of the Dataset as an Exportable.
-func (d *Dataset) YAML() (*Exportable, error) {
+// YAML returns a YAML representation of the Dataset as an Export.
+func (d *Dataset) YAML() (*Export, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
@@ -53,11 +53,11 @@ func (d *Dataset) YAML() (*Exportable, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newExportableFromBytes(b), nil
+	return newExportFromBytes(b), nil
 }
 
-// YAML returns a YAML representation of the Databook as an Exportable.
-func (d *Databook) YAML() (*Exportable, error) {
+// YAML returns a YAML representation of the Databook as an Export.
+func (d *Databook) YAML() (*Export, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
@@ -73,5 +73,5 @@ func (d *Databook) YAML() (*Exportable, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newExportableFromBytes(b), nil
+	return newExportFromBytes(b), nil
 }

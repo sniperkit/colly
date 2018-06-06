@@ -1,10 +1,10 @@
-// https://github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg/issues/17
+// https://github.com/sniperkit/colly/plugins/data/transform/mxj/issues/17
 
 package main
 
 import (
 	"fmt"
-	"github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj"
 	"io"
 	"os"
 )

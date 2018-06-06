@@ -5,9 +5,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg/x2j"
 	"io"
 	"os"
+
+	"github.com/sniperkit/colly/plugins/data/transform/mxj/x2j"
 )
 
 func main() {

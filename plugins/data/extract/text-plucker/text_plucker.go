@@ -17,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/sniperkit/colly/addons/content/striphtml"
+	"github.com/sniperkit/colly/plugins/data/encoding/html/striphtml"
 )
 
 // Config specifies parameters for plucking

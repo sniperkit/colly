@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/sniperkit/colly/addons/content/secureimage"
+	"github.com/sniperkit/colly/plugins/data/validate/image"
 )
 
 func main() {

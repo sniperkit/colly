@@ -1,4 +1,4 @@
-// Per https://github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg/issues/34
+// Per https://github.com/sniperkit/colly/plugins/data/transform/mxj/issues/34
 
 package main
 
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/sniperkit/xutil/plugin/format/convert/mxj/pkg"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj"
 )
 
 var data = []byte(`

@@ -32,7 +32,7 @@ var (
 )
 
 type StoreConfig struct {
-	Enabled   bool   `default:"false" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
+	Enabled   bool   `default:"false" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
 	Domain    string `json:"domain" yaml:"domain" toml:"domain" xml:"domain" ini:"domain"`
 	Protocol  string `json:"protocol" yaml:"protocol" toml:"protocol" xml:"protocol" ini:"protocol"`
 	Host      string `json:"host" yaml:"host" toml:"host" xml:"host" ini:"host"`

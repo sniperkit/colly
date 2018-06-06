@@ -7,6 +7,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	cmmap "github.com/sniperkit/colly/plugins/data/structure/map/multi"
 )
 
 // Dataset represents a set of data, which is a list of data and header for each column.
@@ -19,9 +21,15 @@ type Dataset struct {
 	splitAt       int      // Split dataset set the max number of rows before splitting an export or sharding the dataset.
 	outputFile    string   // OutputFile set the local path for exporting/writing the dataset content
 	outputFormats []string // OutputFormats set all formats to export the dataset. It will rename the file extension automatically when processed
-	compress      bool     // compress enable the compression after encoding the datasets to each outputFormats defined
-	streamed      bool     // streamed allow the dataset to be streamed
 
+	compress  *Compressable
+	Stream    bool // streamed allow the dataset to be streamed
+	Pivotable bool // isPivotable enables the dataset to be imported with pivot package for more advanced operations on different type of store backends
+
+	scm                  *cmmap.ShardedConcurrentMap
+	scmm                 *cmmap.ShardedConcurrentMultiMap
+	cmm                  *cmmap.ConcurrentMultiMap
+	cm                   *cmmap.ConcurrentMap
 	headers              []string
 	data                 [][]interface{}
 	tags                 [][]string
@@ -29,10 +37,11 @@ type Dataset struct {
 	rows                 int
 	cols                 int
 	errorOnUnmatchedKeys bool
-	isExportable         bool
+	isExport             bool
 	lock                 *sync.RWMutex
 	wg                   *sync.WaitGroup
 	validationErrors     []ValidationError // validationErrors store an array of all validation errors that occured on this dataset
+	errors               []string          // internal process errors
 
 	//-- End
 }
@@ -61,6 +70,8 @@ func NewDataset(headers []string) *Dataset {
 func NewDatasetWithData(headers []string, data [][]interface{}) *Dataset {
 	d := &Dataset{
 		EmptyValue:       "",
+		Stream:           false,
+		Pivotable:        false,
 		headers:          headers,
 		data:             data,
 		tags:             make([][]string, 0),
@@ -68,8 +79,23 @@ func NewDatasetWithData(headers []string, data [][]interface{}) *Dataset {
 		rows:             len(data),
 		cols:             len(headers),
 		validationErrors: make([]ValidationError, 0),
+		cm:               cmmap.NewConcurrentMap(),
+		cmm:              cmmap.NewConcurrentMultiMap(),
+		scm:              cmmap.NewShardedConcurrentMap(),
+		scmm:             cmmap.NewShardedConcurrentMultiMap(),
 		lock:             &sync.RWMutex{},
 		wg:               &sync.WaitGroup{},
+	}
+	return d
+}
+
+// SplitAt sets the max number ot rows for a Dataset before sharding or exporting to a local file.
+func (d *Dataset) Compress(engine string, status bool, level int) *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	if d.compress == nil {
+		d.compress = NewCompressable()
 	}
 	return d
 }
@@ -92,15 +118,25 @@ func (d *Dataset) OutputFile(fp string) *Dataset {
 	return d
 }
 
-// OutputFile sets the default output filepath of the Dataset.
-func (d *Dataset) OutputFormats(formats ...string) *Dataset {
+/*
+// Compress sets the compression formats to apply on the file exported.
+func (d *Dataset) CompressWithOptions(opts ...string) *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	d.outputFormats = opts
+	return d
+}
+*/
+
+// Formats sets the default output filepath of the Dataset.
+func (d *Dataset) Formats(formats ...string) *Dataset {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 
 	// check if format is supported/allowed
 	var sanitizedFormats []string
 	for _, format := range formats {
-		if ok := inArray(format); ok {
+		if ok := inArray(format, formats); ok {
 			sanitizedFormats = append(sanitizedFormats, format)
 		}
 	}
@@ -658,6 +694,35 @@ func (d *Dataset) Column(header string) []interface{} {
 	return values
 }
 
+// ColumnIndex returns all the values for a specific column number
+// returns nil if column is not found.
+func (d *Dataset) ColumnIndex(colIndex int) []interface{} {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	if ok := colIndexExists(colIndex, d); !ok {
+		return nil
+	}
+
+	values := make([]interface{}, d.rows)
+	for i, e := range d.data {
+		switch e[colIndex].(type) {
+		case DynamicColumn:
+			values[i] = e[colIndex].(DynamicColumn)(e)
+		default:
+			values[i] = e[colIndex]
+		}
+	}
+	return values
+}
+
+func colIndexExists(colIndex int, d *Dataset) bool {
+	if len(d.headers) <= 0 || len(d.headers) > colIndex {
+		return false
+	}
+	return true
+}
+
 // Row returns a map representing a specific row of the Dataset.
 // returns tablib.ErrInvalidRowIndex if the row cannot be found
 func (d *Dataset) Row(index int) (map[string]interface{}, error) {
@@ -935,10 +1000,10 @@ func (d *Dataset) ValidationErrors() []ValidationError {
 	return d.validationErrors
 }
 
-// Errors return the errors total count of the Dataset.
-func (d *Dataset) Errors() []ValidationError {
+// Errors return the errors list the Dataset.
+func (d *Dataset) Errors() []string {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 
-	return len(d.validationErrors)
+	return d.errors
 }

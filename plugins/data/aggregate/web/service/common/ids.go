@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
 )
 
 func AdminChannelID(admin *resource.Admin) string {

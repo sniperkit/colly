@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/feedlabs/feedify"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/controller/channel"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/controller/channel"
 )
 
 func InitRouters() {

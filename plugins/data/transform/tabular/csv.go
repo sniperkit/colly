@@ -6,8 +6,8 @@ import (
 	// "sync"
 )
 
-// CSV returns a CSV representation of the Dataset an Exportable.
-func (d *Dataset) CSV() (*Exportable, error) {
+// CSV returns a CSV representation of the Dataset an Export.
+func (d *Dataset) CSV() (*Export, error) {
 	records := d.Records()
 	b := newBuffer()
 
@@ -18,7 +18,7 @@ func (d *Dataset) CSV() (*Exportable, error) {
 		return nil, err
 	}
 
-	return newExportable(b), nil
+	return newExport(b), nil
 }
 
 // LoadCSV loads a Dataset by its CSV representation.
@@ -43,7 +43,7 @@ func LoadCSV(input []byte) (*Dataset, error) {
 }
 
 // TSV returns a TSV representation of the Dataset as string.
-func (d *Dataset) TSV() (*Exportable, error) {
+func (d *Dataset) TSV() (*Export, error) {
 	records := d.Records()
 	b := newBuffer()
 
@@ -55,7 +55,7 @@ func (d *Dataset) TSV() (*Exportable, error) {
 		return nil, err
 	}
 
-	return newExportable(b), nil
+	return newExport(b), nil
 }
 
 // LoadTSV loads a Dataset by its TSV representation.

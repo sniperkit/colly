@@ -3,15 +3,15 @@ package workflow
 import (
 	"fmt"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
 
-	emodel "github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
-	pmodel "github.com/sniperkit/colly/plugins/data/aggregate/service/plugin/model"
-	smodel "github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/model"
+	emodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
+	pmodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/plugin/model"
+	smodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/model"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream/controller/room"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream/controller/room"
 )
 
 var (

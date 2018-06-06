@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/config"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/uuid"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
-	template "github.com/sniperkit/colly/plugins/data/aggregate/service/service/system/v1/template/plugin"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/uuid"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
+	template "github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/system/v1/template/plugin"
 )
 
 type PluginController struct {

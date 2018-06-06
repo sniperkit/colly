@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/chonla/console"
-	db "github.com/sniperkit/colly/addons/convert/data-yaml2db"
+	db "github.com/sniperkit/colly/plugins/convert/data-yaml2db"
 )
 
 func main() {

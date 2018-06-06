@@ -1,8 +1,8 @@
 package resource
 
 import (
-	emodel "github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream"
+	emodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream"
 )
 
 type ResourceManager struct {

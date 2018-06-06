@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/sniperkit/colly/plugins/data/backends"
+	"github.com/sniperkit/colly/plugins/data/storage/backend"
 )
 
 // Initialize creates a new Store object, initializing the client

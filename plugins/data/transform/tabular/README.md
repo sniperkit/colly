@@ -16,6 +16,7 @@ Export formats supported:
 
 * JSON (Sets + Books)
 * YAML (Sets + Books)
+* TOML (Sets + Books)
 * XLSX (Sets + Books)
 * XML (Sets + Books)
 * TSV (Sets)
@@ -28,10 +29,10 @@ Loading formats supported:
 
 * JSON (Sets + Books)
 * YAML (Sets + Books)
+* TOML (Sets + Books)
 * XML (Sets)
 * CSV (Sets)
 * TSV (Sets)
-
 
 ## Overview
 
@@ -41,7 +42,7 @@ A Dataset is a table of tabular data. It must have a header row. Datasets can be
 ### tablib.Databook
 A Databook is a set of Datasets. The most common form of a Databook is an Excel file with multiple spreadsheets. Databooks can be exported to JSON, YAML and XML.
 
-### tablib.Exportable
+### tablib.Export
 An exportable is a struct that holds a buffer representing the Databook or Dataset after it has been formated to any of the supported export formats.
 At this point the Datbook or Dataset cannot be modified anymore, but it can be returned as a `string`, a `[]byte` or written to a `io.Writer` or a file.
 
@@ -244,9 +245,9 @@ ds, _ := LoadYAML([]byte(`- age: 90
 
 ## Exports
 
-### Exportable
+### Export
 
-Any of the following export format returns an `*Exportable` which means you can use:
+Any of the following export format returns an `*Export` which means you can use:
 - `Bytes()` to get the content as a byte array
 - `String()` to get the content as a string
 - `WriteTo(io.Writer)` to write the content to an `io.Writer`
@@ -581,7 +582,7 @@ Will output the following JSON representation of the Databook:
 go get github.com/agrison/go-tablib
 ```
 
-For those wanting the v1 version where export methods returned a `string` and not an `Exportable`:
+For those wanting the v1 version where export methods returned a `string` and not an `Export`:
 ```bash
 go get gopkg.in/agrison/go-tablib.v1
 ```

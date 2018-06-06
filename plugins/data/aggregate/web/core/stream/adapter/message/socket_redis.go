@@ -1,8 +1,8 @@
 package message
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/redis"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/stream"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/redis"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/stream"
 )
 
 func init() {

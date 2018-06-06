@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmcvetta/neoism"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/config"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/config"
 )
 
 type Neo4jClient struct {

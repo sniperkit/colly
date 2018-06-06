@@ -25,7 +25,7 @@ import (
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
 
-	"github.com/sniperkit/colly/addons/content/contenttype"
+	"github.com/sniperkit/colly/plugins/data/encoding/html/contenttype"
 )
 
 const (

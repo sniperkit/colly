@@ -1,9 +1,9 @@
 package plugin
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/common/uuid"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/resource"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/system/v1/template"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/common/uuid"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/resource"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/system/v1/template"
 )
 
 func GetEntry(plugin *resource.Plugin) (entry map[string]interface{}) {

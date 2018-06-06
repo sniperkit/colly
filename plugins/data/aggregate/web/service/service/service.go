@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/predict"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/store"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/stream"
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/service/system"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/predict"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/store"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/stream"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/service/system"
 
-	"github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
 )
 
 type Service struct{}

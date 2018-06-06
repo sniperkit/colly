@@ -1,7 +1,7 @@
 package population
 
 import (
-	emodel "github.com/sniperkit/colly/plugins/data/aggregate/service/elasticfeed/model"
+	emodel "github.com/sniperkit/colly/plugins/data/aggregate/web/service/elasticfeed/model"
 )
 
 type PopulationManager struct {

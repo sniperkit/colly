@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/sniperkit/colly/plugins/data/aggregate/core/stream"
+	"github.com/sniperkit/colly/plugins/data/aggregate/web/core/stream"
 )
 
 type StreamService struct {
