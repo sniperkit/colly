@@ -17,7 +17,7 @@ ignore:
 - golang.org/x/text/secure/bidirule
 - com/golang/protobuf/ptypes/timestamp
 import:
-- packahe: github.com/ngdinhtoan/flagstruct
+- package: github.com/ngdinhtoan/flagstruct
 - package: github.com/SteelSeries/bufrr
 - package: code.google.com/p/go.net
   subpackages:
