@@ -2,18 +2,7 @@
 version: '3.4'
 services:
 
-  dashboard:
-    build: "./_example/_nice/colly_dashboard"
-    container_name: c_dashboard
-    image: sniperkit/colly-dashboard
-    command:
-    - "/opt/colly/bin/colly-dashboard"
-    - "-conf_dir=/opt/colly/config"
-    environment:
-    - APP_REPO_URL=https://github.com/sniperkit/colly.git
-    - APP_ETCD_HOSTS=http://etcd:2379/
-    volumes:
-    - "./_example/_nice/colly_dashboard:/go/src/app"
+
 
   influxdb:
     image: influxdb:alpine

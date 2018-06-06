@@ -213,6 +213,7 @@ type Collector struct {
 	robotsMap         map[string]*robotstxt.RobotsData
 	htmlCallbacks     []*htmlCallbackContainer
 	xmlCallbacks      []*xmlCallbackContainer
+	jsonCallbacks     []*jsonCallbackContainer
 	requestCallbacks  []RequestCallback
 	responseCallbacks []ResponseCallback
 	errorCallbacks    []ErrorCallback
@@ -600,6 +601,20 @@ func (c *Collector) OnResponse(f ResponseCallback) {
 	c.lock.Unlock()
 }
 
+// OnJSON registers a function. Function will be executed on every JSON
+// element matched by the xpath parameter.
+func (c *Collector) OnJSON(xPath string, f JSONCallback) {
+	c.lock.Lock()
+	if c.jsonCallbacks == nil {
+		c.jsonCallbacks = make([]*jsonCallbackContainer, 0, 4)
+	}
+	c.jsonCallbacks = append(c.jsonCallbacks, &jsonCallbackContainer{
+		Query:    xPath,
+		Function: f,
+	})
+	c.lock.Unlock()
+}
+
 // OnHTML registers a function. Function will be executed on every HTML
 // element matched by the GoQuery Selector parameter.
 // GoQuery Selector is a selector used by https://github.com/PuerkitoBio/goquery
@@ -627,6 +642,22 @@ func (c *Collector) OnXML(xpathQuery string, f XMLCallback) {
 		Query:    xpathQuery,
 		Function: f,
 	})
+	c.lock.Unlock()
+}
+
+// OnJSONDetach deregister a function. Function will not be execute after detached
+func (c *Collector) OnJSONDetach(xPath string) {
+	c.lock.Lock()
+	deleteIdx := -1
+	for i, cc := range c.jsonCallbacks {
+		if cc.Query == xPath {
+			deleteIdx = i
+			break
+		}
+	}
+	if deleteIdx != -1 {
+		c.jsonCallbacks = append(c.jsonCallbacks[:deleteIdx], c.jsonCallbacks[deleteIdx+1:]...)
+	}
 	c.lock.Unlock()
 }
 
