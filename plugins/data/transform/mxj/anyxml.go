@@ -21,7 +21,7 @@ const (
 	import (
 		"encoding/json"
 		"fmt"
-		"github.com/clbanning/mxj"
+		"github.com/sniperkit/xutil/plugin/format/convert/mxj"
 	)
 
 	func main() {

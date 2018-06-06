@@ -58,6 +58,9 @@ func (mv Map) ValuesForKey(key string, subkeys ...string) ([]interface{}, error)
 	var cnt int
 	hasKey(m, key, &ret, &cnt, subKeyMap)
 	return ret[:cnt], nil
+	// ret := make([]interface{}, 0)
+	// hasKey(m, key, &ret, subKeyMap)
+	// return ret, nil
 }
 
 // hasKey - if the map 'key' exists append it to array
@@ -118,10 +121,12 @@ func hasKey(iv interface{}, key string, ret *[]interface{}, cnt *int, subkeys ma
 		// scan the rest
 		for _, v := range vv {
 			hasKey(v, key, ret, cnt, subkeys)
+			// hasKey(v, key, ret, subkeys)
 		}
 	case []interface{}:
 		for _, v := range iv.([]interface{}) {
 			hasKey(v, key, ret, cnt, subkeys)
+			// hasKey(v, key, ret, subkeys)
 		}
 	}
 }
@@ -326,6 +331,9 @@ func (mv Map) oldValuesForPath(path string, subkeys ...string) ([]interface{}, e
 	if keys[len(keys)-1] == "" {
 		keys = keys[:len(keys)-1]
 	}
+	// ivals := make([]interface{}, 0)
+	// valuesForKeyPath(&ivals, m, keys, subKeyMap)
+	// return ivals, nil
 	ivals := make([]interface{}, 0, defaultArraySize)
 	var cnt int
 	valuesForKeyPath(&ivals, &cnt, m, keys, subKeyMap)
@@ -493,6 +501,7 @@ func getSubKeyMap(kv ...string) (map[string]interface{}, error) {
 	}
 	m := make(map[string]interface{}, 0)
 	for _, v := range kv {
+
 		vv := strings.Split(v, fieldSep)
 		switch len(vv) {
 		case 2:

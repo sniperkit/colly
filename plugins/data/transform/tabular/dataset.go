@@ -4,24 +4,37 @@
 package tablib
 
 import (
-	"fmt"
 	"sort"
+	"sync"
 	"time"
-	// "sync"
 )
 
 // Dataset represents a set of data, which is a list of data and header for each column.
 type Dataset struct {
-	// EmptyValue represents the string value to b output if a field cannot be
-	// formatted as a string during output of certain formats.
-	EmptyValue       string
-	headers          []string
-	data             [][]interface{}
-	tags             [][]string
-	constraints      []ColumnConstraint
-	rows             int
-	cols             int
-	ValidationErrors []ValidationError
+
+	// Public attributes
+	EmptyValue string // EmptyValue represents the string value to b output if a field cannot be formatted as a string during output of certain formats.
+
+	// Private attributes
+	splitAt       int      // Split dataset set the max number of rows before splitting an export or sharding the dataset.
+	outputFile    string   // OutputFile set the local path for exporting/writing the dataset content
+	outputFormats []string // OutputFormats set all formats to export the dataset. It will rename the file extension automatically when processed
+	compress      bool     // compress enable the compression after encoding the datasets to each outputFormats defined
+	streamed      bool     // streamed allow the dataset to be streamed
+
+	headers              []string
+	data                 [][]interface{}
+	tags                 [][]string
+	constraints          []ColumnConstraint
+	rows                 int
+	cols                 int
+	errorOnUnmatchedKeys bool
+	isExportable         bool
+	lock                 *sync.RWMutex
+	wg                   *sync.WaitGroup
+	validationErrors     []ValidationError // validationErrors store an array of all validation errors that occured on this dataset
+
+	//-- End
 }
 
 // DynamicColumn represents a function that can be evaluated dynamically
@@ -46,28 +59,85 @@ func NewDataset(headers []string) *Dataset {
 
 // NewDatasetWithData creates a new Dataset.
 func NewDatasetWithData(headers []string, data [][]interface{}) *Dataset {
-	d := &Dataset{"", headers, data, make([][]string, 0), make([]ColumnConstraint,
-		len(headers)), len(data), len(headers), nil}
+	d := &Dataset{
+		EmptyValue:       "",
+		headers:          headers,
+		data:             data,
+		tags:             make([][]string, 0),
+		constraints:      make([]ColumnConstraint, len(headers)),
+		rows:             len(data),
+		cols:             len(headers),
+		validationErrors: make([]ValidationError, 0),
+		lock:             &sync.RWMutex{},
+		wg:               &sync.WaitGroup{},
+	}
+	return d
+}
+
+// SplitAt sets the max number ot rows for a Dataset before sharding or exporting to a local file.
+func (d *Dataset) SplitAt(splitAt int) *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	d.splitAt = splitAt
+	return d
+}
+
+// OutputFile sets the default output filepath of the Dataset.
+func (d *Dataset) OutputFile(fp string) *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	d.outputFile = fp
+	return d
+}
+
+// OutputFile sets the default output filepath of the Dataset.
+func (d *Dataset) OutputFormats(formats ...string) *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	// check if format is supported/allowed
+	var sanitizedFormats []string
+	for _, format := range formats {
+		if ok := inArray(format); ok {
+			sanitizedFormats = append(sanitizedFormats, format)
+		}
+	}
+
+	d.outputFormats = formats
 	return d
 }
 
 // Headers return the headers of the Dataset.
 func (d *Dataset) Headers() []string {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	return d.headers
 }
 
 // Width returns the number of columns in the Dataset.
 func (d *Dataset) Width() int {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	return d.cols
 }
 
 // Height returns the number of rows in the Dataset.
 func (d *Dataset) Height() int {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	return d.rows
 }
 
 // Append appends a row of values to the Dataset.
 func (d *Dataset) Append(row []interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if len(row) != d.cols {
 		return ErrInvalidDimensions
 	}
@@ -80,6 +150,9 @@ func (d *Dataset) Append(row []interface{}) error {
 // AppendTagged appends a row of values to the Dataset with one or multiple tags
 // for filtering purposes.
 func (d *Dataset) AppendTagged(row []interface{}, tags ...string) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if err := d.Append(row); err != nil {
 		return err
 	}
@@ -89,15 +162,22 @@ func (d *Dataset) AppendTagged(row []interface{}, tags ...string) error {
 
 // AppendValues appends a row of values to the Dataset.
 func (d *Dataset) AppendValues(row ...interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	return d.Append(row[:])
 }
 
 // AppendValuesTagged appends a row of values to the Dataset with one or multiple tags
 // for filtering purposes.
 func (d *Dataset) AppendValuesTagged(row ...interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if len(row) < d.cols {
 		return ErrInvalidDimensions
 	}
+
 	var tags []string
 	for _, tag := range row[d.cols:] {
 		if tagStr, ok := tag.(string); ok {
@@ -111,6 +191,9 @@ func (d *Dataset) AppendValuesTagged(row ...interface{}) error {
 
 // Insert inserts a row at a given index.
 func (d *Dataset) Insert(index int, row []interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if index < 0 || index >= d.rows {
 		return ErrInvalidRowIndex
 	}
@@ -137,11 +220,17 @@ func (d *Dataset) Insert(index int, row []interface{}) error {
 
 // InsertValues inserts a row of values at a given index.
 func (d *Dataset) InsertValues(index int, values ...interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	return d.Insert(index, values[:])
 }
 
 // InsertTagged inserts a row at a given index with specific tags.
 func (d *Dataset) InsertTagged(index int, row []interface{}, tags ...string) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if err := d.Insert(index, row); err != nil {
 		return err
 	}
@@ -154,6 +243,9 @@ func (d *Dataset) InsertTagged(index int, row []interface{}, tags ...string) err
 // Tag tags a row at a given index with specific tags.
 // Returns ErrInvalidRowIndex if the row does not exist.
 func (d *Dataset) Tag(index int, tags ...string) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if index < 0 || index >= d.rows {
 		return ErrInvalidRowIndex
 	}
@@ -170,6 +262,9 @@ func (d *Dataset) Tag(index int, tags ...string) error {
 // Tags returns the tags of a row at a given index.
 // Returns ErrInvalidRowIndex if the row does not exist.
 func (d *Dataset) Tags(index int) ([]string, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if index < 0 || index >= d.rows {
 		return nil, ErrInvalidRowIndex
 	}
@@ -179,6 +274,9 @@ func (d *Dataset) Tags(index int) ([]string, error) {
 
 // AppendColumn appends a new column with values to the Dataset.
 func (d *Dataset) AppendColumn(header string, cols []interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if len(cols) != d.rows {
 		return ErrInvalidDimensions
 	}
@@ -193,6 +291,9 @@ func (d *Dataset) AppendColumn(header string, cols []interface{}) error {
 
 // AppendConstrainedColumn appends a constrained column to the Dataset.
 func (d *Dataset) AppendConstrainedColumn(header string, constraint ColumnConstraint, cols []interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	err := d.AppendColumn(header, cols)
 	if err != nil {
 		return err
@@ -204,11 +305,17 @@ func (d *Dataset) AppendConstrainedColumn(header string, constraint ColumnConstr
 
 // AppendColumnValues appends a new column with values to the Dataset.
 func (d *Dataset) AppendColumnValues(header string, cols ...interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	return d.AppendColumn(header, cols[:])
 }
 
 // AppendDynamicColumn appends a dynamic column to the Dataset.
 func (d *Dataset) AppendDynamicColumn(header string, fn DynamicColumn) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	d.headers = append(d.headers, header)
 	d.constraints = append(d.constraints, nil)
 	d.cols++
@@ -219,6 +326,9 @@ func (d *Dataset) AppendDynamicColumn(header string, fn DynamicColumn) {
 
 // ConstrainColumn adds a constraint to a column in the Dataset.
 func (d *Dataset) ConstrainColumn(header string, constraint ColumnConstraint) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	i := indexOfColumn(header, d)
 	if i != -1 {
 		d.constraints[i] = constraint
@@ -227,6 +337,9 @@ func (d *Dataset) ConstrainColumn(header string, constraint ColumnConstraint) {
 
 // InsertColumn insert a new column at a given index.
 func (d *Dataset) InsertColumn(index int, header string, cols []interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if index < 0 || index >= d.cols {
 		return ErrInvalidColumnIndex
 	}
@@ -251,6 +364,9 @@ func (d *Dataset) InsertColumn(index int, header string, cols []interface{}) err
 
 // InsertDynamicColumn insert a new dynamic column at a given index.
 func (d *Dataset) InsertDynamicColumn(index int, header string, fn DynamicColumn) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if index < 0 || index >= d.cols {
 		return ErrInvalidColumnIndex
 	}
@@ -270,8 +386,10 @@ func (d *Dataset) InsertDynamicColumn(index int, header string, fn DynamicColumn
 }
 
 // InsertConstrainedColumn insert a new constrained column at a given index.
-func (d *Dataset) InsertConstrainedColumn(index int, header string,
-	constraint ColumnConstraint, cols []interface{}) error {
+func (d *Dataset) InsertConstrainedColumn(index int, header string, constraint ColumnConstraint, cols []interface{}) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	err := d.InsertColumn(index, header, cols)
 	if err != nil {
 		return err
@@ -283,6 +401,9 @@ func (d *Dataset) InsertConstrainedColumn(index int, header string,
 
 // insertHeader inserts a header at a specific index.
 func (d *Dataset) insertHeader(index int, header string) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	headers := make([]string, 0, d.cols+1)
 	headers = append(headers, d.headers[:index]...)
 	headers = append(headers, header)
@@ -301,6 +422,9 @@ func (d *Dataset) insertHeader(index int, header string) {
 // ValidFailFast returns whether the Dataset is valid regarding constraints that have
 // been previously set on columns.
 func (d *Dataset) ValidFailFast() bool {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	valid := true
 	for column, constraint := range d.constraints {
 		if constraint != nil {
@@ -323,7 +447,7 @@ func (d *Dataset) ValidFailFast() bool {
 	}
 
 	if valid {
-		d.ValidationErrors = make([]ValidationError, 0)
+		d.validationErrors = make([]ValidationError, 0)
 	}
 
 	return valid
@@ -332,9 +456,12 @@ func (d *Dataset) ValidFailFast() bool {
 // Valid returns whether the Dataset is valid regarding constraints that have
 // been previously set on columns.
 // Its behaviour is different of ValidFailFast in a sense that it will validate the whole
-// Dataset and all the validation errors will be available by using Dataset.ValidationErrors
+// Dataset and all the validation errors will be available by using Dataset.ValidationErrors()
 func (d *Dataset) Valid() bool {
-	d.ValidationErrors = make([]ValidationError, 0)
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	d.validationErrors = make([]ValidationError, 0)
 
 	valid := true
 	for column, constraint := range d.constraints {
@@ -350,8 +477,11 @@ func (d *Dataset) Valid() bool {
 				}
 
 				if !cellIsValid {
-					d.ValidationErrors = append(d.ValidationErrors,
-						ValidationError{Row: row, Column: column})
+					d.validationErrors = append(d.validationErrors,
+						ValidationError{
+							Row:    row,
+							Column: column,
+						})
 					valid = false
 				}
 			}
@@ -362,6 +492,9 @@ func (d *Dataset) Valid() bool {
 
 // HasAnyConstraint returns whether the Dataset has any constraint set.
 func (d *Dataset) HasAnyConstraint() bool {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	hasConstraint := false
 	for _, constraint := range d.constraints {
 		if constraint != nil {
@@ -377,6 +510,9 @@ func (d *Dataset) HasAnyConstraint() bool {
 // If no constraints are set, it returns the same instance.
 // Note: The returned Dataset is free of any constraints, tags are conserved.
 func (d *Dataset) ValidSubset() *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	return d.internalValidSubset(true)
 }
 
@@ -385,12 +521,18 @@ func (d *Dataset) ValidSubset() *Dataset {
 // If no constraints are set, it returns the same instance.
 // Note: The returned Dataset is free of any constraints, tags are conserved.
 func (d *Dataset) InvalidSubset() *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	return d.internalValidSubset(false)
 }
 
 // internalValidSubset return a new Dataset containing only the rows validating their
 // constraints or not depending on its parameter `valid`.
 func (d *Dataset) internalValidSubset(valid bool) *Dataset {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	if !d.HasAnyConstraint() {
 		return d
 	}
@@ -440,6 +582,9 @@ func (d *Dataset) internalValidSubset(valid bool) *Dataset {
 
 // Stack stacks two Dataset by joining at the row level, and return new combined Dataset.
 func (d *Dataset) Stack(other *Dataset) (*Dataset, error) {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	if d.Width() != other.Width() {
 		return nil, ErrInvalidDimensions
 	}
@@ -461,6 +606,9 @@ func (d *Dataset) Stack(other *Dataset) (*Dataset, error) {
 
 // StackColumn stacks two Dataset by joining them at the column level, and return new combined Dataset.
 func (d *Dataset) StackColumn(other *Dataset) (*Dataset, error) {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	if d.Height() != other.Height() {
 		return nil, ErrInvalidDimensions
 	}
@@ -490,6 +638,9 @@ func (d *Dataset) StackColumn(other *Dataset) (*Dataset, error) {
 // Column returns all the values for a specific column
 // returns nil if column is not found.
 func (d *Dataset) Column(header string) []interface{} {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	colIndex := indexOfColumn(header, d)
 	if colIndex == -1 {
 		return nil
@@ -510,6 +661,9 @@ func (d *Dataset) Column(header string) []interface{} {
 // Row returns a map representing a specific row of the Dataset.
 // returns tablib.ErrInvalidRowIndex if the row cannot be found
 func (d *Dataset) Row(index int) (map[string]interface{}, error) {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
 	if index < 0 || index >= d.rows {
 		return nil, ErrInvalidRowIndex
 	}
@@ -529,6 +683,9 @@ func (d *Dataset) Row(index int) (map[string]interface{}, error) {
 // Rows returns an array of map representing a set of specific rows of the Dataset.
 // returns tablib.ErrInvalidRowIndex if the row cannot be found.
 func (d *Dataset) Rows(index ...int) ([]map[string]interface{}, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	for _, i := range index {
 		if i < 0 || i >= d.rows {
 			return nil, ErrInvalidRowIndex
@@ -547,6 +704,9 @@ func (d *Dataset) Rows(index ...int) ([]map[string]interface{}, error) {
 // Slice returns a new Dataset representing a slice of the orignal Dataset like a slice of an array.
 // returns tablib.ErrInvalidRowIndex if the lower or upper bound is out of range.
 func (d *Dataset) Slice(lower, upperNonInclusive int) (*Dataset, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if lower > upperNonInclusive || lower < 0 || upperNonInclusive > d.rows {
 		return nil, ErrInvalidRowIndex
 	}
@@ -574,6 +734,9 @@ func (d *Dataset) Slice(lower, upperNonInclusive int) (*Dataset, error) {
 // Filter filters a Dataset, returning a fresh Dataset including only the rows
 // previously tagged with one of the given tags. Returns a new Dataset.
 func (d *Dataset) Filter(tags ...string) *Dataset {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	nd := NewDataset(d.headers)
 	for rowIndex, rowValue := range d.data {
 		for _, filterTag := range tags {
@@ -587,15 +750,24 @@ func (d *Dataset) Filter(tags ...string) *Dataset {
 
 // Sort sorts the Dataset by a specific column. Returns a new Dataset.
 func (d *Dataset) Sort(column string) *Dataset {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	return d.internalSort(column, false)
 }
 
 // SortReverse sorts the Dataset by a specific column in reverse order. Returns a new Dataset.
 func (d *Dataset) SortReverse(column string) *Dataset {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	return d.internalSort(column, true)
 }
 
 func (d *Dataset) internalSort(column string, reverse bool) *Dataset {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	nd := NewDataset(d.headers)
 	pairs := make([]entryPair, 0, nd.rows)
 	for i, v := range d.Column(column) {
@@ -641,6 +813,9 @@ func (d *Dataset) internalSort(column string, reverse bool) *Dataset {
 // in the returned Dataset.
 // TODO
 func (d *Dataset) Transpose() *Dataset {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	newHeaders := make([]string, 0, d.cols+1)
 	newHeaders = append(newHeaders, d.headers[0])
 	for _, c := range d.Column(d.headers[0]) {
@@ -662,6 +837,9 @@ func (d *Dataset) Transpose() *Dataset {
 
 // DeleteRow deletes a row at a specific index
 func (d *Dataset) DeleteRow(row int) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	if row < 0 || row >= d.rows {
 		return ErrInvalidRowIndex
 	}
@@ -672,6 +850,9 @@ func (d *Dataset) DeleteRow(row int) error {
 
 // DeleteColumn deletes a column from the Dataset.
 func (d *Dataset) DeleteColumn(header string) error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	colIndex := indexOfColumn(header, d)
 	if colIndex == -1 {
 		return ErrInvalidColumnIndex
@@ -696,6 +877,9 @@ func indexOfColumn(header string, d *Dataset) int {
 
 // Dict returns the Dataset as an array of map where each key is a column.
 func (d *Dataset) Dict() []interface{} {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	back := make([]interface{}, d.rows)
 	for i, e := range d.data {
 		m := make(map[string]interface{}, d.cols-1)
@@ -715,6 +899,9 @@ func (d *Dataset) Dict() []interface{} {
 // Records returns the Dataset as an array of array where each entry is a string.
 // The first row of the returned 2d array represents the columns of the Dataset.
 func (d *Dataset) Records() [][]string {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	records := make([][]string, d.rows+1 /* +1 for header */)
 	records[0] = make([]string, d.cols)
 	for j, e := range d.headers {
@@ -740,7 +927,18 @@ func (d *Dataset) Records() [][]string {
 	return records
 }
 
-// ffs
-func justLetMeKeepFmt() {
-	fmt.Printf("")
+// ValidationErrors return the validationErrors of the Dataset.
+func (d *Dataset) ValidationErrors() []ValidationError {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	return d.validationErrors
+}
+
+// Errors return the errors total count of the Dataset.
+func (d *Dataset) Errors() []ValidationError {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+
+	return len(d.validationErrors)
 }

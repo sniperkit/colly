@@ -14,11 +14,11 @@ import (
 	"github.com/gregjones/httpcache"
 
 	// cache - advanced backends
-	"github.com/sniperkit/xcache/backend/default/badger"
-	"github.com/sniperkit/xcache/backend/default/diskv"
+	"github.com/sniperkit/colly/plugins/data/storage/backend/default/badger"
+	"github.com/sniperkit/colly/plugins/data/storage/backend/default/diskv"
 
 	// general helpers
-	"github.com/sniperkit/xtask/util/fs"
+	"github.com/sniperkit/colly/plugins/system/fs"
 )
 
 // cache related objects

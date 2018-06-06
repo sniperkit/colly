@@ -1,8 +1,6 @@
 package tablib
 
 import (
-	// "sync"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -46,6 +44,9 @@ func LoadDatabookYAML(yamlContent []byte) (*Databook, error) {
 
 // YAML returns a YAML representation of the Dataset as an Exportable.
 func (d *Dataset) YAML() (*Exportable, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	back := d.Dict()
 
 	b, err := yaml.Marshal(back)
@@ -57,6 +58,9 @@ func (d *Dataset) YAML() (*Exportable, error) {
 
 // YAML returns a YAML representation of the Databook as an Exportable.
 func (d *Databook) YAML() (*Exportable, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
 	y := make([]map[string]interface{}, len(d.sheets))
 	i := 0
 	for _, s := range d.sheets {

@@ -1,6 +1,8 @@
 package mxj
 
-import "strings"
+import (
+	"strings"
+)
 
 // Removes the path.
 func (mv Map) Remove(path string) error {

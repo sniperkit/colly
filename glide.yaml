@@ -11,6 +11,11 @@ ignore:
 - code.google.com/p/go.net
 - goCF/bayesianFilter
 - github.com/jimsmart/bufrr
+- github.com/zaibon/resp
+- golang.org/x/sys/cpu
+- github.com/golang/protobuf
+- golang.org/x/text/secure/bidirule
+- com/golang/protobuf/ptypes/timestamp
 import:
 - package: github.com/SteelSeries/bufrr
 - package: code.google.com/p/go.net

@@ -21,13 +21,15 @@ type LeafNode struct {
 	Value interface{} // the value at the path termination
 }
 
+var LeafSeparator string = "."
+
 // LeafNodes - returns an array of all LeafNode values for the Map.
 // The option no_attr argument suppresses attribute values (keys with prepended hyphen, '-')
 // as well as the "#text" key for the associated simple element value.
 //
-// PrependAttrWithHypen(false) will result in attributes having .attr-name as 
-// terminal node in 'path' while the path for the element value, itself, will be 
-// the base path w/o "#text". 
+// PrependAttrWithHypen(false) will result in attributes having .attr-name as
+// terminal node in 'path' while the path for the element value, itself, will be
+// the base path w/o "#text".
 //
 // LeafUseDotNotation(true) causes list members to be identified using ".N" syntax
 // rather than "[N]" syntax.
@@ -46,7 +48,7 @@ func getLeafNodes(path, node string, mv interface{}, l *[]LeafNode, noattr bool)
 	// if stripping attributes, then also strip "#text" key
 	if !noattr || node != "#text" {
 		if path != "" && node[:1] != "[" {
-			path += "."
+			path += LeafSeparator
 		}
 		path += node
 	}
@@ -101,7 +103,7 @@ var useDotNotation bool
 
 // LeafUseDotNotation sets a flag that list members in LeafNode paths
 // should be identified using ".N" syntax rather than the default "[N]"
-// syntax.  Calling LeafUseDotNotation with no arguments toggles the 
+// syntax.  Calling LeafUseDotNotation with no arguments toggles the
 // flag on/off; otherwise, the argument sets the flag value 'true'/'false'.
 func LeafUseDotNotation(b ...bool) {
 	if len(b) == 0 {

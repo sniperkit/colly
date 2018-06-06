@@ -7,6 +7,15 @@ import (
 	// "sync"
 )
 
+func inArray(input string, array []string) bool {
+	for _, v := range array {
+		if input == v {
+			return true
+		}
+	}
+	return false
+}
+
 // internalLoadFromDict creates a Dataset from an array of map representing columns.
 func internalLoadFromDict(input []map[string]interface{}) (*Dataset, error) {
 	// retrieve columns

@@ -5,10 +5,13 @@
 package mxj
 
 import (
-	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
+	// "encoding/json"
 
+	json "github.com/sniperkit/xutil/plugin/format/json"
+	// json "github.com/sniperkit/xutil/plugin/format/json"
 	// "github.com/fatih/structs"
 )
 
@@ -51,4 +54,15 @@ func (mv Map) Struct(structPtr interface{}) error {
 	}
 
 	return json.Unmarshal(j, structPtr)
+}
+
+func Struct2Map(obj interface{}) (Map, error) {
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(obj)
+
+	var data = make(map[string]interface{})
+	for i := 0; i < t.NumField(); i++ {
+		data[strings.ToLower(t.Field(i).Name)] = v.Field(i).Interface()
+	}
+	return data, nil
 }

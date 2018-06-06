@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	fsutil "github.com/sniperkit/xtask/util/fs"
+	fsutil "github.com/sniperkit/colly/plugins/system/fs"
 )
 
 // Timeline holds a []*timelineEvents,

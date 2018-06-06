@@ -6,11 +6,16 @@ package mxj
 
 import (
 	"bytes"
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"io"
+	// "io/ioutil"
 	"time"
+
+	json "github.com/sniperkit/xutil/plugin/format/json"
 )
+
+// var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // ------------------------------ write JSON -----------------------
 
@@ -105,11 +110,11 @@ func (mv Map) JsonIndentWriterRaw(jsonWriter io.Writer, prefix, indent string, s
 // --------------------------- read JSON -----------------------------
 
 // Decode numericvalues as json.Number type Map values - see encoding/json#Number.
-// NOTE: this is for decoding JSON into a Map with NewMapJson(), NewMapJsonReader(), 
+// NOTE: this is for decoding JSON into a Map with NewMapJson(), NewMapJsonReader(),
 // etc.; it does not affect NewMapXml(), etc.  The XML encoders mv.Xml() and mv.XmlIndent()
 // do recognize json.Number types; a JSON object can be decoded to a Map with json.Number
 // value types and the resulting Map can be correctly encoded into a XML object.
-var JsonUseNumber bool
+var JsonUseNumber bool = false
 
 // Just a wrapper on json.Unmarshal
 //	Converting JSON to XML is a simple as:
@@ -144,6 +149,37 @@ func NewMapJson(jsonVal []byte) (Map, error) {
 	}
 	err := dec.Decode(&m)
 	return m, err
+}
+
+// Retrieve a Map value from an io.Reader.
+//  NOTE: The raw JSON off the reader is buffered to []byte using a ByteReader. If the io.Reader is an
+//        os.File, there may be significant performance impact. If the io.Reader is wrapping a []byte
+//        value in-memory, however, such as http.Request.Body you CAN use it to efficiently unmarshal
+//        a JSON object.
+func NewMapJsonReaderAll(jsonReader io.Reader) (Map, error) {
+	dec := json.NewDecoder(jsonReader)
+	if JsonUseNumber {
+		dec.UseNumber()
+	}
+	m := make(map[string]interface{})
+	err := dec.Decode(&m) // Unmarshal the 'presumed' JSON string
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func NewMapJsonArrayReaderAll(jsonReader io.Reader) (Map, error) {
+	var items []interface{}
+	dec := json.NewDecoder(jsonReader)
+	if JsonUseNumber {
+		dec.UseNumber()
+	}
+	if err := dec.Decode(&items); err != nil {
+		return nil, err
+	}
+	// m := map[string]interface{}{"items": items}
+	return map[string]interface{}{"items": items}, nil
 }
 
 // Retrieve a Map value from an io.Reader.

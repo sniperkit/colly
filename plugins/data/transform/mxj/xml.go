@@ -10,16 +10,17 @@ package mxj
 
 import (
 	"bytes"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+	// "encoding/json"
+
+	json "github.com/sniperkit/xutil/plugin/format/json"
 )
 
 // ------------------- NewMapXml & NewMapXmlReader ... -------------------------
@@ -29,7 +30,7 @@ import (
 // set the CustomDecoder attribute instead.
 //   import (
 //	     charset "code.google.com/p/go-charset/charset"
-//	     github.com/clbanning/mxj
+//	     github.com/sniperkit/xutil/plugin/format/convert/mxj
 //	 )
 //   ...
 //   mxj.XmlCharsetReader = charset.NewReader
@@ -83,6 +84,16 @@ func NewMapXmlReader(xmlReader io.Reader, cast ...bool) (Map, error) {
 		xmlReader = myByteReader(xmlReader) // see code at EOF
 	}
 
+	// build the map
+	return xmlReaderToMap(xmlReader, r)
+}
+
+func NewMapXmlReaderAll(xmlReader io.Reader, cast ...bool) (Map, error) {
+	var r bool
+	if len(cast) == 1 {
+		r = cast[0]
+	}
+	// dec := xml.NewDecoder(xmlReader)
 	// build the map
 	return xmlReaderToMap(xmlReader, r)
 }
@@ -426,7 +437,7 @@ func xmlToMapParser(skey string, a []xml.Attr, p *xml.Decoder, r bool) (map[stri
 				} else {
 					// per Adrian (http://www.adrianlungu.com/) catch stray text
 					// in decoder stream -
-					// https://github.com/clbanning/mxj/pull/14#issuecomment-182816374
+					// https://github.com/sniperkit/xutil/plugin/format/convert/mxj/pull/14#issuecomment-182816374
 					// NOTE: CharSetReader must be set to non-UTF-8 CharSet or you'll get
 					// a p.Token() decoding error when the BOM is UTF-16 or UTF-32.
 					continue
@@ -453,27 +464,23 @@ func cast(s string, r bool) interface{} {
 		if !castNanInf {
 			switch strings.ToLower(s) {
 			case "nan", "inf", "-inf":
-				return s
+				return interface{}(s)
 			}
 		}
 
 		// handle numeric strings ahead of boolean
 		if f, err := strconv.ParseFloat(s, 64); err == nil {
-			return f
+			return interface{}(f)
 		}
-		// ParseBool treats "1"==true & "0"==false, we've already scanned those
-		// values as float64. See if value has 't' or 'f' as initial screen to
-		// minimize calls to ParseBool; also, see if len(s) < 6.
-		if len(s) > 0 && len(s) < 6 {
-			switch s[:1] {
-			case "t", "T", "f", "F":
-				if b, err := strconv.ParseBool(s); err == nil {
-					return b
-				}
+		// ParseBool treats "1"==true & "0"==false
+		// but be more strick - only allow TRUE, True, true, FALSE, False, false
+		if s != "t" && s != "T" && s != "f" && s != "F" {
+			if b, err := strconv.ParseBool(s); err == nil {
+				return interface{}(b)
 			}
 		}
 	}
-	return s
+	return interface{}(s)
 }
 
 // ------------------ END: NewMapXml & NewMapXmlReader -------------------------
@@ -812,22 +819,6 @@ func mapToXmlIndent(doIndent bool, s *string, key string, value interface{}, pp 
 	var elen int
 	p := &pretty{pp.indent, pp.cnt, pp.padding, pp.mapDepth, pp.start}
 
-	// per issue #48, 18apr18 - try and coerce maps to map[string]interface{}
-	// Don't need for mapToXmlSeqIndent, since maps there are decoded by NewMapXmlSeq().
-	if reflect.ValueOf(value).Kind() == reflect.Map {
-		switch value.(type) {
-		case map[string]interface{}:
-		default:
-			val := make(map[string]interface{})
-			vv := reflect.ValueOf(value)
-			keys := vv.MapKeys()
-			for _, k := range keys {
-				val[fmt.Sprint(k)] = vv.MapIndex(k).Interface()
-			}
-			value = val
-		}
-	}
-
 	switch value.(type) {
 	// special handling of []interface{} values when len(value) == 0
 	case map[string]interface{}, []byte, string, float64, bool, int, int32, int64, float32, json.Number:
@@ -1092,7 +1083,10 @@ func (a attrList) Swap(i, j int) {
 }
 
 func (a attrList) Less(i, j int) bool {
-	return a[i][0] <= a[j][0]
+	if a[i][0] > a[j][0] {
+		return false
+	}
+	return true
 }
 
 type elemList [][2]interface{}
@@ -1106,5 +1100,8 @@ func (e elemList) Swap(i, j int) {
 }
 
 func (e elemList) Less(i, j int) bool {
-	return e[i][0].(string) <= e[j][0].(string)
+	if e[i][0].(string) > e[j][0].(string) {
+		return false
+	}
+	return true
 }
