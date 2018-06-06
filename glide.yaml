@@ -205,7 +205,7 @@ import:
   - jwt
   - secure
 - package: github.com/gin-gonic/gin
-- package: github.com/gizak/termui
+- package: github.com/sasile/termui
 - package: github.com/go-chi/chi
 - package: github.com/go-contrib/uuid
 - package: github.com/go-ini/ini

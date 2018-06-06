@@ -569,6 +569,7 @@ func (c *Cache) keys() (keys []string) {
 	return // keys
 }
 
+/*
 func (c *Cache) purgeOlderVersions() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -577,6 +578,7 @@ func (c *Cache) purgeOlderVersions() {
 	c.db.PurgeOlderVersions()
 	log.Info("badgercache.purgeOlderVersions(), END")
 }
+*/
 
 func (c *Cache) seekPrefix(value string) {
 	c.mu.Lock()

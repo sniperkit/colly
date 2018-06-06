@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	ui "github.com/gizak/termui"
+	ui "github.com/sasile/termui"
 )
 
 const (

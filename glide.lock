@@ -450,7 +450,7 @@ imports:
   - binding
   - json
   - render
-- name: github.com/gizak/termui
+- name: github.com/sasile/termui
   version: e9a3a6b3d6472ce875254d734f36335c15ebd4e6
 - name: github.com/glycerine/go-unsnap-stream
   version: 62a9a9eb44fd8932157b1a8ace2149eff5971af6
