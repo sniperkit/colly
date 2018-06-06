@@ -46,9 +46,8 @@ func NewJSONElementFromJSONNode(resp *Response, s *jsonquery.Node) *JSONElement 
 	}
 }
 
-// Attr returns the selected attribute of a JSONElement or empty string
-// if no attribute found
-func (h *JSONElement) Node(xpathQuery string) string {
+// Pluck
+func (h *JSONElement) Pluck(xpathQuery string) string {
 	n := jsonquery.FindOne(h.DOM.(*jsonquery.Node), xpathQuery)
 	if n == nil {
 		return ""
@@ -56,9 +55,8 @@ func (h *JSONElement) Node(xpathQuery string) string {
 	return strings.TrimSpace(n.InnerText())
 }
 
-// ChildText returns the concatenated and stripped text content of the matching
-// elements.
-func (h *JSONElement) ChildText(xpathQuery string) string {
+// FindOne
+func (h *JSONElement) FindOne(xpathQuery string) string {
 
 	n := jsonquery.FindOne(h.DOM.(*jsonquery.Node), xpathQuery)
 	if n == nil {
@@ -67,19 +65,8 @@ func (h *JSONElement) ChildText(xpathQuery string) string {
 	return strings.TrimSpace(n.InnerText())
 }
 
-// ChildAttr returns the stripped text content of the first matching
-// element's attribute.
-func (h *JSONElement) ChildAttr(xpathQuery, attrName string) string {
-	child := jsonquery.FindOne(h.DOM.(*jsonquery.Node), xpathQuery)
-	if child != nil {
-		return strings.TrimSpace(child.InnerText())
-	}
-	return ""
-}
-
-// ChildAttrs returns the stripped text content of all the matching
-// element's attributes.
-func (h *JSONElement) ChildAttrs(xpathQuery, attrName string) []string {
+// Find
+func (h *JSONElement) Find(xpathQuery, attrName string) []string {
 	var res []string
 	child := jsonquery.Find(h.DOM.(*jsonquery.Node), xpathQuery)
 	for _, node := range child {

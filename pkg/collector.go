@@ -41,6 +41,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/antchfx/htmlquery"
+	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
 	"github.com/kennygrant/sanitize"
 	"github.com/temoto/robotstxt"
@@ -475,6 +476,11 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 		c.handleOnError(response, err, request, ctx)
 	}
 
+	err = c.handleOnJSON(response)
+	if err != nil {
+		c.handleOnError(response, err, request, ctx)
+	}
+
 	c.handleOnScraped(response)
 
 	return err
@@ -810,6 +816,45 @@ func (c *Collector) handleOnResponse(r *Response) {
 	for _, f := range c.responseCallbacks {
 		f(r)
 	}
+}
+
+func (c *Collector) handleOnJSON(resp *Response) error {
+	if len(c.jsonCallbacks) == 0 || !strings.Contains(strings.ToLower(resp.Headers.Get("Content-Type")), "json") {
+		return nil
+	}
+
+	doc, err := jsonquery.Parse(bytes.NewBuffer(resp.Body))
+	if err != nil {
+		return err
+	}
+
+	for _, cc := range c.jsonCallbacks {
+		for _, n := range jsonquery.Find(doc, cc.Query) {
+			e := NewJSONElementFromJSONNode(resp, n)
+			if c.debugger != nil {
+				c.debugger.Event(createEvent("html", resp.Request.ID, c.ID, map[string]string{
+					"selector": cc.Query,
+					"url":      resp.Request.URL.String(),
+				}))
+			}
+			cc.Function(e)
+			// a = append(a, n.InnerText())
+		}
+		/*
+			doc.Find(doc, cc.Query, func(i int, n *jsonquery.Node) {
+				e := NewJSONElementFromJSONNode(resp, n)
+				if c.debugger != nil {
+					c.debugger.Event(createEvent("json", resp.Request.ID, c.ID, map[string]string{
+						"selector": cc.Query,
+						"url":      resp.Request.URL.String(),
+					}))
+				}
+				cc.Function(e)
+			})
+		*/
+	}
+
+	return nil
 }
 
 func (c *Collector) handleOnHTML(resp *Response) error {
