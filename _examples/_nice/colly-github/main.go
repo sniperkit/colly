@@ -61,7 +61,7 @@ func main() {
 		}
 		fmt.Println(yaml)
 
-		fmt.Println(ds.Sort("stargazers_count").Tabular("condensed"))
+		// fmt.Println(ds.SortReverse("id").Tabular("condensed"))
 
 	})
 
