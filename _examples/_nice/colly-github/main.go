@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	colly "github.com/sniperkit/colly/pkg"
-	debug "github.com/sniperkit/colly/pkg/debug"
+	// debug "github.com/sniperkit/colly/pkg/debug"
 )
 
 var version = "0.0.1-alpha"
@@ -16,7 +16,7 @@ func main() {
 		colly.AllowedDomains("api.github.com"),
 	)
 
-	c.SetDebugger(&debug.LogDebugger{})
+	// c.SetDebugger(&debug.LogDebugger{})
 
 	// On every a element which has href attribute call callback
 	c.OnJSON("//description", func(e *colly.JSONElement) {

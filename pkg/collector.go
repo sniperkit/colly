@@ -838,20 +838,7 @@ func (c *Collector) handleOnJSON(resp *Response) error {
 				}))
 			}
 			cc.Function(e)
-			// a = append(a, n.InnerText())
 		}
-		/*
-			doc.Find(doc, cc.Query, func(i int, n *jsonquery.Node) {
-				e := NewJSONElementFromJSONNode(resp, n)
-				if c.debugger != nil {
-					c.debugger.Event(createEvent("json", resp.Request.ID, c.ID, map[string]string{
-						"selector": cc.Query,
-						"url":      resp.Request.URL.String(),
-					}))
-				}
-				cc.Function(e)
-			})
-		*/
 	}
 
 	return nil

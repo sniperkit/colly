@@ -55,6 +55,21 @@ func (h *JSONElement) Pluck(xpathQuery string) string {
 	return strings.TrimSpace(n.InnerText())
 }
 
+// Header
+func (h *JSONElement) Header(key string) (value string) {
+	value = strings.TrimSpace(h.Response.Headers.Get(key))
+	return
+}
+
+// Headers
+func (h *JSONElement) Headers() map[string]string {
+	res := make(map[string]string, len(h.Response.Headers))
+	for key, val := range h.Response.Headers {
+		res[key] = val
+	}
+	return res
+}
+
 // FindOne
 func (h *JSONElement) FindOne(xpathQuery string) string {
 
