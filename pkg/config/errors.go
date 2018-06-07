@@ -9,24 +9,20 @@ import (
 
 // cache storage errors
 var (
-	errInvalidCacheDuration = errors.New("Invalid cache duration...")
-	errInvalidCacheTTL      = errors.New("Invalid cache TTL...")
-	errInvalidCacheTimeUnit = errors.New("Invalid cache time unit. available: second, hour, day")
-	errInvalidCacheBackend  = errors.New("Invalid cache backend. Available: " + strings.Join(defaultCacheBackends, ",") + ".")
+	ErrInvalidCacheDuration = errors.New("Invalid cache duration...")
+	ErrInvalidCacheTTL      = errors.New("Invalid cache TTL...")
+	ErrInvalidCacheTimeUnit = errors.New("Invalid cache time unit. available: second, hour, day")
+	// ErrInvalidCacheBackend  = errors.New("Invalid cache backend. Available: " + strings.Join(DefaultCacheBackends, ",") + ".")
 )
 
 // colly queue processing errors
 var (
-	errInvalidQueueThreads     = errors.New("Invalid queue consumer threads count. Must be superior or equal to 0.")
-	errInvalidQueueBackend     = errors.New("Unkown queue storage backend name. Available: inmemory, redis, sqlite3, badger, mysql, postgres.")
-	errInvalidQueueMaxSize     = errors.New("Invalid queue max size value. Must be superior or equal to 0.")
-	errLocalFileStat           = errors.New("File not found.")
-	errLocalFileOpen           = errors.New("Could not open the filepath")
-	errInvalidRemoteStatusCode = errors.New("errInvalidRemoteStatusCode")
-)
-
-var (
-	fullyQualifiedPath bool = false
+	ErrInvalidQueueThreads     = errors.New("Invalid queue consumer threads count. Must be superior or equal to 0.")
+	ErrInvalidQueueBackend     = errors.New("Unkown queue storage backend name. Available: inmemory, redis, sqlite3, badger, mysql, postgres.")
+	ErrInvalidQueueMaxSize     = errors.New("Invalid queue max size value. Must be superior or equal to 0.")
+	ErrLocalFileStat           = errors.New("File not found.")
+	ErrLocalFileOpen           = errors.New("Could not open the filepath")
+	ErrInvalidRemoteStatusCode = errors.New("errInvalidRemoteStatusCode")
 )
 
 // e returns an error, prefixed with the name of the function that triggered it. Originally by StackOverflow user svenwltr:

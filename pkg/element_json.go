@@ -46,13 +46,9 @@ func NewJSONElementFromJSONNode(resp *Response, s *jsonquery.Node) *JSONElement 
 	}
 }
 
-// Pluck
-func (h *JSONElement) Pluck(xpathQuery string) string {
-	n := jsonquery.FindOne(h.DOM.(*jsonquery.Node), xpathQuery)
-	if n == nil {
-		return ""
-	}
-	return strings.TrimSpace(n.InnerText())
+// Extract
+func (h *JSONElement) Extract(pluckerConfig map[string]interface{}) string {
+	return ""
 }
 
 // Header
@@ -63,10 +59,12 @@ func (h *JSONElement) Header(key string) (value string) {
 
 // Headers
 func (h *JSONElement) Headers() map[string]string {
-	res := make(map[string]string, len(h.Response.Headers))
-	for key, val := range h.Response.Headers {
-		res[key] = val
-	}
+	res := make(map[string]string, 0)
+	/*
+		for key, val := range h.Response.Headers {
+			res[key] = val
+		}
+	*/
 	return res
 }
 

@@ -14,16 +14,15 @@ type Sheet struct {
 
 // Title return the title of the sheet.
 func (s Sheet) Title() string {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-
+	// s.lock.RLock()
+	// defer s.lock.RUnlock()
 	return s.title
 }
 
 // Dataset returns the dataset of the sheet.
 func (s Sheet) Dataset() *Dataset {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
+	// s.lock.RLock()
+	// defer s.lock.RUnlock()
 
 	return s.dataset
 }

@@ -37,4 +37,19 @@ var (
 
 	// ErrNoPattern is the error type for LimitRules without patterns
 	ErrNoPattern = errors.New("No pattern defined in LimitRule")
+
+	// ErrNotValidTabularFormat
+	ErrNotValidTabularFormat = errors.New("Not valid tabular format")
+
+	// ErrInvalidTabularQuery
+	ErrInvalidTabularQuery = errors.New("Invalid tabular query. Get a row or multiple rows: `0`, `0,1` or slice a Dataset: `0:5`")
+
+	// ErrTabularInvalidQuery
+	ErrTabularInvalidQuery = errors.New("Invalid tabular query.")
+
+	// ErrTabularRowSelectionNotImplemented
+	ErrTabularRowSelectionNotImplemented = errors.New("Tabular row selection is not implemented yet.")
+
+	// ErrTabularMixedSelectionNotImplemented
+	ErrTabularMixedSelectionNotImplemented = errors.New("Tabular with custom row and col selection is not implemented yet.")
 )

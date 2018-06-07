@@ -28,8 +28,10 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -48,10 +50,15 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	// core
 	cfg "github.com/sniperkit/colly/pkg/config"
-	"github.com/sniperkit/colly/pkg/debug"
-	"github.com/sniperkit/colly/pkg/metric"
-	"github.com/sniperkit/colly/pkg/storage"
+	debug "github.com/sniperkit/colly/pkg/debug"
+	metric "github.com/sniperkit/colly/pkg/metric"
+	storage "github.com/sniperkit/colly/pkg/storage"
+
+	// plugins
+	tabular "github.com/sniperkit/colly/plugins/data/transform/tabular"
+	// tabular "github.com/agrison/go-tablib"
 )
 
 var (
@@ -132,7 +139,10 @@ type Collector struct {
 	// MaxBodySize is the limit of the retrieved response body in bytes.
 	// 0 means unlimited.
 	// The default value for MaxBodySize is 10MB (10 * 1024 * 1024 bytes).
-	MaxBodySize int `default:"0" json:"max_body_size" yaml:"max_body_size" toml:"max_body_size" xml:"maxBodySize" ini:"maxBodySize" csv:"maxBodySize"`
+	MaxBodySize int `default:"0" json:"max_body_size" yaml:"max_body_size" toml:"max_body_size" xml:"maxBodySize" ini:"maxBodySize" csv:"MaxBodySize"`
+
+	// AllowTabular
+	AllowTabular bool `default:"false" json:"allow_tabular" yaml:"allow_tabular" toml:"allowTabular" xml:"allowTabular" ini:"allowTabular" csv:"AllowTabular"`
 
 	//////////////////////////////////////////////////
 	///// Response processing
@@ -209,21 +219,26 @@ type Collector struct {
 	RedirectHandler func(req *http.Request, via []*http.Request) error
 
 	// not exported attributes
-	store             storage.Storage
-	debugger          debug.Debugger
-	robotsMap         map[string]*robotstxt.RobotsData
-	htmlCallbacks     []*htmlCallbackContainer
-	xmlCallbacks      []*xmlCallbackContainer
-	jsonCallbacks     []*jsonCallbackContainer
+	store         storage.Storage
+	debugger      debug.Debugger
+	robotsMap     map[string]*robotstxt.RobotsData
+	requestCount  uint32
+	responseCount uint32
+	backend       *httpBackend
+	wg            *sync.WaitGroup
+	lock          *sync.RWMutex
+
+	// content callbacks
+	htmlCallbacks []*htmlCallbackContainer
+	xmlCallbacks  []*xmlCallbackContainer
+	jsonCallbacks []*jsonCallbackContainer
+	tabCallbacks  []*tabCallbackContainer
+
+	// collector callbacks
 	requestCallbacks  []RequestCallback
 	responseCallbacks []ResponseCallback
 	errorCallbacks    []ErrorCallback
 	scrapedCallbacks  []ScrapedCallback
-	requestCount      uint32
-	responseCount     uint32
-	backend           *httpBackend
-	wg                *sync.WaitGroup
-	lock              *sync.RWMutex
 }
 
 // Init initializes the Collector's private variables and sets default configuration for the Collector
@@ -466,19 +481,40 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 
 	c.handleOnResponse(response)
 
-	err = c.handleOnHTML(response)
-	if err != nil {
-		c.handleOnError(response, err, request, ctx)
-	}
+	isTabularContent, format := isTabular(response.Headers.Get("Content-Type"), request.URL.String())
 
-	err = c.handleOnXML(response)
-	if err != nil {
-		c.handleOnError(response, err, request, ctx)
-	}
+	if c.AllowTabular && isTabularContent {
+		err = c.handleOnTAB(response)
+		if err != nil {
+			c.handleOnError(response, err, request, ctx)
+		}
 
-	err = c.handleOnJSON(response)
-	if err != nil {
-		c.handleOnError(response, err, request, ctx)
+	} else {
+
+		switch format {
+		case "json":
+			err = c.handleOnJSON(response)
+			if err != nil {
+				c.handleOnError(response, err, request, ctx)
+			}
+
+		case "xml":
+			err = c.handleOnXML(response)
+			if err != nil {
+				c.handleOnError(response, err, request, ctx)
+			}
+
+		case "html":
+			fallthrough
+
+		default:
+			err = c.handleOnHTML(response)
+			if err != nil {
+				c.handleOnError(response, err, request, ctx)
+			}
+
+		}
+
 	}
 
 	c.handleOnScraped(response)
@@ -607,6 +643,20 @@ func (c *Collector) OnResponse(f ResponseCallback) {
 	c.lock.Unlock()
 }
 
+// OnTAB registers a function. Function will be executed on every JSON
+// element matched by the xpath parameter.
+func (c *Collector) OnTAB(query string, f TABCallback) {
+	c.lock.Lock()
+	if c.tabCallbacks == nil {
+		c.tabCallbacks = make([]*tabCallbackContainer, 0, 4)
+	}
+	c.tabCallbacks = append(c.tabCallbacks, &tabCallbackContainer{
+		Query:    query,
+		Function: f,
+	})
+	c.lock.Unlock()
+}
+
 // OnJSON registers a function. Function will be executed on every JSON
 // element matched by the xpath parameter.
 func (c *Collector) OnJSON(xPath string, f JSONCallback) {
@@ -663,6 +713,22 @@ func (c *Collector) OnJSONDetach(xPath string) {
 	}
 	if deleteIdx != -1 {
 		c.jsonCallbacks = append(c.jsonCallbacks[:deleteIdx], c.jsonCallbacks[deleteIdx+1:]...)
+	}
+	c.lock.Unlock()
+}
+
+// OnTABDetach deregister a function. Function will not be execute after detached
+func (c *Collector) OnTABDetach(xPath string) {
+	c.lock.Lock()
+	deleteIdx := -1
+	for i, cc := range c.tabCallbacks {
+		if cc.Query == xPath {
+			deleteIdx = i
+			break
+		}
+	}
+	if deleteIdx != -1 {
+		c.tabCallbacks = append(c.tabCallbacks[:deleteIdx], c.tabCallbacks[deleteIdx+1:]...)
 	}
 	c.lock.Unlock()
 }
@@ -818,6 +884,201 @@ func (c *Collector) handleOnResponse(r *Response) {
 	}
 }
 
+var tabContentKeywords []string = []string{"json", "yaml", "xml", "csv", "tsv"}
+
+func isTabularEncoding(header string) (ok bool, format string) {
+	for _, match := range tabContentKeywords {
+		if strings.Contains(strings.ToLower(header), match) {
+			return true, match
+		}
+	}
+	return false, ""
+}
+
+func isTabularExtension(url string) (ok bool, format string) {
+	for _, match := range tabContentKeywords {
+		ext := path.Ext(url)
+		if strings.Contains(strings.ToLower(ext), match) {
+			return true, match
+		}
+	}
+	return false, ""
+}
+
+func isTabular(contentType string, requestURL string) (ok bool, format string) {
+	isValid, format := isTabularEncoding(contentType)
+	if !isValid {
+		isValid, format = isTabularExtension(requestURL)
+	}
+	return isValid, format
+}
+
+func parseSliceQuery(query string, ds *tabular.Dataset) (lower int, upper int, err error) {
+
+	// row[1:5] = dataset slice from row 1 to 5
+	parts := strings.Split(query, ":")
+	count := len(parts)
+
+	switch {
+	case count > 2:
+		fallthrough
+	case count <= 1:
+		return -1, -1, ErrTabularInvalidQuery
+	}
+
+	lowerStr := parts[0]
+	upperStr := parts[1]
+
+	if lowerStr == "" {
+		lower = 0
+
+	} else {
+		lower, err = strconv.Atoi(lowerStr)
+		if err != nil {
+			return -1, -1, err
+		}
+
+		// check validity
+		switch {
+		case lower < 0: // lower limit not inferior to 0
+			lower = 0
+
+		case lower > ds.Height(): // lower limit is not out of range
+			lower = ds.Height() - 1
+
+		}
+
+	}
+
+	if upperStr == "" {
+		upper = ds.Height()
+	} else {
+		upper, err = strconv.Atoi(upperStr)
+		if err != nil {
+			return -1, lower, err
+		}
+
+		// check validity
+		switch {
+		case upper <= lower: // upper limit not inferior to lower limit
+			return -1, upper, ErrTabularInvalidQuery
+
+		case upper > ds.Height(): // upper limit is not out of range
+			upper = ds.Height()
+
+		}
+
+	}
+
+	return
+}
+
+/*
+	// Loading formats supported:
+	JSON (Sets + Books)
+	YAML (Sets + Books)
+	XML (Sets)
+	CSV (Sets)
+	TSV (Sets)
+*/
+func (c *Collector) handleOnTAB(resp *Response) error {
+
+	// check if valid encoding format to load
+	isValid, format := isTabular(resp.Headers.Get("Content-Type"), resp.Request.URL.String())
+
+	if c.debugger != nil {
+		c.debugger.Event(createEvent("tabular.check", resp.Request.ID, c.ID, map[string]string{
+			"content-type":    resp.Headers.Get("Content-Type"),
+			"url":             resp.Request.URL.String(),
+			"is_valid":        fmt.Sprintf("%t", isValid),
+			"format_slug":     format,
+			"callbacks_count": fmt.Sprintf("%d", len(c.tabCallbacks)),
+		}))
+	}
+
+	if len(c.tabCallbacks) == 0 || !isValid {
+		return ErrNotValidTabularFormat
+	}
+
+	var err error
+	var ds *tabular.Dataset
+	switch format {
+	case "json":
+		ds, err = tabular.LoadJSON(resp.Body)
+
+	case "yaml":
+		ds, err = tabular.LoadYAML(resp.Body)
+
+	case "xml":
+		ds, err = tabular.LoadXML(resp.Body)
+
+	case "csv":
+		ds, err = tabular.LoadCSV(resp.Body)
+
+	case "tsv":
+		ds, err = tabular.LoadTSV(resp.Body)
+
+	}
+
+	if c.debugger != nil {
+		c.debugger.Event(
+			createEvent("tabular.dataset", resp.Request.ID, c.ID, map[string]string{
+				"valid": fmt.Sprintf("%d", ds.Valid()),
+				"cols":  fmt.Sprintf("%d", ds.Width()),
+				"rows":  fmt.Sprintf("%d", ds.Height()),
+			}))
+
+		if err != nil {
+			c.debugger.Event(
+				createEvent("tabular.err", resp.Request.ID, c.ID, map[string]string{
+					"err": err.Error(),
+				}))
+		}
+	}
+
+	// Invalid dataset if error
+	// Note: We can check the dataset validity with `ds.Valid()` method.
+	if err != nil {
+		return err
+	}
+
+	// Note: It requires better query parsing to extract custom columns and rows selection
+	for _, cc := range c.tabCallbacks {
+		// var isRow, isSlice, isMixed bool
+		if strings.Contains(cc.Query, ",") && strings.Contains(cc.Query, ":") {
+			// isMixed = true
+			return ErrTabularMixedSelectionNotImplemented
+		}
+
+		if strings.Contains(cc.Query, ",") {
+			// rows, _ := ds.Rows(0, 1) // ([]map[string]interface{}, error) --> need to get Rows selection as a dataset struct
+			// isRow = true
+			return ErrTabularRowSelectionNotImplemented
+		}
+
+		var lowerRow, upperRow int
+		var errQuery error
+		if strings.Contains(cc.Query, ":") {
+			lowerRow, upperRow, errQuery = parseSliceQuery(cc.Query, ds)
+			// slice tabular dataset
+			if errQuery == nil {
+				ds, err = ds.Slice(lowerRow, upperRow)
+			}
+		}
+		e := NewTABElementFromTABNode(resp, cc.Query, ds)
+
+		if c.debugger != nil {
+			c.debugger.Event(createEvent("tab", resp.Request.ID, c.ID, map[string]string{
+				"selector": cc.Query,
+				"url":      resp.Request.URL.String(),
+			}))
+		}
+		cc.Function(e)
+	}
+
+	return nil
+}
+
 func (c *Collector) handleOnJSON(resp *Response) error {
 	if len(c.jsonCallbacks) == 0 || !strings.Contains(strings.ToLower(resp.Headers.Get("Content-Type")), "json") {
 		return nil
@@ -832,7 +1093,7 @@ func (c *Collector) handleOnJSON(resp *Response) error {
 		for _, n := range jsonquery.Find(doc, cc.Query) {
 			e := NewJSONElementFromJSONNode(resp, n)
 			if c.debugger != nil {
-				c.debugger.Event(createEvent("html", resp.Request.ID, c.ID, map[string]string{
+				c.debugger.Event(createEvent("json", resp.Request.ID, c.ID, map[string]string{
 					"selector": cc.Query,
 					"url":      resp.Request.URL.String(),
 				}))
