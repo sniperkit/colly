@@ -27,13 +27,13 @@ func main() {
 	// c.SetDebugger(debugger)
 
 	// On every a element which has href attribute call callback
-	c.OnTAB("0:5", func(e *colly.TABElement) {
+	c.OnTAB("0:0", func(e *colly.TABElement) {
 		fmt.Println("OnTAB event processing...")
 		fmt.Printf("\nValid: %t\n", e.Dataset.Valid())
 		fmt.Printf("Height: %d\n", e.Dataset.Height())
 		fmt.Printf("Width: %d\n", e.Dataset.Width())
 
-		ds, err := e.Dataset.Select(0, 5, false, "id", "name", "full_name", "language", "stargazers_count", "watchers")
+		ds, err := e.Dataset.Select(0, 0, "id", "name", "full_name", "language", "stargazers_count", "watchers")
 		if err != nil {
 			fmt.Println("error:", err)
 		}
@@ -61,5 +61,5 @@ func main() {
 	})
 
 	// Start scraping on https://hackerspaces.org
-	c.Visit("https://api.github.com/users/roscopecoltran/starred?sort=updated&direction=desc&page=1&per_page=10")
+	c.Visit("https://api.github.com/users/roscopecoltran/starred?sort=updated&direction=desc&page=1&per_page=100")
 }
