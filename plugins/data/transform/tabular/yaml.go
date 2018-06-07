@@ -1,7 +1,7 @@
 package tablib
 
 import (
-	"gopkg.in/yaml.v2"
+	"github.com/go-yaml/yaml"
 )
 
 // LoadYAML loads a dataset from a YAML source.

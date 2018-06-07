@@ -3,6 +3,7 @@ package tablib
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -73,6 +74,8 @@ func (d *Dataset) asString(vv interface{}) string {
 		v = strconv.FormatBool(vv.(bool))
 	case float64:
 		v = strconv.FormatFloat(vv.(float64), 'G', -1, 32)
+	case json.Number:
+		v = vv.(json.Number).String()
 	case time.Time:
 		v = vv.(time.Time).Format(time.RFC3339)
 	default:

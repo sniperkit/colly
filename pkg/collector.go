@@ -42,13 +42,13 @@ import (
 	"google.golang.org/appengine/urlfetch"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/antchfx/htmlquery"
-	"github.com/antchfx/jsonquery"
-	"github.com/antchfx/xmlquery"
 	"github.com/kennygrant/sanitize"
 	"github.com/temoto/robotstxt"
 
 	jsoniter "github.com/json-iterator/go"
+	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query-html"
+	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query-json"
+	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query-xml"
 
 	// core
 	cfg "github.com/sniperkit/colly/pkg/config"

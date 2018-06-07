@@ -14,6 +14,10 @@ import (
 var version = "0.0.1-alpha"
 var debugger *debug.LogDebugger = &debug.LogDebugger{}
 
+func descriptionLen(row []interface{}) interface{} {
+	return len(row[3].(string))
+}
+
 func main() {
 	pp.Println("colly-github start")
 
@@ -28,19 +32,36 @@ func main() {
 
 	// On every a element which has href attribute call callback
 	c.OnTAB("0:0", func(e *colly.TABElement) {
-		fmt.Println("OnTAB event processing...")
-		fmt.Printf("\nValid: %t\n", e.Dataset.Valid())
-		fmt.Printf("Height: %d\n", e.Dataset.Height())
-		fmt.Printf("Width: %d\n", e.Dataset.Width())
 
-		ds, err := e.Dataset.Select(0, 0, "id", "name", "full_name", "language", "stargazers_count", "watchers")
+		// fmt.Println("OnTAB event processing...")
+		// fmt.Printf("\nValid: %t\n", e.Dataset.Valid())
+		// fmt.Printf("Height: %d\n", e.Dataset.Height())
+		// fmt.Printf("Width: %d\n", e.Dataset.Width())
+		// pp.Println(e.Dataset.Headers())
+
+		// Select
+		ds, err := e.Dataset.Select(0, 0, "id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")
 		if err != nil {
 			fmt.Println("error:", err)
 		}
+		ds.AppendDynamicColumn("description_length", descriptionLen)
 
-		// https://github.com/childe/gohangout/blob/af567d80a8208108fe194b217072a28683a4afef/codec/json_decoder.go
-		fmt.Println(ds.YAML())
-		fmt.Println(ds.Tabular("grid"))
+		// JSON
+		json, err := ds.JSON()
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		fmt.Println(json)
+
+		// YAML
+		yaml, err := ds.YAML()
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		fmt.Println(yaml)
+
+		// Tabular (markdown)
+		// fmt.Println(ds.Tabular("condensed"))
 
 	})
 
@@ -61,5 +82,5 @@ func main() {
 	})
 
 	// Start scraping on https://hackerspaces.org
-	c.Visit("https://api.github.com/users/roscopecoltran/starred?sort=updated&direction=desc&page=1&per_page=100")
+	c.Visit("https://api.github.com/users/roscopecoltran/starred?sort=updated&direction=desc&page=1&per_page=10")
 }

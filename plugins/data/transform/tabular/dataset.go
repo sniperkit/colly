@@ -673,10 +673,6 @@ func (d *Dataset) StackColumn(other *Dataset) (*Dataset, error) {
 	return nd, nil
 }
 
-func Prepend(v interface{}, slice []interface{}) []interface{} {
-	return append([]interface{}{v}, slice...)
-}
-
 // Slice returns a new Dataset representing a slice of the orignal Dataset like a slice of an array.
 // returns tablib.ErrInvalidRowIndex if the lower or upper bound is out of range.
 func (d *Dataset) Select(lower, upperNonInclusive int, headers ...string) (*Dataset, error) {

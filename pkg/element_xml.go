@@ -18,8 +18,10 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/antchfx/htmlquery"
-	"github.com/antchfx/xmlquery"
+	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query-html"
+	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query-xml"
+	// "github.com/antchfx/htmlquery"
+	// "github.com/antchfx/xmlquery"
 	"golang.org/x/net/html"
 )
 

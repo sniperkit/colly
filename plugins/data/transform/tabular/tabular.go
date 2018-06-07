@@ -34,6 +34,7 @@ func (d *Dataset) Markdown() *Export {
 func (d *Dataset) Tabular(format string) *Export {
 	back := d.Records()
 	t := gotabulate.Create(back)
+	t.SetWrapStrings(true)
 
 	if format == TabularCondensed || format == TabularMarkdown {
 		rendered := regexp.MustCompile("\n\n\\s").ReplaceAllString(t.Render("simple"), "\n ")

@@ -2,6 +2,8 @@ package tablib
 
 import (
 	"encoding/json"
+	"strings"
+	// "log"
 	// "sync"
 	// "github.com/json-iterator/go"
 )
@@ -12,10 +14,17 @@ import (
 
 // LoadJSON loads a dataset from a YAML source.
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
+
 	var input []map[string]interface{}
-	if err := json.Unmarshal(jsonContent, &input); err != nil {
+	d := json.NewDecoder(strings.NewReader(string(jsonContent)))
+	d.UseNumber()
+	if err := d.Decode(&input); err != nil {
 		return nil, err
 	}
+
+	// if err := json.Unmarshal(jsonContent, &input); err != nil {
+	// 	return nil, err
+	// }
 
 	return internalLoadFromDict(input)
 }
@@ -30,7 +39,7 @@ func LoadDatabookJSON(jsonContent []byte) (*Databook, error) {
 
 	db := NewDatabook()
 	for _, d := range input {
-		b, err := json.Marshal(d["data"])
+		b, err := json.MarshalIndent(d["data"], "", "\t")
 		if err != nil {
 			return nil, err
 		}
@@ -52,12 +61,7 @@ func LoadDatabookJSON(jsonContent []byte) (*Databook, error) {
 func (d *Dataset) JSON() (*Export, error) {
 	back := d.Dict()
 
-	// json.UseNumber = true
-
-	// d := json.NewDecoder(strings.NewReader(s))
-	// d.UseNumber()
-
-	b, err := json.Marshal(back)
+	b, err := json.MarshalIndent(back, "", "\t")
 	if err != nil {
 		return nil, err
 	}

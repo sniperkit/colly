@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 // A NodeType is the type of a Node.
@@ -138,10 +139,18 @@ func parseValue(x interface{}, top *Node, level int) {
 }
 
 func parse(b []byte) (*Node, error) {
+
 	var v interface{}
-	if err := json.Unmarshal(b, &v); err != nil {
+	d := json.NewDecoder(strings.NewReader(string(b)))
+	d.UseNumber()
+	if err := d.Decode(&v); err != nil {
 		return nil, err
 	}
+
+	// if err := json.Unmarshal(b, &v); err != nil {
+	//	return nil, err
+	// }
+
 	doc := &Node{Type: DocumentNode}
 	parseValue(v, doc, 1)
 	return doc, nil
