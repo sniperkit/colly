@@ -15,6 +15,9 @@ var version = "0.0.1-alpha"
 var debugger *debug.LogDebugger = &debug.LogDebugger{}
 
 func descriptionLen(row []interface{}) interface{} {
+	if row == nil {
+		return 0
+	}
 	return len(row[3].(string))
 }
 
@@ -34,9 +37,7 @@ func main() {
 	c.OnTAB("0:0", func(e *colly.TABElement) {
 
 		// fmt.Println("OnTAB event processing...")
-		// fmt.Printf("\nValid: %t\n", e.Dataset.Valid())
-		// fmt.Printf("Height: %d\n", e.Dataset.Height())
-		// fmt.Printf("Width: %d\n", e.Dataset.Width())
+		// fmt.Printf("\nValid: %t\n", e.Dataset.Valid(), "Height: %d\n", e.Dataset.Height(), "Width: %d\n", e.Dataset.Width())
 		// pp.Println(e.Dataset.Headers())
 
 		// Select
@@ -60,8 +61,7 @@ func main() {
 		}
 		fmt.Println(yaml)
 
-		// Tabular (markdown)
-		// fmt.Println(ds.Tabular("condensed"))
+		fmt.Println(ds.Sort("stargazers_count").Tabular("condensed"))
 
 	})
 
