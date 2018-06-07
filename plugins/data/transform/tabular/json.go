@@ -1,15 +1,14 @@
 package tablib
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	// "sync"
-
-	"github.com/json-iterator/go"
+	// "github.com/json-iterator/go"
 )
 
-var (
-	json = jsoniter.ConfigCompatibleWithStandardLibrary
-)
+//var (
+//	json = jsoniter.ConfigCompatibleWithStandardLibrary
+//)
 
 // LoadJSON loads a dataset from a YAML source.
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
@@ -52,6 +51,11 @@ func LoadDatabookJSON(jsonContent []byte) (*Databook, error) {
 // JSON returns a JSON representation of the Dataset as an Export.
 func (d *Dataset) JSON() (*Export, error) {
 	back := d.Dict()
+
+	// json.UseNumber = true
+
+	// d := json.NewDecoder(strings.NewReader(s))
+	// d.UseNumber()
 
 	b, err := json.Marshal(back)
 	if err != nil {

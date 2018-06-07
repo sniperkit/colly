@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	// plugins
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 	cmmap "github.com/sniperkit/colly/plugins/data/structure/map/multi"
 )
 
@@ -671,6 +673,70 @@ func (d *Dataset) StackColumn(other *Dataset) (*Dataset, error) {
 	return nd, nil
 }
 
+func Prepend(v interface{}, slice []interface{}) []interface{} {
+	return append([]interface{}{v}, slice...)
+}
+
+// Slice returns a new Dataset representing a slice of the orignal Dataset like a slice of an array.
+// returns tablib.ErrInvalidRowIndex if the lower or upper bound is out of range.
+func (d *Dataset) Select(lower, upperNonInclusive int, headerRow bool, headers ...string) (*Dataset, error) {
+	// d.lock.Lock()
+	// defer d.lock.Unlock()
+
+	if upperNonInclusive == 0 {
+		upperNonInclusive = d.rows
+	}
+
+	if lower > upperNonInclusive || lower < 0 || upperNonInclusive > d.rows {
+		return nil, ErrInvalidRowIndex
+	}
+
+	rowCount := upperNonInclusive - lower
+	cols := len(headers)
+	upperNonInclusive = rowCount
+
+	var j int = 0
+	nd := NewDataset(headers)
+
+	nd.data = make([][]interface{}, 0, rowCount)
+	nd.tags = make([][]string, 0, rowCount)
+	nd.rows = upperNonInclusive - lower
+
+	var colIndices []int
+	for _, header := range headers {
+		colIndex := indexOfColumn(header, d)
+		if colIndex == -1 {
+			return nil, ErrInvalidColumnIndex
+		}
+		colIndices = append(colIndices, colIndex)
+	}
+
+	for i := lower; i < upperNonInclusive; i++ {
+
+		nd.data = append(nd.data, make([]interface{}, 0, cols))
+		nd.data[j] = make([]interface{}, 0, cols)
+
+		// get row result
+		subset := make([]interface{}, 0, cols)
+		for _, c := range colIndices {
+			subset = append(subset, d.data[i][c])
+		}
+		nd.data[j] = append(nd.data[j], subset...)
+
+		nd.tags = append(nd.tags, make([]string, 0, cols))
+		nd.tags[j] = make([]string, 0, cols)
+		nd.tags[j] = append(nd.tags[j], d.tags[i]...)
+
+		j++
+	}
+
+	return nd, nil
+}
+
+// func prepend(arr []interface, item string) {
+//  return append([]string{item}, arr...)
+//}
+
 // Column returns all the values for a specific column
 // returns nil if column is not found.
 func (d *Dataset) Column(header string) []interface{} {
@@ -691,6 +757,7 @@ func (d *Dataset) Column(header string) []interface{} {
 			values[i] = e[colIndex]
 		}
 	}
+
 	return values
 }
 
