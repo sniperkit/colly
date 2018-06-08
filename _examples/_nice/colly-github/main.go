@@ -50,7 +50,7 @@ var (
 	// collectorDebugger stores the collector's log event listener
 	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
 	// collectorTabEnabled sets some debugging information
-	collectorTabEnabled = true
+	collectorTabEnabled = false
 	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
 	collectorDatasetOutputPrefixPath = "./shared/dataset"
 	// collectorDatasetOutputBasename specifies the template to use to write the dataset dump
@@ -101,7 +101,7 @@ func main() {
 	c := colly.NewCollector(
 		// Visit only domains: api.github.com
 		colly.AllowedDomains("api.github.com"),
-		colly.AllowTabular(true),
+		colly.AllowTabular(collectorTabEnabled),
 	)
 
 	if collectorDebug {
@@ -200,6 +200,7 @@ func main() {
 
 		}
 
+		// output final export
 		fmt.Println(output)
 
 	})
