@@ -18,11 +18,12 @@ import (
 	"encoding/xml"
 	"strings"
 
-	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query-html"
-	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query-xml"
-	// "github.com/antchfx/htmlquery"
-	// "github.com/antchfx/xmlquery"
+	// external
 	"golang.org/x/net/html"
+
+	// internal
+	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
+	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query/xml"
 )
 
 // XMLElement is the representation of a XML tag.

@@ -45,20 +45,22 @@ import (
 	"github.com/kennygrant/sanitize"
 	"github.com/temoto/robotstxt"
 
-	jsoniter "github.com/json-iterator/go"
-	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query-html"
-	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query-json"
-	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query-xml"
-
-	// core
+	// collector - core
 	cfg "github.com/sniperkit/colly/pkg/config"
 	debug "github.com/sniperkit/colly/pkg/debug"
 	metric "github.com/sniperkit/colly/pkg/metric"
 	storage "github.com/sniperkit/colly/pkg/storage"
 
-	// plugins
+	// collector - plugins
 	tabular "github.com/sniperkit/colly/plugins/data/transform/tabular"
-	// tabular "github.com/agrison/go-tablib"
+
+	// format - serialization
+	jsoniter "github.com/json-iterator/go"
+
+	// format - operation
+	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
+	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
+	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query/xml"
 )
 
 var (

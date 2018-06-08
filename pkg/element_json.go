@@ -17,8 +17,8 @@ package colly
 import (
 	"strings"
 
-	// "github.com/antchfx/jsonquery"
-	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query-json"
+	// internal
+	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 )
 
 // JSONElement is the representation of a JSON tag.

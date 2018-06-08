@@ -11,15 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package colly_test
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/antchfx/htmlquery"
-	"github.com/sniperkit/colly/pkg"
+	// core
+	colly "github.com/sniperkit/colly/pkg"
+
+	// plugins
+	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
 )
 
 // Borrowed from http://infohost.nmt.edu/tcc/help/pubs/xhtml/example.html

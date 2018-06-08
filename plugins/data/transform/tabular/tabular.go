@@ -4,11 +4,26 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
-	// "sync"
 
-	"github.com/bndr/gotabulate"
+	"github.com/sniperkit/colly/plugins/data/print/table/gotabulate"
 )
 
+// Tabular defines its type
+type Tabular string
+
+// Tabular const
+const (
+	// TAB_GRID is the const to be used to specifu to render the table as ASCII table with grid format
+	TAB_GRID Tabular = "grid"
+	// TAB_SIMPLE is the const to be used to specifu to render the table as ASCII table with grid format
+	TAB_SIMPLE Tabular = "grid"
+	// TAB_CONDENSED is the const to be used to specifu to render the table as ASCII table with grid format
+	TAB_CONDENSED Tabular = "condensed"
+	// TAB_NARKDOWN is the const to be used to specifu to render the table as ASCII table with grid format
+	TAB_NARKDOWN Tabular = "markdown"
+)
+
+// Exposed/public variables related to tabular output format
 var (
 	// TabularGrid is the value to be passed to gotabulate to render the table
 	// as ASCII table with grid format
