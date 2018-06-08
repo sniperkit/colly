@@ -9,42 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	// "io/ioutil"
 	"time"
-	// json "github.com/sniperkit/xutil/plugin/format/json"
 )
-
-// JSON is the key for the json encoding
-const JSON = "json"
-
-// var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
-// NewJSONDecoder return the right JSON decoder
-func NewJSONDecoder(isCollection bool) Decoder {
-	if isCollection {
-		return JSONCollectionDecoder
-	}
-	return JSONDecoder
-}
-
-// JSONDecoder implements the Decoder interface
-func JSONDecoder(r io.Reader, v *map[string]interface{}) error {
-	d := json.NewDecoder(r)
-	d.UseNumber()
-	return d.Decode(v)
-}
-
-// JSONCollectionDecoder implements the Decoder interface over a collection
-func JSONCollectionDecoder(r io.Reader, v *map[string]interface{}) error {
-	var collection []interface{}
-	d := json.NewDecoder(r)
-	d.UseNumber()
-	if err := d.Decode(&collection); err != nil {
-		return err
-	}
-	*(v) = map[string]interface{}{"collection": collection}
-	return nil
-}
 
 // ------------------------------ write JSON -----------------------
 
@@ -167,10 +133,9 @@ func NewMapJson(jsonVal []byte) (Map, error) {
 	}
 	// handle a goofy case ...
 	if jsonVal[0] == '[' {
-		jsonVal = []byte(`{"object":` + string(jsonVal) + `}`)
+		jsonVal = []byte(`{"array":` + string(jsonVal) + `}`)
 	}
 	m := make(map[string]interface{})
-	// err := json.Unmarshal(jsonVal, &m)
 	buf := bytes.NewReader(jsonVal)
 	dec := json.NewDecoder(buf)
 	if JsonUseNumber {
@@ -179,6 +144,55 @@ func NewMapJson(jsonVal []byte) (Map, error) {
 	err := dec.Decode(&m)
 	return m, err
 }
+
+func NewMapJsonArray(jsonVal []byte) (Map, error) {
+	var items []interface{}
+	// empty or nil begets empty
+	if len(jsonVal) == 0 {
+		empty := make(map[string]interface{}, 0)
+		return empty, nil
+	}
+
+	buf := bytes.NewReader(jsonVal)
+	dec := json.NewDecoder(buf)
+	if JsonUseNumber {
+		dec.UseNumber()
+	}
+	if err := dec.Decode(&items); err != nil {
+		fmt.Println("error", err)
+		return nil, err
+	}
+	return map[string]interface{}{"entries": items}, nil
+}
+
+/*
+// NewJSONDecoder return the right JSON decoder
+func NewJSONDecoder(isCollection bool) Decoder {
+	if isCollection {
+		return JSONCollectionDecoder
+	}
+	return JSONDecoder
+}
+
+// JSONDecoder implements the Decoder interface
+func JSONDecoder(r io.Reader, v *map[string]interface{}) error {
+	d := json.NewDecoder(r)
+	d.UseNumber()
+	return d.Decode(v)
+}
+
+// JSONCollectionDecoder implements the Decoder interface over a collection
+func JSONCollectionDecoder(r io.Reader, v *map[string]interface{}) error {
+	var collection []interface{}
+	d := json.NewDecoder(r)
+	d.UseNumber()
+	if err := d.Decode(&collection); err != nil {
+		return err
+	}
+	*(v) = map[string]interface{}{"collection": collection}
+	return nil
+}
+*/
 
 // Retrieve a Map value from an io.Reader.
 //  NOTE: The raw JSON off the reader is buffered to []byte using a ByteReader. If the io.Reader is an

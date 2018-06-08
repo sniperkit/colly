@@ -3,9 +3,10 @@ package tablib
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	// "errors"
+	// "fmt"
+	// "log"
 	"strings"
-
 	// plugins - json parsers
 	/*
 		gjson "github.com/sniperkit/colly/plugins/data/parser/json/gson"
@@ -19,79 +20,20 @@ import (
 		jsonparser "github.com/sniperkit/colly/plugins/data/parser/json/jsonparser"
 		jsonstream "github.com/sniperkit/colly/plugins/data/parser/json/jsonstream"
 		lazyjson "github.com/sniperkit/colly/plugins/data/parser/json/lazyjson"
-	*/
-
-	gjson "github.com/sniperkit/colly/plugins/data/parser/json/gson"     // fork
-	mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
+	*/// gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
+	// mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/master" // latest commit
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1" // fork v1
-
 	// dev helpers
-	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
-
-func Map(i interface{}) map[string]interface{} {
-	d := make(map[string]interface{})
-	b, _ := json.Marshal(i)
-	json.Unmarshal(b, &d)
-	return d
-}
-
-// LoadMXJ loads a dataset from a XML/JSON source.
-// - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
-//   extract values with dot-notation paths and wildcards.
-// - Forked from `github.com/clbanning/mxj`
-func LoadMXJ(jsonContent []byte) (*Dataset, error) {
-
-	// var input []interface{}
-	// var input map[string]interface{}
-	// var input []map[string]interface{}
-	mxj.JsonUseNumber = true
-	mv, err := mxj.NewMapJson(jsonContent)
-	if err != nil {
-		fmt.Println("NewMapJson, error: ", err)
-		return nil, err
-	}
-
-	// mv := mxj.Map(structs.Map(user))
-
-	// var paths []string
-	// pp.Println("jsonContent=", string(jsonContent))
-	// pp.Println("mv=", mv)
-	mxj.LeafUseDotNotation()
-	// paths = mv.LeafPaths()
-	pp.Println(mv.LeafNodes())
-	pp.Println(mv.LeafPaths())
-
-	return nil, ErrUnmarshallingJsonWithMxj
-	// return internalLoadFromDict(input)
-}
-
-// LoadGSON loads a dataset from a JSON source.
-// - GJSON package allows to get values from a json document
-//   with features such as one line retrieval, dot notation paths, iteration, and parsing json lines.
-// - Forked from `github.com/tidwall/gjson`
-func LoadGJSON(jsonContent []byte) (*Dataset, error) {
-
-	// var input []map[string]interface{}
-	// results := gjson.GetMany(json, "name.first", "name.last", "age")
-	// input = gjson.GetBytes(jsonContent, "").Value().([]map[string]interface{})
-	m, ok := gjson.GetBytes(jsonContent, "").Value().(map[string]interface{})
-	if !ok {
-		fmt.Println("Error")
-		return nil, ErrUnmarshallingJsonWithGson
-	}
-	pp.Println("map[string]interface{}=", m)
-
-	return nil, ErrUnmarshallingJsonWithGson
-	// return internalLoadFromDict(input)
-}
 
 // LoadJSON loads a dataset from a JSON source.
 // - Default pkg "encoding/json"
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
 
 	var input []map[string]interface{}
+
 	d := json.NewDecoder(strings.NewReader(string(jsonContent)))
 	d.UseNumber()
 	if err := d.Decode(&input); err != nil {
@@ -104,6 +46,93 @@ func LoadJSON(jsonContent []byte) (*Dataset, error) {
 
 	return internalLoadFromDict(input)
 }
+
+/*
+// LoadMXJ loads a dataset from a XML/JSON source.
+// - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
+//   extract values with dot-notation paths and wildcards.
+// - Forked from `github.com/clbanning/mxj`
+func LoadMXJ(jsonContent []byte) (*Dataset, error) {
+
+	mxj.JsonUseNumber = true
+	mv, err := mxj.NewMapJson(jsonContent)
+	if err != nil {
+		return nil, err
+	}
+
+
+		mxj.LeafUseDotNotation()
+		l := mv.LeafNodes()
+		for _, v := range l {
+			fmt.Println("path:", v.Path, "value:", v.Value)
+		}
+
+
+	// map[string]interface{}
+
+	// input := mv.([]map[string]interface{})
+
+	return internalLoadFromDict(mv.([]interface{}))
+
+	// return nil, ErrUnmarshallingJsonWithMxj
+	// return internalLoadFromDict(input)
+}
+*/
+
+func LoadMXJ(jsonContent []byte) (*Dataset, error)   { return nil, nil }
+func LoadGJSON(jsonContent []byte) (*Dataset, error) { return nil, nil }
+
+/*
+// LoadGSON loads a dataset from a JSON source.
+// - GJSON package allows to get values from a json document
+//   with features such as one line retrieval, dot notation paths, iteration, and parsing json lines.
+// - Forked from `github.com/tidwall/gjson`
+func LoadGJSON(jsonContent []byte) (*Dataset, error) {
+
+	// handle a goofy case ...
+	//if jsonContent[0] == '[' {
+	//	jsonContent = []byte(`{"array":` + string(jsonContent) + `}`)
+	//}
+
+	// if !gjson.Valid(string(jsonContent)) {
+	// 	return nil, errors.New("invalid json")
+	// }
+
+	var input []map[string]interface{}
+	if err := gjson.Unmarshal(jsonContent, &input); err != nil {
+		return nil, err
+	}
+
+
+	//	input, ok := gjson.Parse(string(jsonContent)).Value().(map[string]interface{})
+	//	if !ok {
+	//		log.Fatalln("error, could not unmarshal to a map[string]interface{}")
+	//		// not a map
+	//	}
+	//	pp.Println("map[string]interface{}=", input)
+
+	// results := gjson.GetMany(json, "name.first", "name.last", "age")
+
+	// var input []map[string]interface{}
+	// results := gjson.GetMany(json, "name.first", "name.last", "age")
+	// input = gjson.GetBytes(jsonContent, "").Value().([]map[string]interface{})
+
+	result := gjson.ParseBytes(jsonContent) //.(map[string]interface{})
+	pp.Println("Map=", result)
+
+	// if !gjson.Valid(string(jsonContent)) {
+	// 	return nil, errors.New("invalid json")
+	// }
+
+	// []map[string]interface{}
+	// pp.Println("Array=", result.Array())
+	// pp.Println("Map=", result.Map())
+
+	// return nil, ErrUnmarshallingJsonWithGson
+	return internalLoadFromDict(input)
+}
+
+*/
 
 // LoadDatabookJSON loads a Databook from a JSON source.
 func LoadDatabookJSON(jsonContent []byte) (*Databook, error) {

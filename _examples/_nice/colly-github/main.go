@@ -50,7 +50,7 @@ var (
 	// collectorDebugger stores the collector's log event listener
 	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
 	// collectorJsonParser
-	collectorJsonParser = "mxj"
+	collectorJsonParser = "json"
 	// collectorTabEnabled sets some debugging information
 	collectorTabEnabled = true
 	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
@@ -84,6 +84,12 @@ func descriptionLen(row []interface{}) interface{} {
 	if row == nil {
 		return 0
 	}
+	pp.Println("row=", row)
+	fmt.Println("len(row)=", len(row))
+	if len(row) < 2 {
+		return 0
+	}
+
 	return len(row[2].(string))
 }
 

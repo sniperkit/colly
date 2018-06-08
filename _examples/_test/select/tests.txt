@@ -1,0 +1,40 @@
+package main
+
+// Mixed columns
+const (
+	SELECTOR_MIXED_0 = `col[2],rows[1,6,8]`
+	SELECTOR_MIXED_1 = `col["name", "fullname"],rows[:10]`
+	SELECTOR_MIXED_2 = `col["name", "fullname"],row[4]`
+	SELECTOR_MIXED_3 = `cols[:],rows[1:7]`
+	SELECTOR_MIXED_4 = `cols[1:],rows[:10]`
+	SELECTOR_MIXED_5 = `cols[1:7],rows[1:]`
+	SELECTOR_MIXED_6 = `cols[:10],row[1,5,7]`
+)
+
+
+// Only rows
+const (
+	// Row
+	SELECTOR_ROW_0 = `row[1]`
+	SELECTOR_ROW_1 = `row[1,2]`
+	SELECTOR_ROW_2 = `row[1,5,7]`
+	// Rows slice
+	SELECTOR_ROWS_0 = `rows[:]`
+	SELECTOR_ROWS_1 = `rows[1:]`
+	SELECTOR_ROWS_2 = `rows[1:7]`
+	SELECTOR_ROWS_3 = `rows[:10]`
+)
+
+// Only columns
+const (
+	// Column
+	SELECTOR_COL_0 = `col[2]`
+	SELECTOR_COL_2 = `col["name", "fullname"]`
+	SELECTOR_COL_3 = `col["name", "fullname"]`
+	// Cols
+	SELECTOR_COLS_0 = `cols[:]`
+	SELECTOR_COLS_1 = `cols[1:]`
+	SELECTOR_COLS_2 = `cols[1:7]`
+	SELECTOR_COLS_3 = `cols[:10]`
+)
+
