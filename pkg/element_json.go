@@ -21,6 +21,14 @@ import (
 	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 )
 
+type JsonParser string
+
+const (
+	MXJ   JsonParser = "mxj"
+	GJSON JsonParser = "gjson"
+	JSON  JsonParser = "json"
+)
+
 // JSONElement is the representation of a JSON tag.
 type JSONElement struct {
 	// Name is the name of the tag

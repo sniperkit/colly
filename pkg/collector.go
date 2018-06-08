@@ -148,6 +148,10 @@ type Collector struct {
 	// AllowTabular
 	AllowTabular bool `default:"false" json:"allow_tabular" yaml:"allow_tabular" toml:"allowTabular" xml:"allowTabular" ini:"allowTabular" csv:"AllowTabular"`
 
+	// UseJsonParser
+	UseJsonParser string `json:"useJsonParser" yaml:"useJsonParser" toml:"useJsonParser" xml:"useJsonParser" ini:"useJsonParser" csv:"UseJsonParser"`
+	// UseJsonParser JsonParser `json:"useJsonParser" yaml:"useJsonParser" toml:"useJsonParser" xml:"useJsonParser" ini:"useJsonParser" csv:"UseJsonParser"`
+
 	//////////////////////////////////////////////////
 	///// Response processing
 	//////////////////////////////////////////////////
@@ -1008,9 +1012,20 @@ func (c *Collector) handleOnTAB(resp *Response) error {
 	var ds *tabular.Dataset
 	switch format {
 	case "json":
-		ds, err = tabular.LoadMXJ(resp.Body)
-		// ds, err = tabular.LoadGJSON(resp.Body)
-		// ds, err = tabular.LoadJSON(resp.Body)
+
+		switch c.UseJsonParser {
+		// MXJ: Decode / encode XML to/from map[string]interface{} (or JSON); extract values with dot-notation paths and wildcards.
+		case "mxj":
+			ds, err = tabular.LoadMXJ(resp.Body)
+
+		case "gjson":
+			ds, err = tabular.LoadGJSON(resp.Body)
+
+		case "json":
+			fallthrough
+		default:
+			ds, err = tabular.LoadJSON(resp.Body)
+		}
 
 	case "yaml":
 		ds, err = tabular.LoadYAML(resp.Body)

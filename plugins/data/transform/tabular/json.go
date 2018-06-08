@@ -1,6 +1,7 @@
 package tablib
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -13,7 +14,9 @@ import (
 )
 
 // LoadMXJ loads a dataset from a XML/JSON source.
-// Forked from `github.com/clbanning/mxj`
+// - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
+//   extract values with dot-notation paths and wildcards.
+// - Forked from `github.com/clbanning/mxj`
 func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 
 	// var input []map[string]interface{}
@@ -24,19 +27,24 @@ func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 		return nil, err
 	}
 
-	var paths []string
+	// mv := mxj.Map(structs.Map(user))
+
+	// var paths []string
 	// pp.Println("jsonContent=", string(jsonContent))
 	// pp.Println("mv=", mv)
 	mxj.LeafUseDotNotation()
-	paths = mv.LeafPaths()
-	pp.Println(paths)
+	// paths = mv.LeafPaths()
+	pp.Println(mv.LeafNodes())
+	pp.Println(mv.LeafPaths())
 
 	return nil, ErrUnmarshallingJsonWithMxj
 	// return internalLoadFromDict(input)
 }
 
 // LoadGSON loads a dataset from a JSON source.
-// Forked from `github.com/tidwall/gjson`
+// - GJSON package allows to get values from a json document
+//   with features such as one line retrieval, dot notation paths, iteration, and parsing json lines.
+// - Forked from `github.com/tidwall/gjson`
 func LoadGJSON(jsonContent []byte) (*Dataset, error) {
 
 	// var input []map[string]interface{}
@@ -54,6 +62,7 @@ func LoadGJSON(jsonContent []byte) (*Dataset, error) {
 }
 
 // LoadJSON loads a dataset from a JSON source.
+// - Default pkg "encoding/json"
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
 
 	var input []map[string]interface{}
@@ -125,4 +134,26 @@ func (d *Databook) JSON() (*Export, error) {
 	by := b.Bytes()
 	by[len(by)-1] = ']'
 	return newExportFromBytes(by), nil
+}
+
+func JsonMarshal(t interface{}) ([]byte, error) {
+	buff := &bytes.Buffer{}
+	enc := json.NewEncoder(buff)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "  ")
+	err := enc.Encode(t)
+	return buff.Bytes(), err
+}
+
+func JsonMarshalIndent(t interface{}, prefix, indent string) ([]byte, error) {
+	b, err := JsonMarshal(t)
+	if err != nil {
+		return b, err
+	}
+	var out bytes.Buffer
+	err = json.Indent(&out, b, prefix, indent)
+	if err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
 }

@@ -49,6 +49,8 @@ var (
 	collectorDebug = false
 	// collectorDebugger stores the collector's log event listener
 	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
+	// collectorJsonParser
+	collectorJsonParser = "mxj"
 	// collectorTabEnabled sets some debugging information
 	collectorTabEnabled = true
 	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
@@ -103,6 +105,9 @@ func main() {
 		colly.AllowedDomains("api.github.com"),
 		colly.AllowTabular(collectorTabEnabled),
 	)
+
+	// UseJsonParser. Available: mxj, gjson, json (default)
+	c.UseJsonParser = collectorJsonParser
 
 	if collectorDebug {
 		c.SetDebugger(collectorDebugger)
