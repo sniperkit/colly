@@ -6,7 +6,8 @@ import (
 	"strings"
 
 	"github.com/sniperkit/colly/plugins/data/extract/json/gson"
-	"github.com/sniperkit/colly/plugins/data/transform/mxj"
+	// "github.com/sniperkit/colly/plugins/data/transform/mxj/v2"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj/v1"
 
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
