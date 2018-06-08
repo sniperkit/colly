@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	striphtml "github.com/sniperkit/colly/plugins/data/encoding/html/striphtml"
-	plucker_config "github.com/sniperkit/colly/plugins/data/extract/text-plucker/config"
+	plucker_config "github.com/sniperkit/colly/plugins/data/extract/text/pluck/config"
 )
 
 // Plucker stores the result and the types of things to pluck

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	cfg "github.com/sniperkit/colly/plugins/data/extract/text-plucker/config"
+	cfg "github.com/sniperkit/colly/plugins/data/extract/text/pluck/config"
 )
 
 type Configs struct {

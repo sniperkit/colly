@@ -6,11 +6,13 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/temoto/robotstxt"
-
+	// core
 	cfg "github.com/sniperkit/colly/pkg/config"
-	"github.com/sniperkit/colly/pkg/debug"
-	"github.com/sniperkit/colly/pkg/storage"
+	debug "github.com/sniperkit/colly/pkg/debug"
+	storage "github.com/sniperkit/colly/pkg/storage"
+
+	// plugins
+	robotstxt "github.com/sniperkit/colly/plugins/data/format/robotstxt"
 )
 
 // NewCollector creates a new Collector instance with cfg.Default configuration
@@ -92,7 +94,6 @@ func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
 func UserAgent(ua string) func(*Collector) {
 	return func(c *Collector) {
 		c.UserAgent = ua
-		// c.Config.UserAgent = ua
 	}
 }
 
@@ -100,7 +101,13 @@ func UserAgent(ua string) func(*Collector) {
 func MaxDepth(depth int) func(*Collector) {
 	return func(c *Collector) {
 		c.MaxDepth = depth
-		// c.Config.MaxDepth = depth
+	}
+}
+
+// AllowTabular enables OnTAB event callback by the Collector.
+func AllowTabular(status bool) func(*Collector) {
+	return func(c *Collector) {
+		c.AllowTabular = status
 	}
 }
 
@@ -108,7 +115,6 @@ func MaxDepth(depth int) func(*Collector) {
 func AllowedDomains(domains ...string) func(*Collector) {
 	return func(c *Collector) {
 		c.AllowedDomains = domains
-		// c.Config.AllowedDomains = domains
 	}
 }
 
@@ -124,7 +130,6 @@ func ParseHTTPErrorResponse() func(*Collector) {
 func ForceDir() func(*Collector) {
 	return func(c *Collector) {
 		c.ForceDir = cfg.DefaultForceDir
-		// c.Config.ForceDir = cfg.DefaultForceDir
 	}
 }
 
@@ -132,7 +137,6 @@ func ForceDir() func(*Collector) {
 func ForceDirRecursive() func(*Collector) {
 	return func(c *Collector) {
 		c.ForceDirRecursive = cfg.DefaultForceDirRecursive
-		// c.Config.ForceDirRecursive = cfg.DefaultForceDirRecursive
 	}
 }
 
@@ -140,7 +144,6 @@ func ForceDirRecursive() func(*Collector) {
 func DisallowedDomains(domains ...string) func(*Collector) {
 	return func(c *Collector) {
 		c.DisallowedDomains = domains
-		// c.Config.DisallowedDomains = domains
 	}
 }
 
@@ -158,7 +161,6 @@ func DisallowedURLFilters(filters ...*regexp.Regexp) func(*Collector) {
 func URLFilters(filters ...*regexp.Regexp) func(*Collector) {
 	return func(c *Collector) {
 		c.URLFilters = filters
-		// c.Config.URLFilters = filters
 	}
 }
 
@@ -166,7 +168,6 @@ func URLFilters(filters ...*regexp.Regexp) func(*Collector) {
 func AllowURLRevisit() func(*Collector) {
 	return func(c *Collector) {
 		c.AllowURLRevisit = cfg.DefaultAllowURLRevisit
-		// c.Config.AllowURLRevisit = cfg.DefaultAllowURLRevisit
 	}
 }
 
@@ -174,7 +175,6 @@ func AllowURLRevisit() func(*Collector) {
 func MaxBodySize(sizeInBytes int) func(*Collector) {
 	return func(c *Collector) {
 		c.MaxBodySize = sizeInBytes
-		// c.Config.MaxBodySize = sizeInBytes
 	}
 }
 
@@ -182,7 +182,6 @@ func MaxBodySize(sizeInBytes int) func(*Collector) {
 func CacheDir(path string) func(*Collector) {
 	return func(c *Collector) {
 		c.CacheDir = path
-		// c.Config.CacheDir = path
 	}
 }
 
@@ -191,7 +190,6 @@ func CacheDir(path string) func(*Collector) {
 func IgnoreRobotsTxt() func(*Collector) {
 	return func(c *Collector) {
 		c.IgnoreRobotsTxt = cfg.DefaultIgnoreRobotsTxt
-		// c.Config.IgnoreRobotsTxt = cfg.DefaultIgnoreRobotsTxt
 	}
 }
 
@@ -199,7 +197,6 @@ func IgnoreRobotsTxt() func(*Collector) {
 func RandomUserAgent() func(*Collector) {
 	return func(c *Collector) {
 		c.RandomUserAgent = cfg.DefaultRandomUserAgent
-		// c.Config.RandomUserAgent = true
 	}
 }
 
@@ -207,7 +204,6 @@ func RandomUserAgent() func(*Collector) {
 func ID(id uint32) func(*Collector) {
 	return func(c *Collector) {
 		c.ID = id
-		// c.Config.ID = id
 	}
 }
 
@@ -215,7 +211,6 @@ func ID(id uint32) func(*Collector) {
 func Async(a bool) func(*Collector) {
 	return func(c *Collector) {
 		c.Async = a
-		// c.Config.Async = a
 	}
 }
 
@@ -224,7 +219,6 @@ func Async(a bool) func(*Collector) {
 func DetectCharset() func(*Collector) {
 	return func(c *Collector) {
 		c.DetectCharset = cfg.DefaultDetectCharset
-		// c.Config.DetectCharset = cfg.DefaultDetectCharset
 	}
 }
 
@@ -232,7 +226,6 @@ func DetectCharset() func(*Collector) {
 func DetectMimeType() func(*Collector) {
 	return func(c *Collector) {
 		c.DetectMimeType = cfg.DefaultDetectMimeType
-		// c.Config.DetectMimeType = cfg.DefaultDetectMimeType
 	}
 }
 
@@ -240,41 +233,13 @@ func DetectMimeType() func(*Collector) {
 func DetectTabular() func(*Collector) {
 	return func(c *Collector) {
 		c.DetectTabular = cfg.DefaultDetectMimeType
-		// c.Config.DetectTabular = cfg.DefaultDetectMimeType
 	}
 }
-
-/*
-// AnalyzeContent enables content classification, ranking and profiling.
-func AnalyzeContent() func(*Collector) {
-	return func(c *Collector) {
-		c.AnalyzeContent = cfg.DefaultAnalyzeContent
-		// c.Config.AnalyzeContent = cfg.DefaultAnalyzeContent
-	}
-}
-
-// TopicModelling enables to detect topics in text-based content
-func TopicModelling() func(*Collector) {
-	return func(c *Collector) {
-		c.TopicModelling = cfg.DefaultTopicModelling
-		// c.Config.TopicModelling = cfg.DefaultTopicModelling
-	}
-}
-
-// SummarizeContent enables text-based content summarization.
-func SummarizeContent() func(*Collector) {
-	return func(c *Collector) {
-		c.SummarizeContent = cfg.DefaultSummarizeContent
-		// c.Config.SummarizeContent = cfg.DefaultSummarizeContent
-	}
-}
-*/
 
 // DebugMode enables text-based content summarization.
 func DebugMode() func(*Collector) {
 	return func(c *Collector) {
 		c.DebugMode = cfg.DefaultDebugMode
-		// c.Config.DebugMode = cfg.DebugMode
 	}
 }
 
@@ -282,7 +247,6 @@ func DebugMode() func(*Collector) {
 func VerboseMode() func(*Collector) {
 	return func(c *Collector) {
 		c.VerboseMode = cfg.DefaultVerboseMode
-		// c.Config.VerboseMode = cfg.VerboseMode
 	}
 }
 

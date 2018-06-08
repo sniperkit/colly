@@ -22,25 +22,25 @@ var (
 
 // github api vars
 var (
-	// githubAPI_Account sets the github user name to request for its starred repositories list
-	githubAPI_Account = "roscopecoltran"
-	// githubAPI_Pagination_Page
-	githubAPI_Pagination_Page = 1
-	// githubAPI_Pagination_PerPage
-	githubAPI_Pagination_PerPage = 10
-	// githubAPI_Pagination_Direction
-	githubAPI_Pagination_Direction = "desc"
-	// githubAPI_Pagination_Sort
-	githubAPI_Pagination_Sort = "updated"
-	// githubAPI_Account
-	githubAPI_Pagination_Params = []string{
-		fmt.Sprintf("page=%d", githubAPI_Pagination_Page),
-		fmt.Sprintf("per_page=%s", githubAPI_Pagination_PerPage),
-		fmt.Sprintf("direction=%s", githubAPI_Pagination_Direction),
-		fmt.Sprintf("sort=%s", githubAPI_Pagination_Sort),
+	// githubAPIAccount sets the github user name to request for its starred repositories list
+	githubAPIAccount = "roscopecoltran"
+	// githubAPIPaginationPage
+	githubAPIPaginationPage = 1
+	// githubAPIPaginationPerPage
+	githubAPIPaginationPerPage = 10
+	// githubAPIPaginationDirection
+	githubAPIPaginationDirection = "desc"
+	// githubAPIPaginationSort
+	githubAPIPaginationSort = "updated"
+	// githubAPIPaginationParams
+	githubAPIPaginationParams = []string{
+		fmt.Sprintf("page=%d", githubAPIPaginationPage),
+		fmt.Sprintf("per_page=%s", githubAPIPaginationPerPage),
+		fmt.Sprintf("direction=%s", githubAPIPaginationDirection),
+		fmt.Sprintf("sort=%s", githubAPIPaginationSort),
 	}
 	// githubAPI_EndpointURL
-	githubAPI_EndpointURL = fmt.Println("https://api.github.com/users/%s/starred?%s", githubAPI_Account, strings.Join(githubAPI_Pagination_Params, "&"))
+	githubAPI_EndpointURL = fmt.Sprintf("https://api.github.com/users/%s/starred?%s", githubAPI_Account, strings.Join(githubAPIPaginationParams, "&"))
 )
 
 // collector vars
@@ -49,8 +49,8 @@ var (
 	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
 	// collectorDatasetDebug sets some debugging information
 	collectorDatasetDebug = true
-	// collectorDatasetDebug sets some debugging information
-	collectorDatasetEnable = true
+	// collectorTabEnabled sets some debugging information
+	collectorTabEnabled = true
 	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
 	collectorDatasetOutputPrefixPath = "./shared/dataset"
 	// collectorDatasetOutputBasename specifies the template to use to write the dataset dump
@@ -87,7 +87,7 @@ func descriptionLen(row []interface{}) interface{} {
 
 // PrettyPrint structs
 func prettyPrint(msg ...interface{}) {
-	pp.Println(interface{}...)
+	pp.Println(msg...)
 }
 
 func init() {
@@ -104,9 +104,8 @@ func main() {
 		colly.AllowTabular(true),
 	)
 
-	c.AllowTabular = true
-	if collectorWithDebug {
-		c.SetDebugger(debugger)
+	if appDebug {
+		c.SetDebugger(collectorDebugger)
 	}
 
 	// On every a element which has tabular format data call callback
@@ -129,32 +128,85 @@ func main() {
 		}
 		ds.AppendDynamicColumn("description_length", descriptionLen)
 
-		switch outputFormat {
-		case "yaml":
-		case "json":
-		case "tsv":
-		case "csv":
-		case "grid-simple":
-		case "grid-condensed":
-		case "grid-markdown", "ascii":
-		case "mysql":
-		case "postgresql":
-		}
-		// JSON
-		json, err := ds.JSON()
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		fmt.Println(json)
-
+		// var err error
+		// var output string
+		switch collectorDatasetOutputFormat {
 		// YAML
-		yaml, err := ds.YAML()
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		fmt.Println(yaml)
+		case "yaml":
+			output, err := ds.YAML()
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			fmt.Println(output)
 
-		// fmt.Println(ds.SortReverse("id").Tabular("condensed"))
+			// JSON
+		case "json":
+			output, err := ds.JSON()
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			fmt.Println(output)
+
+			// TSV
+		case "tsv":
+			output, err := ds.TSV()
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			fmt.Println(output)
+
+			// CSV
+		case "csv":
+			output, err := ds.CSV()
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			fmt.Println(output)
+
+			// Markdown
+		case "markdown":
+			output := ds.Markdown()
+			fmt.Println(output)
+
+			// HTML
+		case "html":
+			output := ds.HTML()
+			fmt.Println(output)
+
+			// MySQL
+		case "mysql":
+			output, err := ds.MySQL()
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			fmt.Println(output)
+
+			// Postgres
+		case "postgresql":
+			output, err := ds.Postgres()
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			fmt.Println(output)
+
+			// ASCII - TabularGrid
+		case "grid-default", "ascii-grid", "tabular-grid":
+			output := ds.Tabular("grid" /* tablib.TabularGrid */)
+			fmt.Println(output)
+
+			// ASCII - TabularSimple
+		case "grid-simple", "ascii-simple", "tabular-simple":
+			// ASCII
+			output := ds.Tabular("simple" /* tablib.TabularSimple */)
+			fmt.Println(output)
+
+			// ASCII - TabularSiTabularCondensedmple
+		case "grid-condensed", "ascii-condensed", "tabular-condensed":
+			// ASCII
+			output := ds.Tabular("condensed" /* tablib.TabularCondensed */)
+			fmt.Println(output)
+
+		}
 
 	})
 

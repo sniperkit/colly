@@ -42,8 +42,6 @@ import (
 	"google.golang.org/appengine/urlfetch"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/kennygrant/sanitize"
-	"github.com/temoto/robotstxt"
 
 	// collector - core
 	cfg "github.com/sniperkit/colly/pkg/config"
@@ -51,10 +49,14 @@ import (
 	metric "github.com/sniperkit/colly/pkg/metric"
 	storage "github.com/sniperkit/colly/pkg/storage"
 
-	// collector - plugins
+	// content - transform
 	tabular "github.com/sniperkit/colly/plugins/data/transform/tabular"
+	sanitize "github.com/sniperkit/colly/plugins/data/transform/text/sanitize"
 
-	// format - serialization
+	// format
+	robotstxt "github.com/sniperkit/colly/plugins/data/format/robotstxt"
+
+	// encoding - iterators
 	jsoniter "github.com/json-iterator/go"
 
 	// format - operation
