@@ -35,12 +35,12 @@ var (
 	// githubAPIPaginationParams
 	githubAPIPaginationParams = []string{
 		fmt.Sprintf("page=%d", githubAPIPaginationPage),
-		fmt.Sprintf("per_page=%s", githubAPIPaginationPerPage),
+		fmt.Sprintf("per_page=%d", githubAPIPaginationPerPage),
 		fmt.Sprintf("direction=%s", githubAPIPaginationDirection),
 		fmt.Sprintf("sort=%s", githubAPIPaginationSort),
 	}
 	// githubAPI_EndpointURL
-	githubAPI_EndpointURL = fmt.Sprintf("https://api.github.com/users/%s/starred?%s", githubAPI_Account, strings.Join(githubAPIPaginationParams, "&"))
+	githubAPI_EndpointURL = fmt.Sprintf("https://api.github.com/users/%s/starred?%s", githubAPIAccount, strings.Join(githubAPIPaginationParams, "&"))
 )
 
 // collector vars
@@ -128,85 +128,75 @@ func main() {
 		}
 		ds.AppendDynamicColumn("description_length", descriptionLen)
 
-		// var err error
-		// var output string
+		// ds.EXPORT_FORMAT().String() 					--> returns the contents of the exported dataset as a string.
+		// ds.EXPORT_FORMAT().Bytes() 					--> returns the contents of the exported dataset as a byte array.
+		// ds.EXPORT_FORMAT().WriteTo(writer) 			--> writes the exported dataset to w.
+		// ds.EXPORT_FORMAT().WriteFile(filename, perm) --> writes the databook or dataset content to a file named by filename.
+		var output string
 		switch collectorDatasetOutputFormat {
 		// YAML
 		case "yaml":
-			output, err := ds.YAML()
-			if err != nil {
+			if export, err := ds.YAML(); err == nil {
+				output = export.String()
+			} else {
 				fmt.Println("error:", err)
 			}
-			fmt.Println(output)
 
-			// JSON
+		// JSON
 		case "json":
-			output, err := ds.JSON()
-			if err != nil {
+			if export, err := ds.JSON(); err == nil {
+				output = export.String()
+			} else {
 				fmt.Println("error:", err)
 			}
-			fmt.Println(output)
 
-			// TSV
+		// TSV
 		case "tsv":
-			output, err := ds.TSV()
-			if err != nil {
+			if export, err := ds.TSV(); err == nil {
+				output = export.String()
+			} else {
 				fmt.Println("error:", err)
 			}
-			fmt.Println(output)
 
-			// CSV
+		// CSV
 		case "csv":
-			output, err := ds.CSV()
-			if err != nil {
+			if export, err := ds.CSV(); err == nil {
+				output = export.String()
+			} else {
 				fmt.Println("error:", err)
 			}
-			fmt.Println(output)
 
-			// Markdown
+		// Markdown
 		case "markdown":
-			output := ds.Markdown()
-			fmt.Println(output)
+			output = ds.Markdown().String()
 
-			// HTML
+		// HTML
 		case "html":
-			output := ds.HTML()
-			fmt.Println(output)
+			output = ds.HTML().String()
 
-			// MySQL
+		// MySQL
 		case "mysql":
-			output, err := ds.MySQL()
-			if err != nil {
-				fmt.Println("error:", err)
-			}
-			fmt.Println(output)
+			output = ds.MySQL("github_starred").String()
 
-			// Postgres
+		// Postgres
 		case "postgresql":
-			output, err := ds.Postgres()
-			if err != nil {
-				fmt.Println("error:", err)
-			}
-			fmt.Println(output)
+			output = ds.Postgres("github_starred").String()
 
-			// ASCII - TabularGrid
+		// ASCII - TabularGrid
 		case "grid-default", "ascii-grid", "tabular-grid":
-			output := ds.Tabular("grid" /* tablib.TabularGrid */)
-			fmt.Println(output)
+			output = ds.Tabular("grid" /* tablib.TabularGrid */).String()
 
-			// ASCII - TabularSimple
+		// ASCII - TabularSimple
 		case "grid-simple", "ascii-simple", "tabular-simple":
-			// ASCII
-			output := ds.Tabular("simple" /* tablib.TabularSimple */)
-			fmt.Println(output)
+			output = ds.Tabular("simple" /* tablib.TabularSimple */).String()
 
-			// ASCII - TabularSiTabularCondensedmple
+		// ASCII - TabularSiTabularCondensedmple
 		case "grid-condensed", "ascii-condensed", "tabular-condensed":
-			// ASCII
-			output := ds.Tabular("condensed" /* tablib.TabularCondensed */)
-			fmt.Println(output)
+			output = ds.Tabular("condensed" /* tablib.TabularCondensed */).String()
 
 		}
+
+		fmt.Println(output)
 
 	})
 

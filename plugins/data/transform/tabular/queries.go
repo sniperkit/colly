@@ -1,4 +1,4 @@
-package tabular
+package tablib
 
 /*
 import (
