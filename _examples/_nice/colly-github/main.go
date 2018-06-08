@@ -2,18 +2,52 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
-	// core
+	// colly - core
 	colly "github.com/sniperkit/colly/pkg"
 	debug "github.com/sniperkit/colly/pkg/debug"
 
-	// plugins
+	// colly - plugins
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
-var version = "0.0.1-alpha"
-var debugger *debug.LogDebugger = &debug.LogDebugger{}
+// app vars
+var appVersion = "0.0.1-alpha"
 
+// collector vars
+var (
+	// collectorWithDebug specifies if the collector debugger is enabled or disabled
+	collectorWithDebug = true
+	// collectorDebugger stores the collector's log event listener
+	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
+	// collectorDatasetDebug sets some debugging information
+	collectorDatasetDebug = true
+	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
+	collectorDatasetOutputPrefixPath = "./shared/dataset"
+	// collectorDatasetOutputBasename specifies the template to use to write the dataset dump
+	collectorDatasetOutputBasename = "colly_github_%d"
+	// collectorDatasetOutputFormat sets the ouput format of the dataset extracted by the collector
+	// `OnTAB` event Export formats supported:
+	//  - JSON (Sets + Books)
+	//  - YAML (Sets + Books)
+	//  - XLSX (Sets + Books)
+	//  - XML (Sets + Books)
+	//  - TSV (Sets)
+	//  - CSV (Sets)
+	//  - ASCII + Markdown (Sets)
+	//  - MySQL (Sets)
+	//  - Postgres (Sets)
+	// `OnTAB` event loading formats supported:
+	//  - JSON (Sets + Books)
+	//  - YAML (Sets + Books)
+	//  - XML (Sets)
+	//  - CSV (Sets)
+	//  - TSV (Sets)
+	collectorDatasetOutputFormat = "json"
+)
+
+// AppendDynamicColumn to the tabular dataset
 func descriptionLen(row []interface{}) interface{} {
 	if row == nil {
 		return 0
@@ -21,8 +55,17 @@ func descriptionLen(row []interface{}) interface{} {
 	return len(row[3].(string))
 }
 
+// PrettyPrint structs
+func prettyPrint(msg ...interface{}) {
+	pp.Println(interface{}...)
+}
+
+func init() {
+	// Ensure that the output format is set in lower case.
+	collectorDatasetOutputFormat = strings.ToLower(collectorDatasetOutputFormat)
+}
+
 func main() {
-	pp.Println("colly-github start")
 
 	// Instantiate default collector
 	c := colly.NewCollector(
@@ -31,11 +74,16 @@ func main() {
 	)
 
 	c.AllowTabular = true
-	// c.SetDebugger(debugger)
+	if collectorWithDebug {
+		c.SetDebugger(debugger)
+	}
 
 	// On every a element which has href attribute call callback
 	c.OnTAB("0:0", func(e *colly.TABElement) {
 
+		if collectorDatasetDebug {
+
+		}
 		// fmt.Println("OnTAB event processing...")
 		// fmt.Printf("\nValid: %t\n", e.Dataset.Valid(), "Height: %d\n", e.Dataset.Height(), "Width: %d\n", e.Dataset.Width())
 		// pp.Println(e.Dataset.Headers())
@@ -47,6 +95,17 @@ func main() {
 		}
 		ds.AppendDynamicColumn("description_length", descriptionLen)
 
+		switch outputFormat {
+		case "yaml":
+		case "json":
+		case "tsv":
+		case "csv":
+		case "grid-simple":
+		case "grid-condensed":
+		case "grid-markdown", "ascii":
+		case "mysql":
+		case "postgresql":
+		}
 		// JSON
 		json, err := ds.JSON()
 		if err != nil {
