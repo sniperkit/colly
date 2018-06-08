@@ -27,7 +27,7 @@ var (
 	// githubAPIPaginationPage
 	githubAPIPaginationPage = 1
 	// githubAPIPaginationPerPage
-	githubAPIPaginationPerPage = 10
+	githubAPIPaginationPerPage = 25
 	// githubAPIPaginationDirection
 	githubAPIPaginationDirection = "desc"
 	// githubAPIPaginationSort
@@ -45,10 +45,10 @@ var (
 
 // collector vars
 var (
+	// collectorDebug sets collector's debugger
+	collectorDebug = false
 	// collectorDebugger stores the collector's log event listener
 	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
-	// collectorDatasetDebug sets some debugging information
-	collectorDatasetDebug = true
 	// collectorTabEnabled sets some debugging information
 	collectorTabEnabled = true
 	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
@@ -72,7 +72,7 @@ var (
 	//  - XML (Sets)
 	//  - CSV (Sets)
 	//  - TSV (Sets)
-	collectorDatasetOutputFormat = "json"
+	collectorDatasetOutputFormat = "tabular-grid"
 	//  collectorSubDatasetColumns specifies the columns to filter from the json content
 	collectorSubDatasetColumns = []string{"id", "name", "full_name", "description", "language", "stargazers_count", "forks_count"}
 )
@@ -82,7 +82,7 @@ func descriptionLen(row []interface{}) interface{} {
 	if row == nil {
 		return 0
 	}
-	return len(row[3].(string))
+	return len(row[2].(string))
 }
 
 // PrettyPrint structs
@@ -104,7 +104,7 @@ func main() {
 		colly.AllowTabular(true),
 	)
 
-	if appDebug {
+	if collectorDebug {
 		c.SetDebugger(collectorDebugger)
 	}
 
@@ -117,17 +117,21 @@ func main() {
 
 		// Debug the dataset slice
 		if appDebug {
-			fmt.Printf("\nValid: %t\n", e.Dataset.Valid(), "Height: %d\n", e.Dataset.Height(), "Width: %d\n", e.Dataset.Width())
-			pp.Println(e.Dataset.Headers())
+			fmt.Println("Valid=", e.Dataset.Valid(), "Height=", e.Dataset.Height(), "Width=", e.Dataset.Width())
+			pp.Printf("Headers: \n %s \n\n", e.Dataset.Headers())
 		}
 
-		// Select
-		ds, err := e.Dataset.Select(0, 0, "id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")
+		// Select sub-dataset
+		ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count")
 		if err != nil {
 			fmt.Println("error:", err)
 		}
+
+		// Update dataset
+		// Add a dynamic column, by passing a function which has access to the current row, and must return a value:
 		ds.AppendDynamicColumn("description_length", descriptionLen)
 
+		// Export dataset
 		// ds.EXPORT_FORMAT().String() 					--> returns the contents of the exported dataset as a string.
 		// ds.EXPORT_FORMAT().Bytes() 					--> returns the contents of the exported dataset as a byte array.
 		// ds.EXPORT_FORMAT().WriteTo(writer) 			--> writes the exported dataset to w.
@@ -167,7 +171,7 @@ func main() {
 			}
 
 		// Markdown
-		case "markdown":
+		case "markdown", "tabular-markdown":
 			output = ds.Markdown().String()
 
 		// HTML
