@@ -3,16 +3,32 @@ package tablib
 import (
 	"encoding/json"
 	"strings"
-	// "log"
-	// "sync"
-	// "github.com/json-iterator/go"
+
+	"github.com/sniperkit/colly/plugins/data/extract/json/gson"
 )
 
-//var (
-//	json = jsoniter.ConfigCompatibleWithStandardLibrary
-//)
+// LoadGSON loads a dataset from a JSON source.
+func LoadGSON(jsonContent []byte) (*Dataset, error) {
 
-// LoadJSON loads a dataset from a YAML source.
+	var input []map[string]interface{}
+
+	// results := gjson.GetMany(json, "name.first", "name.last", "age")
+	input = gjson.GetBytes(jsonContent, "").Value().([]map[string]interface{})
+
+	// d := json.NewDecoder(strings.NewReader(string(jsonContent)))
+	// d.UseNumber()
+	// if err := d.Decode(&input); err != nil {
+	// 	return nil, err
+	// }
+
+	// if err := json.Unmarshal(jsonContent, &input); err != nil {
+	// 	return nil, err
+	// }
+
+	return internalLoadFromDict(input)
+}
+
+// LoadJSON loads a dataset from a JSON source.
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
 
 	var input []map[string]interface{}

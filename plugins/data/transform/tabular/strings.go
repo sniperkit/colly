@@ -1,5 +1,6 @@
 package tablib
 
+/*
 import (
 	"bytes"
 	"fmt"
@@ -81,3 +82,4 @@ func stringifyValue(w *bytes.Buffer, val reflect.Value) {
 		}
 	}
 }
+*/

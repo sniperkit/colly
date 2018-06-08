@@ -50,7 +50,7 @@ var (
 	// collectorDebugger stores the collector's log event listener
 	collectorDebugger *debug.LogDebugger = &debug.LogDebugger{}
 	// collectorTabEnabled sets some debugging information
-	collectorTabEnabled = false
+	collectorTabEnabled = true
 	// collectorDatasetOutputPrefixPath specifies the prefix path for all saved dumps
 	collectorDatasetOutputPrefixPath = "./shared/dataset"
 	// collectorDatasetOutputBasename specifies the template to use to write the dataset dump
