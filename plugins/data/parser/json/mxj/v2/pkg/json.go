@@ -6,16 +6,45 @@ package mxj
 
 import (
 	"bytes"
-	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"io"
 	// "io/ioutil"
 	"time"
-
-	json "github.com/sniperkit/xutil/plugin/format/json"
+	// json "github.com/sniperkit/xutil/plugin/format/json"
 )
 
+// JSON is the key for the json encoding
+const JSON = "json"
+
 // var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+// NewJSONDecoder return the right JSON decoder
+func NewJSONDecoder(isCollection bool) Decoder {
+	if isCollection {
+		return JSONCollectionDecoder
+	}
+	return JSONDecoder
+}
+
+// JSONDecoder implements the Decoder interface
+func JSONDecoder(r io.Reader, v *map[string]interface{}) error {
+	d := json.NewDecoder(r)
+	d.UseNumber()
+	return d.Decode(v)
+}
+
+// JSONCollectionDecoder implements the Decoder interface over a collection
+func JSONCollectionDecoder(r io.Reader, v *map[string]interface{}) error {
+	var collection []interface{}
+	d := json.NewDecoder(r)
+	d.UseNumber()
+	if err := d.Decode(&collection); err != nil {
+		return err
+	}
+	*(v) = map[string]interface{}{"collection": collection}
+	return nil
+}
 
 // ------------------------------ write JSON -----------------------
 

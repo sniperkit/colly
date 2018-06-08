@@ -25,6 +25,10 @@ type DecoderFactory func(bool) Decoder
 var decoders = map[string]DecoderFactory{
 	JSON:   NewJSONDecoder,
 	STRING: NewStringDecoder,
+	// RSS:    NewRSSDecoder,
+	// XML:    NewXMLDecoder,
+	// HTML:    NeHTMLDecoder,
+	// TAB:    NewTABDecoder,
 }
 
 // Register registers the decoder factory with the given name

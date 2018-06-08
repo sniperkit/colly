@@ -3,6 +3,8 @@ package tablib
 import (
 	"bytes"
 	"sync"
+	// parallel_gzip "github.com/klauspost/pgzip"
+	// compress "github.com/klauspost/compress"
 )
 
 // public vars

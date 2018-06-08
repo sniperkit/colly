@@ -15,6 +15,12 @@
 # some/subtree/dir
 # ```
 # 
+
+# Important:
+# - https://github.com/john-kurkowski/git-subtree-remote
+# - https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/#hacking-on-git-subtree
+# 
+
 [alias]
 	# list subtrees in simple mode
     ls-subtrees = !"git log | grep git-subtree-dir | awk '{ print $2 }'"

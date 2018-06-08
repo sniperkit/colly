@@ -6,22 +6,36 @@ import (
 	"fmt"
 	"strings"
 
-	// experimental
-	// "github.com/gulyasm/jsonui"
-	// https://github.com/HamiTrip/json2schema
-	// https://github.com/HamiTrip/json2neo
-	//
+	// plugins - json parsers
+	/*
+		gjson "github.com/sniperkit/colly/plugins/data/parser/json/gson"
+		djson "github.com/sniperkit/colly/plugins/data/parser/json/djson"
+		easyjson "github.com/sniperkit/colly/plugins/data/parser/json/easyjson"
+		fastjson "github.com/sniperkit/colly/plugins/data/parser/json/fastjson"
+		ffjson "github.com/sniperkit/colly/plugins/data/parser/json/ffjson"
+		gabs "github.com/sniperkit/colly/plugins/data/parser/json/gabs"
+		jsnm "github.com/sniperkit/colly/plugins/data/parser/json/jsnm"
+		jsonez "github.com/sniperkit/colly/plugins/data/parser/json/jsonez"
+		jsonparser "github.com/sniperkit/colly/plugins/data/parser/json/jsonparser"
+		jsonstream "github.com/sniperkit/colly/plugins/data/parser/json/jsonstream"
+		lazyjson "github.com/sniperkit/colly/plugins/data/parser/json/lazyjson"
+	*/
 
-	// json parsers
-	gjson "github.com/sniperkit/colly/plugins/data/extract/json/gson"
-	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1"
-	mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v2/pkg"
+	gjson "github.com/sniperkit/colly/plugins/data/parser/json/gson"     // fork
+	mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
+	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/master" // latest commit
+	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1" // fork v1
 
 	// dev helpers
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
-// func LoadUI() {}
+func Map(i interface{}) map[string]interface{} {
+	d := make(map[string]interface{})
+	b, _ := json.Marshal(i)
+	json.Unmarshal(b, &d)
+	return d
+}
 
 // LoadMXJ loads a dataset from a XML/JSON source.
 // - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
@@ -29,6 +43,8 @@ import (
 // - Forked from `github.com/clbanning/mxj`
 func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 
+	// var input []interface{}
+	// var input map[string]interface{}
 	// var input []map[string]interface{}
 	mxj.JsonUseNumber = true
 	mv, err := mxj.NewMapJson(jsonContent)
