@@ -102,7 +102,7 @@ func (e *Export) Size(outputType string) (length int) {
 	return length
 }
 
-// Bytes returns the contentes of the exported dataset as a byte array.
+// Bytes returns the contents of the exported dataset as a byte array.
 func (e *Export) Bytes() []byte {
 	e.lock.RLock()
 	defer e.lock.RUnlock()

@@ -36,4 +36,10 @@ var (
 
 	// ErrUnmatchedKeys is thrown when unmarshalling a format failed on some keys
 	ErrUnmatchedKeys = errors.New("Unmatched keys in your dataset.")
+
+	// ErrUnmarshallingJsonWithGson is thrown when unmarshalling JSON format failed
+	ErrUnmarshallingJsonWithGson = errors.New("Error while unmarhsalling a json source with `gson` package.")
+
+	// ErrUnmarshallingJsonWithMxj is thrown when unmarshalling JSON format failed
+	ErrUnmarshallingJsonWithMxj = errors.New("Error while unmarhsalling a json source with `mxj` package.")
 )

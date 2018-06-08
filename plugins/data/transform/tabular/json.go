@@ -2,30 +2,54 @@ package tablib
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/sniperkit/colly/plugins/data/extract/json/gson"
+	"github.com/sniperkit/colly/plugins/data/transform/mxj"
+
+	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
+// LoadMXJ loads a dataset from a XML/JSON source.
+// Forked from `github.com/clbanning/mxj`
+func LoadMXJ(jsonContent []byte) (*Dataset, error) {
+
+	// var input []map[string]interface{}
+	mxj.JsonUseNumber = true
+	mv, err := mxj.NewMapJson(jsonContent)
+	if err != nil {
+		fmt.Println("NewMapJson, error: ", err)
+		return nil, err
+	}
+
+	var paths []string
+	// pp.Println("jsonContent=", string(jsonContent))
+	// pp.Println("mv=", mv)
+	mxj.LeafUseDotNotation()
+	paths = mv.LeafPaths()
+	pp.Println(paths)
+
+	return nil, ErrUnmarshallingJsonWithMxj
+	// return internalLoadFromDict(input)
+}
+
 // LoadGSON loads a dataset from a JSON source.
+// Forked from `github.com/tidwall/gjson`
 func LoadGSON(jsonContent []byte) (*Dataset, error) {
 
-	var input []map[string]interface{}
-
+	// var input []map[string]interface{}
 	// results := gjson.GetMany(json, "name.first", "name.last", "age")
-	input = gjson.GetBytes(jsonContent, "").Value().([]map[string]interface{})
+	// input = gjson.GetBytes(jsonContent, "").Value().([]map[string]interface{})
+	m, ok := gjson.GetBytes(jsonContent, "").Value().(map[string]interface{})
+	if !ok {
+		fmt.Println("Error")
+		return nil, ErrUnmarshallingJsonWithGson
+	}
+	pp.Println("map[string]interface{}=", m)
 
-	// d := json.NewDecoder(strings.NewReader(string(jsonContent)))
-	// d.UseNumber()
-	// if err := d.Decode(&input); err != nil {
-	// 	return nil, err
-	// }
-
-	// if err := json.Unmarshal(jsonContent, &input); err != nil {
-	// 	return nil, err
-	// }
-
-	return internalLoadFromDict(input)
+	return nil, ErrUnmarshallingJsonWithGson
+	// return internalLoadFromDict(input)
 }
 
 // LoadJSON loads a dataset from a JSON source.
