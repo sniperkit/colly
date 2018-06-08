@@ -24,15 +24,26 @@ import (
 type JsonParser string
 
 const (
-	MXJ   JsonParser = "mxj"
-	GJSON JsonParser = "gjson"
-	JSON  JsonParser = "json"
+	MXJ        JsonParser = "mxj"        // https://github.com/clbanning/mxj
+	GABS       JsonParser = "gabs"       // https://github.com/Jeffail/gabs
+	GJSON      JsonParser = "gjson"      // https://github.com/tidwall/gjson
+	LAZYJSON   JsonParser = "lazyjson"   // https://github.com/qw4990/lazyjson
+	FASTJSON   JsonParser = "fastjson"   // https://github.com/valyala/fastjson
+	FFJSON     JsonParser = "ffjson"     // https://github.com/pquerna/ffjson
+	EASYJSON   JsonParser = "easyjson"   // https://github.com/mailru/easyjson
+	JSONPARSER JsonParser = "jsonparser" // https://github.com/buger/jsonparser
+	DJSON      JsonParser = "djson"      // https://github.com/a8m/djson
+	JSNM       JsonParser = "jsnm"       // https://github.com/toukii/jsnm
+	JSONSTREAM JsonParser = "jsonstream" // https://github.com/pb-/jsonstream
+	JSONEZ     JsonParser = "jsonez"     // https://github.com/srikanth2212/jsonez
+	JSON       JsonParser = "json"       // encoding/json
 )
 
 // JSONElement is the representation of a JSON tag.
 type JSONElement struct {
 	// Name is the name of the tag
 	Name string
+	// Text is the content node
 	Text string
 	// Request is the request object of the element's HTML document
 	Request *Request

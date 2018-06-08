@@ -20,27 +20,9 @@ var (
 	appDebug = true
 )
 
-// github api vars
+// web target
 var (
-	// githubAPIAccount sets the github user name to request for its starred repositories list
-	githubAPIAccount = "roscopecoltran"
-	// githubAPIPaginationPage
-	githubAPIPaginationPage = 1
-	// githubAPIPaginationPerPage
-	githubAPIPaginationPerPage = 25
-	// githubAPIPaginationDirection
-	githubAPIPaginationDirection = "desc"
-	// githubAPIPaginationSort
-	githubAPIPaginationSort = "updated"
-	// githubAPIPaginationParams
-	githubAPIPaginationParams = []string{
-		fmt.Sprintf("page=%d", githubAPIPaginationPage),
-		fmt.Sprintf("per_page=%d", githubAPIPaginationPerPage),
-		fmt.Sprintf("direction=%s", githubAPIPaginationDirection),
-		fmt.Sprintf("sort=%s", githubAPIPaginationSort),
-	}
-	// githubAPIEndpointURL
-	githubAPIEndpointURL = fmt.Sprintf("https://api.github.com/users/%s/starred?%s", githubAPIAccount, strings.Join(githubAPIPaginationParams, "&"))
+	targetRootURL = "https://golanglibs.com/sitemap.txt"
 )
 
 // collector vars
@@ -80,7 +62,7 @@ var (
 )
 
 // AppendDynamicColumn to the tabular dataset
-func descriptionLen(row []interface{}) interface{} {
+func addFreq(row []interface{}) interface{} {
 	if row == nil {
 		return 0
 	}
@@ -127,14 +109,16 @@ func main() {
 		}
 
 		// Select sub-dataset
-		ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count")
+		ds, err := e.Dataset.Select(0, 0, "column_1")
 		if err != nil {
 			fmt.Println("error:", err)
 		}
 
 		// Update dataset
 		// Add a dynamic column, by passing a function which has access to the current row, and must return a value:
-		ds.AppendDynamicColumn("description_length", descriptionLen)
+		ds.AppendDynamicColumn("changefreq", addFreq)
+		ds.AppendDynamicColumn("priority", addFreq)
+		// ds.AppendDynamicColumn("freq", addFreq)
 
 		// Export dataset
 		// ds.EXPORT_FORMAT().String() 					--> returns the contents of the exported dataset as a string.
@@ -227,6 +211,6 @@ func main() {
 		}
 	})
 
-	// Start scraping on https://api.github.com
-	c.Visit(githubAPIEndpointURL)
+	// Start scraping on https://golanglibs.org pages
+	c.Visit(targetRootURL)
 }

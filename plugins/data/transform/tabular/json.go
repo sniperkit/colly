@@ -6,12 +6,22 @@ import (
 	"fmt"
 	"strings"
 
-	gjson "github.com/sniperkit/colly/plugins/data/extract/json/gson"
-	mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v2/pkg"
-	// "github.com/sniperkit/colly/plugins/data/transform/mxj/v1"
+	// experimental
+	// "github.com/gulyasm/jsonui"
+	// https://github.com/HamiTrip/json2schema
+	// https://github.com/HamiTrip/json2neo
+	//
 
+	// json parsers
+	gjson "github.com/sniperkit/colly/plugins/data/extract/json/gson"
+	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1"
+	mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v2/pkg"
+
+	// dev helpers
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
+
+// func LoadUI() {}
 
 // LoadMXJ loads a dataset from a XML/JSON source.
 // - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
