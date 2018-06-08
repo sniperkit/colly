@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sniperkit/colly/plugins/data/extract/json/gson"
-	// "github.com/sniperkit/colly/plugins/data/transform/mxj/v2"
-	"github.com/sniperkit/colly/plugins/data/transform/mxj/v1"
+	gjson "github.com/sniperkit/colly/plugins/data/extract/json/gson"
+	mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v2/pkg"
+	// "github.com/sniperkit/colly/plugins/data/transform/mxj/v1"
 
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
@@ -37,7 +37,7 @@ func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 
 // LoadGSON loads a dataset from a JSON source.
 // Forked from `github.com/tidwall/gjson`
-func LoadGSON(jsonContent []byte) (*Dataset, error) {
+func LoadGJSON(jsonContent []byte) (*Dataset, error) {
 
 	// var input []map[string]interface{}
 	// results := gjson.GetMany(json, "name.first", "name.last", "age")

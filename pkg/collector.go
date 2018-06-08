@@ -1009,7 +1009,7 @@ func (c *Collector) handleOnTAB(resp *Response) error {
 	switch format {
 	case "json":
 		ds, err = tabular.LoadMXJ(resp.Body)
-		// ds, err = tabular.LoadGSON(resp.Body)
+		// ds, err = tabular.LoadGJSON(resp.Body)
 		// ds, err = tabular.LoadJSON(resp.Body)
 
 	case "yaml":
