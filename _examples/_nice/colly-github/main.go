@@ -19,7 +19,7 @@ var (
 	appVersion = "0.0.1-alpha"
 
 	// appDebug specifies if the app debug/verbose some development event logged
-	appDebug = true
+	appDebug = false
 
 	//-- End
 )
@@ -119,10 +119,10 @@ func descriptionLength(row []interface{}) interface{} {
 	if row == nil {
 		return 0
 	}
-	if appDebug {
-		fmt.Printf("\n----- Calculated the description length (%d) for row:\n", len(row))
-		prettyPrint(row)
-	}
+	//if appDebug {
+	//	fmt.Printf("\n----- Calculated the description length for row:\n")
+	//	prettyPrint(row)
+	//}
 	if len(row) < 2 {
 		return 0
 	}

@@ -115,10 +115,10 @@ func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 	// fmt.Println("TypeOf=", reflect.TypeOf(mv))
 
 	var input []map[string]interface{}
-	for k, v := range mv {
-		fmt.Println("k=", k, "TypeOf.v=", reflect.TypeOf(v))
+	for _, v := range mv {
+		// fmt.Println("k=", k, "TypeOf.v=", reflect.TypeOf(v))
 		mapValue, ok := v.([]map[string]interface{})
-		fmt.Println("ok=", ok, "mapValue=", mapValue)
+		// fmt.Println("ok=", ok, "mapValue=", mapValue)
 		if ok {
 			for _, m := range mapValue {
 				mx := Flatten(m)
