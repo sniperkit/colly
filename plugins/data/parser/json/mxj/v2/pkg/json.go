@@ -146,7 +146,9 @@ func NewMapJson(jsonVal []byte) (Map, error) {
 }
 
 func NewMapJsonArray(jsonVal []byte) (Map, error) {
-	var items []interface{}
+
+	var items []map[string]interface{}
+	// var items []interface{}
 	// empty or nil begets empty
 	if len(jsonVal) == 0 {
 		empty := make(map[string]interface{}, 0)
@@ -162,7 +164,7 @@ func NewMapJsonArray(jsonVal []byte) (Map, error) {
 		fmt.Println("error", err)
 		return nil, err
 	}
-	return map[string]interface{}{"entries": items}, nil
+	return map[string]interface{}{"array": items}, nil
 }
 
 /*

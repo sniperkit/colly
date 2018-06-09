@@ -70,7 +70,7 @@ var (
 	//     - `JSON` default golang "encoding/json" package. Important: This parser does not extract/flatten nested object headers
 	//     - `MXJ` decodes / encodes JSON or XML to/from map[string]interface{}; extracts values with dot-notation paths and wildcards.
 	//     - `GJSON` (Not Ready Yet), decodes JSON document; performs one line retrieval, dot notation paths, iteration, and parsing json lines.
-	collectorJsonParser = "JSON"
+	collectorJsonParser = "mxj"
 
 	// collectorTabEnabled specifies if the collector load and marshall content-types that are tabular compatible
 	// - `OnTAB` supported loading formats:
@@ -164,21 +164,10 @@ func main() {
 		}
 
 		// Select sub-dataset
-		ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count")
+		ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id")
 		if err != nil {
 			fmt.Println("error:", err)
 		}
-
-		/*
-			// WIP! Attempt to provide more flexibility for dynamic columns callbacks by giving column indices instructions
-			// Maybe create an SQL style query system for dynamic columns ?!
-			//
-			ds.AppendDynamicColumnWithConfig(
-				"description_length",
-				e.Dataset.NewDynamicConfig("2:description", "1:full_name"),
-				descriptionLength,
-			)
-		*/
 
 		// Update dataset
 		// Add a dynamic column, by passing a function which has access to the current row, and must return a value:

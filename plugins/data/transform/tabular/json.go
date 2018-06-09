@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
+
 	// plugins - json parsers
 	/*
 		gjson "github.com/sniperkit/colly/plugins/data/parser/json/gson"
@@ -18,7 +20,8 @@ import (
 		jsonparser "github.com/sniperkit/colly/plugins/data/parser/json/jsonparser"
 		jsonstream "github.com/sniperkit/colly/plugins/data/parser/json/jsonstream"
 		lazyjson "github.com/sniperkit/colly/plugins/data/parser/json/lazyjson"
-	*/                                                                   // gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
+	*/
+	// gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
 	mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/master" // latest commit
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1" // fork v1
@@ -44,6 +47,58 @@ func LoadJSON(jsonContent []byte) (*Dataset, error) {
 	return internalLoadFromDict(input)
 }
 
+func convertInterface(input map[string]interface{}) []interface{} {
+	results := make([]interface{}, len(input))
+	for _, result := range input {
+		resultSlice := result.(interface{})
+		results = append(results, resultSlice)
+	}
+	return results
+}
+
+func testMap() {
+	mapArray := []interface{}{
+		map[string]interface{}{"key1": 1},
+		map[string]interface{}{"key2": "2"},
+	}
+
+	fmt.Println(mapArray)
+
+	fmt.Println(reflect.TypeOf(mapArray))
+
+	var newMapArray []map[string]interface{}
+	/*	newMapArray = mapArray*/
+	/*	newMapArray = []map[string]interface{}(mapArray)*/
+	for _, v := range mapArray {
+		mapValue, ok := v.(map[string]interface{})
+		if ok {
+			newMapArray = append(newMapArray, mapValue)
+		}
+	}
+
+	fmt.Println(newMapArray)
+	fmt.Println(reflect.TypeOf(newMapArray))
+
+}
+
+// Flatten takes a map and returns a new one where nested maps are replaced
+// by dot-delimited keys.
+func Flatten(m map[string]interface{}) map[string]interface{} {
+	o := make(map[string]interface{})
+	for k, v := range m {
+		switch child := v.(type) {
+		case map[string]interface{}:
+			nm := Flatten(child)
+			for nk, nv := range nm {
+				o[k+"_"+nk] = nv
+			}
+		default:
+			o[k] = v
+		}
+	}
+	return o
+}
+
 // LoadMXJ loads a dataset from a XML/JSON source.
 // - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
 //   extract values with dot-notation paths and wildcards.
@@ -51,38 +106,28 @@ func LoadJSON(jsonContent []byte) (*Dataset, error) {
 func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 
 	mxj.JsonUseNumber = true
-	mv, err := mxj.NewMapJson(jsonContent)
+	mv, err := mxj.NewMapJsonArray(jsonContent)
 	if err != nil {
 		return nil, err
 	}
 
-	mxj.LeafUseDotNotation()
-	l := mv.LeafNodes()
+	// mxj.LeafUseDotNotation()
+	// fmt.Println("TypeOf=", reflect.TypeOf(mv))
 
 	var input []map[string]interface{}
-	for _, v := range l {
-		// row := make(map[string]interface{}, 0)
-		// key := v.Path
-		// row[v.Path] := v.Value
-		// input = append(input, v)
-		fmt.Println("path:", v.Path, "value:", v.Value)
+	for k, v := range mv {
+		fmt.Println("k=", k, "TypeOf.v=", reflect.TypeOf(v))
+		mapValue, ok := v.([]map[string]interface{})
+		fmt.Println("ok=", ok, "mapValue=", mapValue)
+		if ok {
+			for _, m := range mapValue {
+				mx := Flatten(m)
+				input = append(input, mx)
+			}
+		}
 	}
 
 	return internalLoadFromDict(input)
-	// pp.Println("mv:", mv["array"])
-
-	// []map[string]interface{} return []interface{}
-	// var input []map[string]interface{}
-
-	// map[string]interface{}
-
-	// mx := Map(mv)
-	// input := mv.([]map[string]interface{})
-
-	// return internalLoadFromDict(mv["entries"])
-
-	// return nil, ErrUnmarshallingJsonWithMxj
-	// return internalLoadFromDict(input)
 }
 
 // func LoadMXJ(jsonContent []byte) (*Dataset, error)   { return nil, nil }

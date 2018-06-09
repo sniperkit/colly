@@ -9,8 +9,8 @@ import (
 	"time"
 
 	// plugins
-	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 	cmmap "github.com/sniperkit/colly/plugins/data/structure/map/multi"
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 // Dataset represents a set of data, which is a list of data and header for each column.
@@ -52,9 +52,9 @@ type Dataset struct {
 // when exporting to a predefined format.
 type DynamicColumn func([]interface{}) interface{}
 
-type MappingConf struct {
-	Indices
-}
+// type MappingConf struct {
+//	Indices
+// }
 
 type RowConfig struct {
 	Enabled        bool
