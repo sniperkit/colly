@@ -97,7 +97,7 @@ var (
 		`rows[:]`,
 		`rows[1:]`,
 		`rows[1:7]`,
-		`rows[:10]`,
+		`rows[:25]`,
 
 		//-- End
 	}

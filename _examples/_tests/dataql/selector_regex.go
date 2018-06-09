@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	// helpers
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
-	// iter "github.com/sniperkit/colly/plugins/data/structure/int/iter"
+	iter "github.com/sniperkit/colly/plugins/data/structure/int/iter"
 )
 
 var SELECTOR_QUERY_REGEX *regexp.Regexp
@@ -29,6 +30,34 @@ func stringsSliceToIntsSlice(sliceStr []string) (sliceInt []int, errs []string) 
 		}
 	}
 	return
+}
+
+func range2List(lower, upper, limit int) (list []int) {
+	if limit == 0 {
+		limit = upper
+	}
+	if upper > limit {
+		upper = limit
+	}
+	fmt.Println("lower=", lower, "upper=", upper, "limit=", limit)
+	for i := lower; i <= upper; i++ {
+		list = append(list, i)
+	}
+	return list
+}
+
+func iterRange2List(lower, upper, limit int) (list []int) {
+	if limit == 0 {
+		limit = upper
+	}
+	if upper > limit {
+		upper = limit
+	}
+	fmt.Println("lower=", lower, "upper=", upper, "limit=", limit)
+	for i := range iter.N(upper) {
+		list = append(list, i)
+	}
+	return list
 }
 
 func parse_selector_query(queryStr string) {
@@ -75,8 +104,8 @@ func parse_selector_query(queryStr string) {
 		selectList := strings.Split(selectPart[3], SELECTOR_SIMPLE_LIST_SEP)
 		selectRange := strings.Split(selectPart[3], SELECTOR_SIMPLE_RANGE_SEP)
 
-		var selectIndices []int  // declare vars for by indices
-		var selectNames []string // declare vars for by names
+		var selectIndices, selectIndicesIter []int // declare vars for by indices
+		var selectNames []string                   // declare vars for by names
 
 		// declare selection type flags
 		var isList, isRange, isUnique, isUniqueInt, isUniqueStr bool
@@ -177,7 +206,10 @@ func parse_selector_query(queryStr string) {
 			if len(selectRange) == 3 {
 				switch {
 				case selectRange[2] == "":
-					rcap = 0 // dataset length...
+					if rupper > 0 {
+						rcap = rupper // dataset length...
+					}
+
 				default:
 					if keyInt, err := strconv.Atoi(selectRange[2]); err == nil {
 						rcap = keyInt
@@ -186,6 +218,17 @@ func parse_selector_query(queryStr string) {
 					}
 				}
 			}
+
+			if rcap == 0 && rupper > 0 && rlower <= rupper {
+				rcap = rupper
+			}
+
+			if rlower <= rupper && rupper > 0 {
+				fmt.Println("attempt to generate the index list between the range...")
+				selectIndices = range2List(rlower, rupper, rcap)
+				// selectIndicesIter = iterRange2List(rlower, rupper, rcap)
+			}
+
 			isRange = true
 
 		case len(selectList) >= 2 && len(selectRange) > 1:
@@ -201,7 +244,13 @@ func parse_selector_query(queryStr string) {
 		switch {
 		case isRange:
 			pp.Println("lowerRange=", rlower, "upperRange=", rupper, "capRange=", rcap, "selectRange.Length=", len(selectRange))
-			// pp.Println("selectIndices=", selectIndices)
+			pp.Println("len(selectIndices)=", len(selectIndices), " len(selectIndicesIter)", len(selectIndicesIter))
+			if len(selectIndices) > 0 {
+				pp.Println("selectIndices=", selectIndices)
+			}
+			if len(selectIndicesIter) > 0 {
+				pp.Println("selectIndicesIter=", selectIndicesIter)
+			}
 
 		case isList:
 			pp.Println("selectList.Length=", len(selectList))
@@ -218,6 +267,11 @@ func parse_selector_query(queryStr string) {
 			isError = true
 		}
 
+		isDebug := false
+		if queryStr == "cols[1:7]" && isDebug {
+			os.Exit(1)
+		}
+
 		if isError {
 			continue
 		}
@@ -226,7 +280,6 @@ func parse_selector_query(queryStr string) {
 		// check if keys are numeric only
 		// check if keys are alphanumeric
 
-		isDebug := false
 		if isDebug {
 			pp.Println("selectIndices=", selectIndices)
 			pp.Println("selectNames=", selectNames)
