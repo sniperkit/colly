@@ -52,6 +52,23 @@ type Dataset struct {
 // when exporting to a predefined format.
 type DynamicColumn func([]interface{}) interface{}
 
+type MappingConf struct {
+	Indices
+}
+
+type RowConfig struct {
+	Enabled        bool
+	ParentIndex    int
+	ColumnHeaders  map[int]string
+	ColumnIndices  map[int]string
+	ExcludeIndices map[int]bool
+	ExcludeHeaders map[string]bool
+}
+
+// DynamicColumn represents a function that can be evaluated dynamically
+// when exporting to a predefined format.
+type DynamicColumnWithMap func(*RowConfig, []interface{}) interface{}
+
 // ColumnConstraint represents a function that is bound as a constraint to
 // the column so that it can validate its value
 type ColumnConstraint func(interface{}) bool

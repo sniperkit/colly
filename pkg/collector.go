@@ -1023,6 +1023,7 @@ func (c *Collector) handleOnTAB(resp *Response) error {
 
 		case "json":
 			fallthrough
+
 		default:
 			ds, err = tabular.LoadJSON(resp.Body)
 		}
