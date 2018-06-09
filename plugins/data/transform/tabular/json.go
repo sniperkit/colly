@@ -3,9 +3,7 @@ package tablib
 import (
 	"bytes"
 	"encoding/json"
-	// "errors"
-	// "fmt"
-	// "log"
+	"fmt"
 	"strings"
 	// plugins - json parsers
 	/*
@@ -20,8 +18,8 @@ import (
 		jsonparser "github.com/sniperkit/colly/plugins/data/parser/json/jsonparser"
 		jsonstream "github.com/sniperkit/colly/plugins/data/parser/json/jsonstream"
 		lazyjson "github.com/sniperkit/colly/plugins/data/parser/json/lazyjson"
-	*/// gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
-	// mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
+	*/                                                                   // gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
+	mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/master" // latest commit
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1" // fork v1
 	// dev helpers
@@ -33,7 +31,6 @@ import (
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
 
 	var input []map[string]interface{}
-
 	d := json.NewDecoder(strings.NewReader(string(jsonContent)))
 	d.UseNumber()
 	if err := d.Decode(&input); err != nil {
@@ -47,7 +44,6 @@ func LoadJSON(jsonContent []byte) (*Dataset, error) {
 	return internalLoadFromDict(input)
 }
 
-/*
 // LoadMXJ loads a dataset from a XML/JSON source.
 // - MXJ allows to decode / encode XML or JSON to/from map[string]interface{};
 //   extract values with dot-notation paths and wildcards.
@@ -60,26 +56,36 @@ func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 		return nil, err
 	}
 
+	mxj.LeafUseDotNotation()
+	l := mv.LeafNodes()
 
-		mxj.LeafUseDotNotation()
-		l := mv.LeafNodes()
-		for _, v := range l {
-			fmt.Println("path:", v.Path, "value:", v.Value)
-		}
+	var input []map[string]interface{}
+	for _, v := range l {
+		// row := make(map[string]interface{}, 0)
+		// key := v.Path
+		// row[v.Path] := v.Value
+		// input = append(input, v)
+		fmt.Println("path:", v.Path, "value:", v.Value)
+	}
 
+	return internalLoadFromDict(input)
+	// pp.Println("mv:", mv["array"])
+
+	// []map[string]interface{} return []interface{}
+	// var input []map[string]interface{}
 
 	// map[string]interface{}
 
+	// mx := Map(mv)
 	// input := mv.([]map[string]interface{})
 
-	return internalLoadFromDict(mv.([]interface{}))
+	// return internalLoadFromDict(mv["entries"])
 
 	// return nil, ErrUnmarshallingJsonWithMxj
 	// return internalLoadFromDict(input)
 }
-*/
 
-func LoadMXJ(jsonContent []byte) (*Dataset, error)   { return nil, nil }
+// func LoadMXJ(jsonContent []byte) (*Dataset, error)   { return nil, nil }
 func LoadGJSON(jsonContent []byte) (*Dataset, error) { return nil, nil }
 
 /*

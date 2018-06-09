@@ -27,7 +27,7 @@ var (
 	// githubAPIPaginationPage
 	githubAPIPaginationPage = 1
 	// githubAPIPaginationPerPage
-	githubAPIPaginationPerPage = 25
+	githubAPIPaginationPerPage = 10
 	// githubAPIPaginationDirection
 	githubAPIPaginationDirection = "desc"
 	// githubAPIPaginationSort

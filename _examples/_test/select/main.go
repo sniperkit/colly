@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	regex "github.com/dakerfp/re"
 	cregex "github.com/mingrammer/commonregex"
@@ -27,38 +28,96 @@ const (
 	ROW   = `([0-9]+)`
 )
 
-const selectQueryRegex = `((col|cols|rows|row))\[((:\d+)|(\d+\:)|(\d+\:\d+)|(\:)|(\d+(,\d+)*))(\])`
+const (
+	selectQueryRegexIdx   = `((col|cols|rows|row))\[((:\d+)|(\d+\:)|(\d+\:\d+)|(\:)|(\d+(,\d+)*))(\])`
+	selectQueryRegexAlpha = `((col|cols|rows|row))\[((:[a-zA-Z0-9-_\"\']+)|([a-zA-Z0-9-_\"\']+\:)|([a-zA-Z0-9-_\"\']+\:[a-zA-Z0-9-_\"\']+)|([a-zA-Z0-9-_\"\']+(,[a-zA-Z0-9-_\"\']+)*)|(\:)|([a-zA-Z0-9-_\"\']+(,[a-zA-Z0-9-_\"\']+)*))(\])`
+	// Ref: https://stackoverflow.com/questions/5988228/how-to-create-a-regex-for-accepting-only-alphanumeric-characters
+	selectHeadersUnicode = `^[\\p{L}0-9]*$`
+	// ^[a-zA-Z0-9_\"\']*$
+)
 
 var ass *regexp.Regexp
 
 func main() {
 
-	ass = regexp.MustCompile(selectQueryRegex)
+	ass = regexp.MustCompile(selectQueryRegexAlpha)
 	getSelection(`cols[0:5],rows[1:7]`)
 
 	getSelection(`cols[:],rows[:]`)
 
 	getSelection(`cols[1,2],rows[:]`)
 
+	getSelection(`col[name, full_name],row[4]`)
+
+	getSelection(`col["name", "full_name"],rows[1,5,7,8]`)
+
+	getSelection(`col["name", "full_name"],rows[:10]`)
+
+	getSelection(`rows[:10],col["name", "full_name"]`)
+
+	getSelection(`rows[1,10],col["name", "fullname"]`)
+
+	getSelection(`rows[1,10],col["id", "name", "full_name", "description", "language", "stargazers_count", "forks_count"]`)
+
+}
+
+type Selection struct {
+	ColumnNames   []string `json:"column_names"`
+	ColumnIndices []int    `json:"column_keys"`
+	RowIndices    []int    `json:"column_keys"`
 }
 
 func getSelection(query string) {
-	res := ass.FindAllStringSubmatch(query, 2)
+	query = strings.Replace(query, " ", "", -1)
+	query = strings.Replace(query, "\"", "", -1)
+
+	selectors := ass.FindAllStringSubmatch(query, 2)
 	fmt.Println("\n------------------------------------------------------------")
-	fmt.Println("extract for `cols[0:1],rows[1:7]`")
+	fmt.Printf("extract for `%s\n", query)
 
-	// pp.Println("res=", res)
-	/*
-		var isRowSlice, isRowRange, isColSlice, isColRange bool
-		var cLowerInt, cUpperInt, rLower, rUpper int
-		var cLowerStr, cUpperStr string // column names
-		var cSliceInt, rSliceInt []int
-		var cSliceList, rSliceList []string
-	*/
+	// Check if results are < 1
+	if len(res) < 1 {
+		fmt.Println("An error occured while parsing the selection query syntax.")
+	}
 
-	for _, r := range res {
-		// pp.Println("match=", r)
-		fmt.Println("action=", r[2], "range=", r[3])
+	// Loop over query selection parameters
+	for _, selectionString := range selectors {
+
+		// extract selection keys from
+		var keys []string
+
+		pp.Printf("action=\"%s\", selectionString=`%s`", selectStr[2], selectStr[3])
+
+		// Check if list of ROW/COL keys
+		var isList bool
+		selectList := strings.Split(selectionString[3], ",")
+		if selectList > 0 {
+			isList = true
+
+		}
+
+		/*
+			// Check if slice of ROW/COL keys
+			var isSlice bool
+			selectSlice := strings.Split(selectStr[3], ":")
+			if selectSlice > 0 {
+				isSlice = true
+			}
+		*/
+
+		// Check if range of ROW/COL keys
+		var isRange bool
+		selectSlice := strings.Split(selectionString[3], ":")
+		if selectSlice > 0 {
+			isSlice = true
+		}
+
+		// unique key
+		if !isSlice && !isList {
+			key
+		}
+
+		pp.Println("selectParts", selectParts)
 	}
 
 }
@@ -96,6 +155,81 @@ func test_cregex() {
 	emailList := cregex.Emails(TEXT)
 	pp.Println("regex.Emails=", emailList)
 	// ['harold.smith@gmail.com']
+}
+
+var headers = []string{
+	"html_url",
+	"keys_url",
+	"pulls_url",
+	"milestones_url",
+	"subscription_url",
+	"compare_url",
+	"has_downloads",
+	"id",
+	"git_refs_url",
+	"statuses_url",
+	"stargazers_url",
+	"git_url",
+	"default_branch",
+	"branches_url",
+	"pushed_at",
+	"watchers_count",
+	"teams_url",
+	"notifications_url",
+	"labels_url",
+	"name",
+	"fork",
+	"commits_url",
+	"comments_url",
+	"full_name",
+	"issue_comment_url",
+	"merges_url",
+	"size",
+	"license",
+	"clone_url",
+	"language",
+	"owner",
+	"private",
+	"events_url",
+	"languages_url",
+	"contributors_url",
+	"contents_url",
+	"homepage",
+	"has_pages",
+	"description",
+	"tags_url",
+	"blobs_url",
+	"git_tags_url",
+	"issues_url",
+	"stargazers_count",
+	"has_wiki",
+	"forks_count",
+	"forks",
+	"url",
+	"releases_url",
+	"created_at",
+	"collaborators_url",
+	"has_issues",
+	"node_id",
+	"forks_url",
+	"subscribers_url",
+	"downloads_url",
+	"deployments_url",
+	"svn_url",
+	"mirror_url",
+	"updated_at",
+	"ssh_url",
+	"has_projects",
+	"hooks_url",
+	"archived",
+	"open_issues_count",
+	"watchers",
+	"issue_events_url",
+	"assignees_url",
+	"trees_url",
+	"git_commits_url",
+	"archive_url",
+	"open_issues",
 }
 
 func test_regexp() {
