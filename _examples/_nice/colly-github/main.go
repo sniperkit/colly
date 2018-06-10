@@ -27,8 +27,11 @@ var (
 // github api vars
 var (
 
-	// githubAPIAccount sets the github user name to request for its starred repositories list
+	// githubAPIAccount sets the github user name for api requests
 	githubAPIAccount = "roscopecoltran"
+
+	// githubAPIRepository sets the github repository for api requests
+	githubAPIRepository = "sniperkit/colly"
 
 	// githubAPIPaginationPage
 	githubAPIPaginationPage = 1
@@ -50,8 +53,14 @@ var (
 		fmt.Sprintf("sort=%s", githubAPIPaginationSort),
 	}
 
+	// githubAPIEndpointURLUserInfo
+	githubAPIEndpointURLUserInfo = fmt.Sprintf("https://api.github.com/users/%s", githubAPIAccount)
+
 	// githubAPIEndpointURL
-	githubAPIEndpointURL = fmt.Sprintf("https://api.github.com/users/%s/starred?%s", githubAPIAccount, strings.Join(githubAPIPaginationParams, "&"))
+	githubAPIEndpointURLStarred = fmt.Sprintf("https://api.github.com/users/%s/starred?%s", githubAPIAccount, strings.Join(githubAPIPaginationParams, "&"))
+
+	//githubAPIEndpointURLRepo
+	githubAPIEndpointURLRepo = fmt.Sprintf("https://api.github.com/repos/%s", githubAPIRepository)
 
 	//-- End
 )
@@ -70,7 +79,7 @@ var (
 	//     - `JSON` default golang "encoding/json" package. Important: This parser does not extract/flatten nested object headers
 	//     - `MXJ` decodes / encodes JSON or XML to/from map[string]interface{}; extracts values with dot-notation paths and wildcards.
 	//     - `GJSON` (Not Ready Yet), decodes JSON document; performs one line retrieval, dot notation paths, iteration, and parsing json lines.
-	collectorJsonParser = "mxj"
+	collectorJsonParser = "json"
 
 	// collectorTabEnabled specifies if the collector load and marshall content-types that are tabular compatible
 	// - `OnTAB` supported loading formats:
@@ -102,7 +111,7 @@ var (
 	//  - ASCII + Markdown (Sets)
 	//  - MySQL (Sets)
 	//  - Postgres (Sets)
-	collectorDatasetOutputFormat = "tabular-grid"
+	collectorDatasetOutputFormat = "yaml" // "tabular-grid"
 
 	//  collectorSubDatasetColumns specifies the columns to filter from the json content
 	collectorSubDatasetColumns = []string{"id", "name", "full_name", "description", "language", "stargazers_count", "forks_count"}
@@ -163,13 +172,34 @@ func main() {
 			pp.Printf("Headers: \n %s \n\n", e.Dataset.Headers())
 		}
 
-		// Select sub-dataset
-		ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id")
-		if err != nil {
-			fmt.Println("error:", err)
+		pp.Printf("Headers: \n %s \n\n", e.Dataset.Headers())
+
+		// Starred
+		// var columnIndex = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id"}
+		// e.Dataset.Exists("id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id")
+
+		// Better url matching ?! ^^
+		switch {
+		case strings.Contains(e.Request.URL.String(), "/starred"):
+			fmt.Println("Starred dataset...")
+
+		case strings.Contains(e.Request.URL.String(), "/repos/"):
+			fmt.Println("Repositories dataset...")
+
+		case strings.Contains(e.Request.URL.String(), "/users/"):
+			fmt.Println("Users dataset...")
+
 		}
 
-		// Update dataset
+		ds := e.Dataset
+		// Select sub-dataset
+		/*
+			ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id")
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+		*/
+
 		// Add a dynamic column, by passing a function which has access to the current row, and must return a value:
 		ds.AppendDynamicColumn("description_length", descriptionLength)
 
@@ -264,6 +294,13 @@ func main() {
 		}
 	})
 
-	// Start scraping on https://api.github.com
-	c.Visit(githubAPIEndpointURL)
+	// 3. Start scraping repository info; json object with nested objects
+	c.Visit(githubAPIEndpointURLRepo)
+
+	// 1. Start scraping user info; json object with no nested objects or arrays
+	c.Visit(githubAPIEndpointURLUserInfo)
+
+	// 2. Start scraping starred repository; json array with nested objects
+	c.Visit(githubAPIEndpointURLStarred)
+
 }

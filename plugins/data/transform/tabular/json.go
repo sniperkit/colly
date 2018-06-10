@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 
 	// plugins - json parsers
@@ -29,74 +28,47 @@ import (
 	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
+var headerStyleTable = map[string]KeyStyle{
+	"jsonpointer": JSONPointerStyle,
+	"slash":       SlashStyle,
+	"underscore":  UnderscoreStyle,
+	"dot":         DotNotationStyle,
+	"dot-bracket": DotBracketStyle,
+}
+
 // LoadJSON loads a dataset from a JSON source.
 // - Default pkg "encoding/json"
 func LoadJSON(jsonContent []byte) (*Dataset, error) {
 
 	var input []map[string]interface{}
+
+	// quick hack to create json array for tablib ^^
+	if jsonContent[0] == '{' {
+		jsonContent = []byte(`[` + string(jsonContent) + `]`)
+	}
+
 	d := json.NewDecoder(strings.NewReader(string(jsonContent)))
 	d.UseNumber()
 	if err := d.Decode(&input); err != nil {
 		return nil, err
 	}
 
-	// if err := json.Unmarshal(jsonContent, &input); err != nil {
-	// 	return nil, err
+	// if _, ok := headerStyleTable[c.String("header-style")]; !ok {
+	//	return fmt.Errorf("Invalid --header-style value %q", c.String("header-style"))
 	// }
+
+	var err error
+	input, err = ToMapSlices(input)
+	if err != nil {
+		fmt.Println("error:", err)
+		return nil, err
+	}
 
 	return internalLoadFromDict(input)
 }
 
-func convertInterface(input map[string]interface{}) []interface{} {
-	results := make([]interface{}, len(input))
-	for _, result := range input {
-		resultSlice := result.(interface{})
-		results = append(results, resultSlice)
-	}
-	return results
-}
-
-func testMap() {
-	mapArray := []interface{}{
-		map[string]interface{}{"key1": 1},
-		map[string]interface{}{"key2": "2"},
-	}
-
-	fmt.Println(mapArray)
-
-	fmt.Println(reflect.TypeOf(mapArray))
-
-	var newMapArray []map[string]interface{}
-	/*	newMapArray = mapArray*/
-	/*	newMapArray = []map[string]interface{}(mapArray)*/
-	for _, v := range mapArray {
-		mapValue, ok := v.(map[string]interface{})
-		if ok {
-			newMapArray = append(newMapArray, mapValue)
-		}
-	}
-
-	fmt.Println(newMapArray)
-	fmt.Println(reflect.TypeOf(newMapArray))
-
-}
-
-// Flatten takes a map and returns a new one where nested maps are replaced
-// by dot-delimited keys.
-func Flatten(m map[string]interface{}) map[string]interface{} {
-	o := make(map[string]interface{})
-	for k, v := range m {
-		switch child := v.(type) {
-		case map[string]interface{}:
-			nm := Flatten(child)
-			for nk, nv := range nm {
-				o[k+"_"+nk] = nv
-			}
-		default:
-			o[k] = v
-		}
-	}
-	return o
+func LoadGJSON(jsonContent []byte) (*Dataset, error) {
+	return nil, nil
 }
 
 // LoadMXJ loads a dataset from a XML/JSON source.
@@ -115,75 +87,15 @@ func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 	// fmt.Println("TypeOf=", reflect.TypeOf(mv))
 
 	var input []map[string]interface{}
-	for _, v := range mv {
-		// fmt.Println("k=", k, "TypeOf.v=", reflect.TypeOf(v))
-		mapValue, ok := v.([]map[string]interface{})
-		// fmt.Println("ok=", ok, "mapValue=", mapValue)
-		if ok {
-			for _, m := range mapValue {
-				mx := Flatten(m)
-				input = append(input, mx)
-			}
-		}
+	var errConvert error
+	input, errConvert = ToMapSlices(mv)
+	if errConvert != nil {
+		fmt.Println("error:", errConvert)
+		return nil, errConvert
 	}
 
 	return internalLoadFromDict(input)
 }
-
-// func LoadMXJ(jsonContent []byte) (*Dataset, error)   { return nil, nil }
-func LoadGJSON(jsonContent []byte) (*Dataset, error) { return nil, nil }
-
-/*
-// LoadGSON loads a dataset from a JSON source.
-// - GJSON package allows to get values from a json document
-//   with features such as one line retrieval, dot notation paths, iteration, and parsing json lines.
-// - Forked from `github.com/tidwall/gjson`
-func LoadGJSON(jsonContent []byte) (*Dataset, error) {
-
-	// handle a goofy case ...
-	//if jsonContent[0] == '[' {
-	//	jsonContent = []byte(`{"array":` + string(jsonContent) + `}`)
-	//}
-
-	// if !gjson.Valid(string(jsonContent)) {
-	// 	return nil, errors.New("invalid json")
-	// }
-
-	var input []map[string]interface{}
-	if err := gjson.Unmarshal(jsonContent, &input); err != nil {
-		return nil, err
-	}
-
-
-	//	input, ok := gjson.Parse(string(jsonContent)).Value().(map[string]interface{})
-	//	if !ok {
-	//		log.Fatalln("error, could not unmarshal to a map[string]interface{}")
-	//		// not a map
-	//	}
-	//	pp.Println("map[string]interface{}=", input)
-
-	// results := gjson.GetMany(json, "name.first", "name.last", "age")
-
-	// var input []map[string]interface{}
-	// results := gjson.GetMany(json, "name.first", "name.last", "age")
-	// input = gjson.GetBytes(jsonContent, "").Value().([]map[string]interface{})
-
-	result := gjson.ParseBytes(jsonContent) //.(map[string]interface{})
-	pp.Println("Map=", result)
-
-	// if !gjson.Valid(string(jsonContent)) {
-	// 	return nil, errors.New("invalid json")
-	// }
-
-	// []map[string]interface{}
-	// pp.Println("Array=", result.Array())
-	// pp.Println("Map=", result.Map())
-
-	// return nil, ErrUnmarshallingJsonWithGson
-	return internalLoadFromDict(input)
-}
-
-*/
 
 // LoadDatabookJSON loads a Databook from a JSON source.
 func LoadDatabookJSON(jsonContent []byte) (*Databook, error) {

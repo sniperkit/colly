@@ -1,9 +1,10 @@
-package json2csv
+package tablib
 
 import (
 	"strings"
 
-	"github.com/sniperkit/xutil/plugin/format/convert/json2csv/jsonpointer"
+	// internal
+	jsonpointer "github.com/sniperkit/colly/plugins/data/transform/tabular/jsonpointer"
 )
 
 type pointers []jsonpointer.JSONPointer
@@ -49,10 +50,27 @@ func (pts pointers) DotNotations(bracketIndex bool) []string {
 	return keys
 }
 
-func (pts pointers) UnderscoreNotations(bracketIndex bool) []string {
+func (pts pointers) Underscores() []string {
 	keys := make([]string, 0, pts.Len())
 	for _, p := range pts {
 		keys = append(keys, strings.Join(p.Strings(), "_"))
 	}
 	return keys
+}
+
+func allPointers(results []KeyValue) (pointers pointers, err error) {
+	set := make(map[string]bool, 0)
+	for _, result := range results {
+		for _, key := range result.Keys() {
+			if !set[key] {
+				set[key] = true
+				pointer, err := jsonpointer.New(key)
+				if err != nil {
+					return nil, err
+				}
+				pointers = append(pointers, pointer)
+			}
+		}
+	}
+	return
 }

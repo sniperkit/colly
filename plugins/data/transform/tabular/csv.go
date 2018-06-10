@@ -80,3 +80,28 @@ func LoadTSV(input []byte) (*Dataset, error) {
 
 	return ds, nil
 }
+
+func toRecord(kv KeyValue, keys []string) []string {
+	record := make([]string, 0, len(keys))
+	for _, key := range keys {
+		if value, ok := kv[key]; ok {
+			record = append(record, toString(value))
+		} else {
+			record = append(record, "")
+		}
+	}
+	return record
+}
+
+func toTransposedRecord(results []KeyValue, key string, header string) []string {
+	record := make([]string, 0, len(results)+1)
+	record = append(record, header)
+	for _, result := range results {
+		if value, ok := result[key]; ok {
+			record = append(record, toString(value))
+		} else {
+			record = append(record, "")
+		}
+	}
+	return record
+}

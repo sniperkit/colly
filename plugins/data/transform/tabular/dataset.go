@@ -16,34 +16,67 @@ import (
 // Dataset represents a set of data, which is a list of data and header for each column.
 type Dataset struct {
 
-	// Public attributes
-	EmptyValue string // EmptyValue represents the string value to b output if a field cannot be formatted as a string during output of certain formats.
+	////////////////////////////////////
+	//
+	// exported attrs
+	//
+	////////////////////////////////////
 
-	// Private attributes
-	splitAt       int      // Split dataset set the max number of rows before splitting an export or sharding the dataset.
-	outputFile    string   // OutputFile set the local path for exporting/writing the dataset content
-	outputFormats []string // OutputFormats set all formats to export the dataset. It will rename the file extension automatically when processed
+	// EmptyValue represents the string value to b output if a field cannot be formatted as a string during output of certain formats.
+	EmptyValue string
+	// streamed allow the dataset to be streamed
+	Stream bool
+	// isPivotable enables the dataset to be imported with pivot package for more advanced operations on different type of store backends
+	Pivotable bool
+	// HeaderStyle specifies...
+	HeaderStyle KeyStyle
+	// errorOnUnmatchedKeys specifies
+	ErrorOnUnmatchedKeys bool
 
-	compress  *Compressable
-	Stream    bool // streamed allow the dataset to be streamed
-	Pivotable bool // isPivotable enables the dataset to be imported with pivot package for more advanced operations on different type of store backends
+	////////////////////////////////////
+	//
+	// not exported attrs
+	//
+	////////////////////////////////////
 
-	scm                  *cmmap.ShardedConcurrentMap
-	scmm                 *cmmap.ShardedConcurrentMultiMap
-	cmm                  *cmmap.ConcurrentMultiMap
-	cm                   *cmmap.ConcurrentMap
-	headers              []string
-	data                 [][]interface{}
-	tags                 [][]string
-	constraints          []ColumnConstraint
-	rows                 int
-	cols                 int
-	errorOnUnmatchedKeys bool
-	isExport             bool
-	lock                 *sync.RWMutex
-	wg                   *sync.WaitGroup
-	validationErrors     []ValidationError // validationErrors store an array of all validation errors that occured on this dataset
-	errors               []string          // internal process errors
+	// compress sets...
+	compress *Compressable
+	// Split dataset set the max number of rows before splitting an export or sharding the dataset.
+	splitAt int
+	// OutputFile set the local path for exporting/writing the dataset content
+	outputFile string
+	// OutputFormats set all formats to export the dataset. It will rename the file extension automatically when processed
+	outputFormats []string
+	// scm sets...
+	scm *cmmap.ShardedConcurrentMap
+	// scmm sets...
+	scmm *cmmap.ShardedConcurrentMultiMap
+	// cmm sets...
+	cmm *cmmap.ConcurrentMultiMap
+	// cm sets...
+	cm *cmmap.ConcurrentMap
+	// headers sets...
+	headers []string
+	// data sets...
+	data [][]interface{}
+	// tags sets...
+	tags [][]string
+	// constraints sets...
+	constraints []ColumnConstraint
+	// rows sets...
+	rows int
+	// cols sets...
+	cols int
+	// isExport sets...
+	isExport bool
+	// lock sets...
+	lock *sync.RWMutex
+	// wg sets...
+	wg *sync.WaitGroup
+	// validationErrors stores an array of all validation errors that occured on this dataset
+	validationErrors []ValidationError
+	// errors stores internal process errors
+	errors []string
 
 	//-- End
 }
@@ -137,15 +170,22 @@ func (d *Dataset) OutputFile(fp string) *Dataset {
 	return d
 }
 
-/*
-// Compress sets the compression formats to apply on the file exported.
-func (d *Dataset) CompressWithOptions(opts ...string) *Dataset {
-	// d.lock.RLock()
-	// defer d.lock.RUnlock()
-	d.outputFormats = opts
-	return d
+func (d *Dataset) headersWithStyle(pointers pointers) []string {
+	switch d.HeaderStyle {
+	case JSONPointerStyle:
+		return pointers.Strings()
+	case UnderscoreStyle:
+		return pointers.Underscores()
+	case SlashStyle:
+		return pointers.Slashes()
+	case DotNotationStyle:
+		return pointers.DotNotations(false)
+	case DotBracketStyle:
+		return pointers.DotNotations(true)
+	default:
+		return pointers.Strings()
+	}
 }
-*/
 
 // Formats sets the default output filepath of the Dataset.
 func (d *Dataset) Formats(formats ...string) *Dataset {

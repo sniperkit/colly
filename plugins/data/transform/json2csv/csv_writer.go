@@ -26,7 +26,10 @@ const (
 	DotNotationStyle
 
 	// "foo.bar[0].baz"
-	DotBracketStyle
+	DotBracketStyle // KeyStyle = iota
+
+	// "foo_bar_0_baz"
+	UnderscoreStyle
 )
 
 // CSVWriter writes CSV data.
@@ -175,8 +178,6 @@ func (w *CSVWriter) writeTransposedCSV(results []KeyValue) error {
 
 // WriteCSV writes CSV data which is transposed rows and columns.
 func (w *CSVWriter) writeListCSV(results []KeyValue) error {
-	// w.mutex.Lock()
-	// defer w.mutex.Unlock()
 
 	pts, err := allPointers(results)
 	if err != nil {
