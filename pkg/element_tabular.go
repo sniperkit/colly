@@ -51,7 +51,6 @@ type TABElement struct {
 
 // NewTABElementFromTABNode creates a TABElement from a jsonquery.Node.
 func NewTABElementFromTABNode(resp *Response, query string, ds *tabular.Dataset) *TABElement {
-
 	// new TABElement object
 	t := &TABElement{
 		Dataset:  ds,
@@ -59,7 +58,6 @@ func NewTABElementFromTABNode(resp *Response, query string, ds *tabular.Dataset)
 		Request:  resp.Request,
 		Response: resp,
 	}
-
 	return t
 }
 
