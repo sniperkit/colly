@@ -1,7 +1,8 @@
 package tablib
 
 import (
-	"github.com/go-yaml/yaml"
+	"github.com/ghodss/yaml"
+	// "github.com/go-yaml/yaml"
 )
 
 // LoadYAML loads a dataset from a YAML source.
@@ -53,6 +54,7 @@ func (d *Dataset) YAML() (*Export, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return newExportFromBytes(b), nil
 }
 

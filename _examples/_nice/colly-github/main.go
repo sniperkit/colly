@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	// colly - core
 	colly "github.com/sniperkit/colly/pkg"
@@ -135,7 +138,32 @@ func descriptionLength(row []interface{}) interface{} {
 	if len(row) < 2 {
 		return 0
 	}
-	return len(row[2].(string))
+	return len(asString(row[2]))
+}
+
+func asString(vv interface{}) string {
+	var v string
+	switch vv.(type) {
+	case string:
+		v = vv.(string)
+	case int:
+		v = strconv.Itoa(vv.(int))
+	case int64:
+		v = strconv.FormatInt(vv.(int64), 10)
+	case uint64:
+		v = strconv.FormatUint(vv.(uint64), 10)
+	case bool:
+		v = strconv.FormatBool(vv.(bool))
+	case float64:
+		v = strconv.FormatFloat(vv.(float64), 'G', -1, 32)
+	case json.Number:
+		v = vv.(json.Number).String()
+	case time.Time:
+		v = vv.(time.Time).Format(time.RFC3339)
+	default:
+		v = fmt.Sprintf("%s", v)
+	}
+	return v
 }
 
 // prettyPrint wraps debug message with `github.com/k0kubun/pp` package functions.
