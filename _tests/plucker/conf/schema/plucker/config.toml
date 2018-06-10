@@ -1,13 +1,13 @@
 xdg_base_dir = "/Users/lucmichalski/.config"
 
 [[plucker]]
-  name = "find_package"
-  activators = ["find_package", "("]
+  name = "rows"
+  activators = ["rows", "["]
   permanent = 0
-  deactivator = ")"
+  deactivator = "]"
   limit = -1
   maximum = 0
-  patterns = ["CONFIG", "REQUIRED"]
+  patterns = [",", ":"]
   [plucker.match]
     mode = ""
     separator = ""
@@ -15,10 +15,10 @@ xdg_base_dir = "/Users/lucmichalski/.config"
     phrase = ""
 
 [[plucker]]
-  name = "hunter_add_package"
-  activators = ["hunter_add_package", "("]
+  name = "cols"
+  activators = ["cols", "["]
   permanent = 0
-  deactivator = ")"
+  deactivator = "]"
   limit = -1
   maximum = 0
   [plucker.match]
@@ -28,11 +28,24 @@ xdg_base_dir = "/Users/lucmichalski/.config"
     phrase = ""
 
 [[plucker]]
-  name = "set_property"
-  activators = ["set_property", "("]
+  name = "unique_row"
+  activators = ["row", "["]
   permanent = 0
-  deactivator = ")"
-  limit = -1
+  deactivator = "]"
+  limit = 0
+  maximum = 0
+  [plucker.match]
+    mode = ""
+    separator = ""
+    split = false
+    phrase = ""
+
+[[plucker]]
+  name = "unique_col"
+  activators = ["col", "["]
+  permanent = 0
+  deactivator = "]"
+  limit = 0
   maximum = 0
   [plucker.match]
     mode = ""

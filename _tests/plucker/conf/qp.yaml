@@ -1,0 +1,31 @@
+---
+debug: false
+verbose: false
+unmatchedKeys: false
+xdg_base_dir: "/Users/lucmichalski/.config"
+plucker:
+- name: rows
+  activators:
+  - rows
+  - "["
+  patterns:
+  - ","
+  - ":"
+  deactivator: "]"
+  limit: -1
+- name: cols
+  activators:
+  - cols
+  - "["
+  deactivator: "]"
+  limit: -1
+- name: unique_row
+  activators:
+  - row
+  - "["
+  deactivator: "]"
+- name: unique_col
+  activators:
+  - col
+  - "["
+  deactivator: "]"

@@ -2,13 +2,13 @@
 	"xdg_base_dir": "/Users/lucmichalski/.config",
 	"plucker": [
 		{
-			"name": "find_package",
+			"name": "rows",
 			"activators": [
-				"find_package",
-				"("
+				"rows",
+				"["
 			],
 			"permanent": 0,
-			"deactivator": ")",
+			"deactivator": "]",
 			"limit": -1,
 			"match": {
 				"mode": "",
@@ -17,20 +17,20 @@
 				"phrase": ""
 			},
 			"patterns": [
-				"CONFIG",
-				"REQUIRED"
+				",",
+				":"
 			],
 			"whitelist": null,
 			"activatoblacklistrs": null
 		},
 		{
-			"name": "hunter_add_package",
+			"name": "cols",
 			"activators": [
-				"hunter_add_package",
-				"("
+				"cols",
+				"["
 			],
 			"permanent": 0,
-			"deactivator": ")",
+			"deactivator": "]",
 			"limit": -1,
 			"match": {
 				"mode": "",
@@ -43,14 +43,33 @@
 			"activatoblacklistrs": null
 		},
 		{
-			"name": "set_property",
+			"name": "unique_row",
 			"activators": [
-				"set_property",
-				"("
+				"row",
+				"["
 			],
 			"permanent": 0,
-			"deactivator": ")",
-			"limit": -1,
+			"deactivator": "]",
+			"limit": 0,
+			"match": {
+				"mode": "",
+				"separator": "",
+				"split": false,
+				"phrase": ""
+			},
+			"patterns": null,
+			"whitelist": null,
+			"activatoblacklistrs": null
+		},
+		{
+			"name": "unique_col",
+			"activators": [
+				"col",
+				"["
+			],
+			"permanent": 0,
+			"deactivator": "]",
+			"limit": 0,
 			"match": {
 				"mode": "",
 				"separator": "",
