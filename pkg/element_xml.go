@@ -28,10 +28,12 @@ import (
 
 // XMLElement is the representation of a XML tag.
 type XMLElement struct {
+
+	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
-	Name       string
-	Text       string
-	attributes interface{}
+	Name string
+	// Text stores...
+	Text string
 	// Request is the request object of the element's HTML document
 	Request *Request
 	// Response is the Response object of the element's HTML document
@@ -39,8 +41,15 @@ type XMLElement struct {
 	// DOM is the DOM object of the page. DOM is relative
 	// to the current XMLElement and is either a html.Node or xmlquery.Node
 	// based on how the XMLElement was created.
-	DOM    interface{}
+	DOM interface{}
+
+	////// not exported /////////////////////////////////////////////
+	// attributes
+	attributes interface{}
+	// isHTML specifies...
 	isHTML bool
+
+	//--- End
 }
 
 // NewXMLElementFromHTMLNode creates a XMLElement from a html.Node.

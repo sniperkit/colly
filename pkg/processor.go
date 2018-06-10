@@ -1,16 +1,23 @@
 package colly
 
 import (
-	// striphtml "github.com/sniperkit/colly/plugins/data/encoding/html/striphtml"
 	plucker "github.com/sniperkit/colly/plugins/data/extract/text/pluck"
 	plucker_config "github.com/sniperkit/colly/plugins/data/extract/text/pluck/config"
 )
 
 // Extractor
 type Extractor struct {
-	ID      string `json:"id" yaml:"id" toml:"id" xml:"id" ini:"id"`
+
+	////// exported //////////////////////////////////////////////////
+	Name string `json:"id" yaml:"id" toml:"id" xml:"id" ini:"id"`
+
+	////// not exported /////////////////////////////////////////////
+	// plucker stores...
 	plucker *plucker.Plucker
-	// expression
+	// configs stores...
+	configs []*plucker_config.Config
+
+	//-- ENd
 }
 
 type ExtractorConfig struct {

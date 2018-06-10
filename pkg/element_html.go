@@ -23,10 +23,14 @@ import (
 
 // HTMLElement is the representation of a HTML tag.
 type HTMLElement struct {
+
+	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
-	Name       string
-	Text       string
-	attributes []html.Attribute
+	Name string
+	// Text is...
+	Text string
+	// Extractor
+	Extractor *Extractor
 	// Request is the request object of the element's HTML document
 	Request *Request
 	// Response is the Response object of the element's HTML document
@@ -34,6 +38,10 @@ type HTMLElement struct {
 	// DOM is the goquery parsed DOM object of the page. DOM is relative
 	// to the current HTMLElement
 	DOM *goquery.Selection
+
+	////// not exported /////////////////////////////////////////////
+	// attributes is a list of html attrs
+	attributes []html.Attribute
 }
 
 // NewHTMLElementFromSelectionNode creates a HTMLElement from a goquery.Selection Node.

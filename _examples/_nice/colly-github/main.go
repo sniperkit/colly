@@ -192,7 +192,12 @@ func main() {
 	// - `OnTAB` callback event are enabled only if the `AllowTabular` attribute is set to true.
 	// - `OnTAB` use a fork of the package `github.com/agrison/go-tablib`
 	// - `OnTAB` query specifications are available in 'SPECS.md'
+
 	c.OnTAB("0:0", func(e *colly.TABElement) {
+		// c.OnTAB(`cols=(:5), rows=(1:7)`, func(e *colly.TABElement) {
+		// c.OnTAB(`cols[0:5], rows[1:7]`, func(e *colly.TABElement) {
+		// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) {
+		// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) {
 
 		// Debug the dataset slice
 		if appDebug {
@@ -201,21 +206,25 @@ func main() {
 		}
 
 		// checkHeader selection
+		var datasetGroup string
 		var hdrSelect, hdrNotFound, hdrFound []string
 
-		// Better url matching ?! ^^
+		// Better url matching/pattern ?! ^^
 		switch {
 		case strings.Contains(e.Request.URL.String(), "/starred"):
 			fmt.Println("Starred dataset...")
-			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id"}
+			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id", "updated_at"}
+			datasetGroup = "starred"
 
 		case strings.Contains(e.Request.URL.String(), "/repos/"):
 			fmt.Println("Repositories dataset...")
-			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id"}
+			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"}
+			datasetGroup = "repos"
 
 		case strings.Contains(e.Request.URL.String(), "/users/"):
 			fmt.Println("Users dataset...")
 			hdrSelect = []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"}
+			datasetGroup = "users"
 
 		}
 
@@ -230,8 +239,14 @@ func main() {
 			fmt.Println("error:", err)
 		}
 
-		// Add a dynamic column, by passing a function which has access to the current row, and must return a value:
-		ds.AppendDynamicColumn("description_length", descriptionLength)
+		switch datasetGroup {
+		case "starred":
+		case "repos":
+			// Add a dynamic column, by passing a function which has access to the current row, and must return a value:
+			ds.AppendDynamicColumn("description_length", descriptionLength)
+		case "users":
+		default:
+		}
 
 		// Export dataset
 		// ds.EXPORT_FORMAT().String() 					--> returns the contents of the exported dataset as a string.

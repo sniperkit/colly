@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
 	// plugins - json parsers
 	/*
 		gjson "github.com/sniperkit/colly/plugins/data/parser/json/gson"
@@ -19,9 +18,8 @@ import (
 		jsonparser "github.com/sniperkit/colly/plugins/data/parser/json/jsonparser"
 		jsonstream "github.com/sniperkit/colly/plugins/data/parser/json/jsonstream"
 		lazyjson "github.com/sniperkit/colly/plugins/data/parser/json/lazyjson"
-	*/
-	// gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
-	mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
+	*/// gjson "github.com/sniperkit/colly/plugins/data/parser/json/gjson"    // fork
+	// mxj "github.com/sniperkit/colly/plugins/data/parser/json/mxj/v2/pkg" // fork v2
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/master" // latest commit
 	// mxj "github.com/sniperkit/colly/plugins/data/transform/mxj/v1" // fork v1
 	// dev helpers
@@ -67,6 +65,7 @@ func LoadJSON(jsonContent []byte) (*Dataset, error) {
 	return internalLoadFromDict(input)
 }
 
+/*
 func LoadGJSON(jsonContent []byte) (*Dataset, error) {
 	return nil, nil
 }
@@ -96,6 +95,7 @@ func LoadMXJ(jsonContent []byte) (*Dataset, error) {
 
 	return internalLoadFromDict(input)
 }
+*/
 
 // LoadDatabookJSON loads a Databook from a JSON source.
 func LoadDatabookJSON(jsonContent []byte) (*Databook, error) {

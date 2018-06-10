@@ -1012,21 +1012,7 @@ func (c *Collector) handleOnTAB(resp *Response) error {
 	var ds *tabular.Dataset
 	switch format {
 	case "json":
-
-		switch c.UseJsonParser {
-		// MXJ: Decode / encode XML to/from map[string]interface{} (or JSON); extract values with dot-notation paths and wildcards.
-		case "mxj":
-			ds, err = tabular.LoadMXJ(resp.Body)
-
-		case "gjson":
-			ds, err = tabular.LoadGJSON(resp.Body)
-
-		case "json":
-			fallthrough
-
-		default:
-			ds, err = tabular.LoadJSON(resp.Body)
-		}
+		ds, err = tabular.LoadJSON(resp.Body)
 
 	case "yaml":
 		ds, err = tabular.LoadYAML(resp.Body)

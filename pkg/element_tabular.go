@@ -29,21 +29,22 @@ import (
 
 // TABElement is the representation of a TAB tag.
 type TABElement struct {
+
+	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
 	Name string
-
 	// Dataset
 	Dataset *tabular.Dataset
-
+	// Extractor
+	Extractor *Extractor
 	// Text
 	Text string
-
 	// Request is the request object of the element's HTML document
 	Request *Request
-
 	// Response is the Response object of the element's HTML document
 	Response *Response
 
+	////// not exported /////////////////////////////////////////////
 	// err stores the loading error
 	err error
 }

@@ -41,6 +41,8 @@ const (
 
 // JSONElement is the representation of a JSON tag.
 type JSONElement struct {
+
+	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
 	Name string
 	// Text is the content node
@@ -49,10 +51,14 @@ type JSONElement struct {
 	Request *Request
 	// Response is the Response object of the element's HTML document
 	Response *Response
+	// Extractor
+	Extractor *Extractor
 	// DOM is the DOM object of the page. DOM is relative
 	// to the current JSONElement and is either a html.Node or jsonquery.Node
 	// based on how the JSONElement was created.
 	DOM interface{}
+
+	////// not exported /////////////////////////////////////////////
 }
 
 // NewJSONElementFromJSONNode creates a JSONElement from a jsonquery.Node.
