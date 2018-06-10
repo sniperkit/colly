@@ -212,6 +212,22 @@ func (d *Dataset) Headers() []string {
 	return d.headers
 }
 
+// Headers return the headers of the Dataset.
+func (d *Dataset) HeadersExists(hdrSelect ...string) (notFound []string, exists []string) {
+	// d.lock.RLock()
+	// defer d.lock.RUnlock()
+
+	for _, n := range hdrSelect {
+		if inArray(n, d.headers) {
+			exists = append(exists, n)
+		} else {
+			notFound = append(notFound, n)
+		}
+	}
+
+	return
+}
+
 // Width returns the number of columns in the Dataset.
 func (d *Dataset) Width() int {
 	// d.lock.RLock()

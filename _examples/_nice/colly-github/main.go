@@ -114,7 +114,7 @@ var (
 	//  - ASCII + Markdown (Sets)
 	//  - MySQL (Sets)
 	//  - Postgres (Sets)
-	collectorDatasetOutputFormat = "yaml" // "tabular-grid"
+	collectorDatasetOutputFormat = "tabular-grid" // "yaml"
 
 	//  collectorSubDatasetColumns specifies the columns to filter from the json content
 	collectorSubDatasetColumns = []string{"id", "name", "full_name", "description", "language", "stargazers_count", "forks_count"}
@@ -200,33 +200,35 @@ func main() {
 			pp.Printf("Headers: \n %s \n\n", e.Dataset.Headers())
 		}
 
-		pp.Printf("Headers: \n %s \n\n", e.Dataset.Headers())
-
-		// Starred
-		// var columnIndex = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id"}
-		// e.Dataset.Exists("id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id")
+		// checkHeader selection
+		var hdrSelect, hdrNotFound, hdrFound []string
 
 		// Better url matching ?! ^^
 		switch {
 		case strings.Contains(e.Request.URL.String(), "/starred"):
 			fmt.Println("Starred dataset...")
+			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id"}
 
 		case strings.Contains(e.Request.URL.String(), "/repos/"):
 			fmt.Println("Repositories dataset...")
+			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id"}
 
 		case strings.Contains(e.Request.URL.String(), "/users/"):
 			fmt.Println("Users dataset...")
+			hdrSelect = []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"}
 
 		}
 
-		ds := e.Dataset
-		// Select sub-dataset
-		/*
-			ds, err := e.Dataset.Select(0, 0, "id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id")
-			if err != nil {
-				fmt.Println("error:", err)
-			}
-		*/
+		hdrNotFound, hdrFound = e.Dataset.HeadersExists(hdrSelect...)
+		if len(hdrNotFound) > 0 {
+			pp.Printf("Headers - NotFound: \n %s \n\n", hdrNotFound)
+			pp.Printf("Headers - Found  \n %s \n\n", hdrFound)
+		}
+
+		ds, err := e.Dataset.Select(0, 0, hdrFound...)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
 
 		// Add a dynamic column, by passing a function which has access to the current row, and must return a value:
 		ds.AppendDynamicColumn("description_length", descriptionLength)
