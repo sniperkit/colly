@@ -1,0 +1,41 @@
+xdg_base_dir = "/Users/lucmichalski/.config"
+
+[[plucker]]
+  name = "find_package"
+  activators = ["find_package", "("]
+  permanent = 0
+  deactivator = ")"
+  limit = -1
+  maximum = 0
+  patterns = ["CONFIG", "REQUIRED"]
+  [plucker.match]
+    mode = ""
+    separator = ""
+    split = false
+    phrase = ""
+
+[[plucker]]
+  name = "hunter_add_package"
+  activators = ["hunter_add_package", "("]
+  permanent = 0
+  deactivator = ")"
+  limit = -1
+  maximum = 0
+  [plucker.match]
+    mode = ""
+    separator = ""
+    split = false
+    phrase = ""
+
+[[plucker]]
+  name = "set_property"
+  activators = ["set_property", "("]
+  permanent = 0
+  deactivator = ")"
+  limit = -1
+  maximum = 0
+  [plucker.match]
+    mode = ""
+    separator = ""
+    split = false
+    phrase = ""

@@ -1,0 +1,24 @@
+[[pluck]]
+activators = ["@context","schema.org",'"name":"']
+deactivator = '"'
+name = "name"
+
+[[pluck]]
+activators = ["all-critics-numbers","Reviews Counted:","<span>"]
+deactivator = "<"
+name = "critic_ratings"
+
+[[pluck]]
+activators = ["all-critics-numbers","Average Rating:",">"]
+deactivator = "/"
+name = "average_critic_rating"
+
+[[pluck]]
+activators = ["audience-score","Average Rating:",">"]
+deactivator = "/"
+name = "average_user_rating"
+
+[[pluck]]
+activators = ["User Ratings:",">"]
+deactivator = "<"
+name = "user_ratings"

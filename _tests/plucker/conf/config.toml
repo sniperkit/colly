@@ -1,0 +1,24 @@
+debug = false
+verbose = false
+xdg_base_dir = "/Users/lucmichalski/.config"
+
+[[pluck]]
+name = "find_package"
+activators = ["find_package","("]
+patterns = ["CONFIG", "REQUIRED"]
+# whitelist = [""]
+# blacklist = [""]
+deactivator = ")"
+limit = -1
+
+[[pluck]]
+name = "hunter_add_package"
+activators = ["hunter_add_package","("]
+deactivator = ")"
+limit = -1
+
+[[pluck]]
+name = "set_property"
+activators = ["set_property","("]
+deactivator = ")"
+limit = -1

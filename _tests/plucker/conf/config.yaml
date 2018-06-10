@@ -1,0 +1,27 @@
+---
+debug: false
+verbose: false
+unmatchedKeys: false
+xdg_base_dir: "/Users/lucmichalski/.config"
+plucker:
+- name: find_package
+  activators:
+  - find_package
+  - "("
+  patterns:
+  - CONFIG
+  - REQUIRED
+  deactivator: ")"
+  limit: -1
+- name: hunter_add_package
+  activators:
+  - hunter_add_package
+  - "("
+  deactivator: ")"
+  limit: -1
+- name: set_property
+  activators:
+  - set_property
+  - "("
+  deactivator: ")"
+  limit: -1
