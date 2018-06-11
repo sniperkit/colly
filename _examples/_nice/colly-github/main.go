@@ -192,12 +192,62 @@ func main() {
 	// - `OnTAB` callback event are enabled only if the `AllowTabular` attribute is set to true.
 	// - `OnTAB` use a fork of the package `github.com/agrison/go-tablib`
 	// - `OnTAB` query specifications are available in 'SPECS.md'
+	// Examples:
+	// c.OnTAB(`cols=(:5), rows=(1:7)`, func(e *colly.TABElement) { }
+	// c.OnTAB(`cols=(:5), rows=(1:7)`, func(e *colly.TABElement) { }
+	// c.OnTAB(`cols[0:5], rows[1:7]`, func(e *colly.TABElement) { }
+	// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) { }
+	// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) { }
 
-	c.OnTAB("0:0", func(e *colly.TABElement) {
-		// c.OnTAB(`cols=(:5), rows=(1:7)`, func(e *colly.TABElement) {
-		// c.OnTAB(`cols[0:5], rows[1:7]`, func(e *colly.TABElement) {
-		// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) {
-		// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) {
+	// OnDATA
+	tabSelector := &colly.TABSelectors{
+		Enabled:   true,
+		Selectors: make(map[string]*colly.TABSelector, 3),
+	}
+
+	tabSelector.Selectors["default"] = &colly.TABSelector{
+		PatternURL: `/(.*)$`,
+		Slicer: &colly.TABSlicer{
+			Cols: "[:]",
+			Rows: "[:]",
+		},
+	}
+
+	tabSelector.Selectors["users"] = &colly.TABSelector{
+		// PatternURL: `/users/([^/]+)(?:/users)?$`,
+		PatternURL: `/users/([^/]+)$`,
+		Slicer: &colly.TABSlicer{
+			Cols: "[:]",
+			Rows: "[:]",
+		},
+		Headers: []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"},
+	}
+
+	tabSelector.Selectors["repos"] = &colly.TABSelector{
+		// PatternURL: `/repos/([A-Za-z0-9-\_\./]+)/`,
+		PatternURL: `/repos/([^/]+)/([^/]+)$`,
+		Slicer: &colly.TABSlicer{
+			Cols: "[:]",
+			Rows: "[:]",
+		},
+		Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"},
+	}
+
+	tabSelector.Selectors["starred"] = &colly.TABSelector{
+		PatternURL: `/users/([^/]+)/starred$`,
+		Slicer: &colly.TABSlicer{
+			Cols: "[:]",
+			Rows: "[:]",
+		},
+		Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id", "updated_at"},
+	}
+
+	c.Hooks(tabSelector)
+
+	c.OnDATA(tabSelector, func(e *colly.TABElement) {
+
+		pp.Printf("TargetDataset: \n %s \n\n", e.Name)
+		pp.Printf("Selectors: \n %s \n\n", e.Selectors)
 
 		// Debug the dataset slice
 		if appDebug {

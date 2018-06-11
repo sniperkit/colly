@@ -27,14 +27,31 @@ import (
 
 */
 
+type TABSlicer = tabular.Slicer
+
+type TABSelector = tabular.Selector
+
+type TABSelectors struct {
+	Enabled   bool
+	Selectors map[string]*TABSelector
+}
+
 // TABElement is the representation of a TAB tag.
 type TABElement struct {
 
 	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
 	Name string
-	// Dataset
+
+	// Dataset represents...
 	Dataset *tabular.Dataset
+
+	// Datasets represents...
+	// Datasets []*tabular.Dataset
+
+	// Selectors represents...
+	Selectors *TABSelectors
+
 	// Extractor
 	Extractor *Extractor
 	// Text
@@ -57,6 +74,17 @@ func NewTABElementFromTABNode(resp *Response, query string, ds *tabular.Dataset)
 		Name:     query,
 		Request:  resp.Request,
 		Response: resp,
+	}
+	return t
+}
+
+func NewTABElementFromTABSelector(resp *Response, selectors *TABSelectors, ds *tabular.Dataset) *TABElement {
+	// new TABElement object
+	t := &TABElement{
+		Dataset:   ds,
+		Selectors: selectors,
+		Request:   resp.Request,
+		Response:  resp,
 	}
 	return t
 }

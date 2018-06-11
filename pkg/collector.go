@@ -79,6 +79,17 @@ type Collector struct {
 	// Collector's settings
 	cfg.Config
 
+	// Selectors (move to config pkg and use it as )
+	/*
+		Selectors struct {
+			TAB  *TABSelectors `json:"tabular,omitempty" yaml:"tabular,omitempty" toml:"tabular,omitempty" xml:"tabular,omitempty" ini:"tabular,omitempty" csv:"Tabular"`
+			HTML string        `json:"html,omitempty" yaml:"html,omitempty" toml:"html,omitempty" xml:"html,omitempty" ini:"html,omitempty" csv:"HTML"`
+			JSON string        `json:"json,omitempty" yaml:"json,omitempty" toml:"json,omitempty" xml:"json,omitempty" ini:"json,omitempty" csv:"JSON"`
+			XML  string        `json:"xml,omitempty" yaml:"xml,omitempty" xml:"xml,omitempty" xml:"xml,omitempty" ini:"xml,omitempty" csv:"XML"`
+		} `json:"selectors" yaml:"selectors" toml:"selectors" xml:"selectors" ini:"selectors" csv:"selectors"`
+	*/
+	Selectors *TABSelectors `json:"selectors" yaml:"selectors" toml:"selectors" xml:"selectors" ini:"selectors" csv:"selectors"`
+
 	//////////////////////////////////////////////////
 	///// Collector - info
 	//////////////////////////////////////////////////
@@ -665,6 +676,28 @@ func (c *Collector) OnTAB(query string, f TABCallback) {
 	c.lock.Unlock()
 }
 
+// Hooks are a set of selectors to trigger if matched a user-defined pattern on the Reuqest.URL
+func (c *Collector) Hooks(selectors *TABSelectors) {
+	c.lock.Lock()
+	c.Selectors = selectors
+	c.lock.Unlock()
+}
+
+// OnTAB registers a function. Function will be executed on every JSON
+// element matched by the xpath parameter.
+func (c *Collector) OnDATA(selectors *TABSelectors, f TABCallback) {
+	c.lock.Lock()
+	if c.tabCallbacks == nil {
+		c.tabCallbacks = make([]*tabCallbackContainer, 0, 4)
+	}
+	t := &tabCallbackContainer{
+		Selectors: selectors,
+		Function:  f,
+	}
+	c.tabCallbacks = append(c.tabCallbacks, t)
+	c.lock.Unlock()
+}
+
 // OnJSON registers a function. Function will be executed on every JSON
 // element matched by the xpath parameter.
 func (c *Collector) OnJSON(xPath string, f JSONCallback) {
@@ -721,6 +754,22 @@ func (c *Collector) OnJSONDetach(xPath string) {
 	}
 	if deleteIdx != -1 {
 		c.jsonCallbacks = append(c.jsonCallbacks[:deleteIdx], c.jsonCallbacks[deleteIdx+1:]...)
+	}
+	c.lock.Unlock()
+}
+
+// OnDATADetach deregister a function. Function will not be execute after detached
+func (c *Collector) OnDATADetach(xPath string) {
+	c.lock.Lock()
+	deleteIdx := -1
+	for i, cc := range c.tabCallbacks {
+		if cc.Query == xPath {
+			deleteIdx = i
+			break
+		}
+	}
+	if deleteIdx != -1 {
+		c.tabCallbacks = append(c.tabCallbacks[:deleteIdx], c.tabCallbacks[deleteIdx+1:]...)
 	}
 	c.lock.Unlock()
 }
@@ -979,6 +1028,104 @@ func parseSliceQuery(query string, ds *tabular.Dataset) (lower int, upper int, e
 	}
 
 	return
+}
+
+func (c *Collector) handleOnDATA(resp *Response) error {
+	// check if valid encoding format to load
+	isValid, format := isTabular(resp.Headers.Get("Content-Type"), resp.Request.URL.String())
+
+	if c.debugger != nil {
+		c.debugger.Event(createEvent("tabular.check", resp.Request.ID, c.ID, map[string]string{
+			"content-type":    resp.Headers.Get("Content-Type"),
+			"url":             resp.Request.URL.String(),
+			"is_valid":        fmt.Sprintf("%t", isValid),
+			"format_slug":     format,
+			"callbacks_count": fmt.Sprintf("%d", len(c.tabCallbacks)),
+		}))
+	}
+
+	if len(c.tabCallbacks) == 0 || !isValid {
+		return ErrNotValidTabularFormat
+	}
+
+	var err error
+	var ds *tabular.Dataset
+	switch format {
+	case "json":
+		ds, err = tabular.LoadJSON(resp.Body)
+
+	case "yaml":
+		ds, err = tabular.LoadYAML(resp.Body)
+
+	case "xml":
+		ds, err = tabular.LoadXML(resp.Body)
+
+	case "csv":
+		ds, err = tabular.LoadCSV(resp.Body)
+
+	case "tsv":
+		ds, err = tabular.LoadTSV(resp.Body)
+
+	}
+
+	if c.debugger != nil {
+		c.debugger.Event(
+			createEvent("tabular.dataset", resp.Request.ID, c.ID, map[string]string{
+				"valid": fmt.Sprintf("%d", ds.Valid()),
+				"cols":  fmt.Sprintf("%d", ds.Width()),
+				"rows":  fmt.Sprintf("%d", ds.Height()),
+			}))
+
+		if err != nil {
+			c.debugger.Event(
+				createEvent("tabular.err", resp.Request.ID, c.ID, map[string]string{
+					"err": err.Error(),
+				}))
+		}
+	}
+
+	// Invalid dataset if error
+	// Note: We can check the dataset validity with `ds.Valid()` method.
+	if err != nil {
+		return err
+	}
+
+	// Note: It requires better query parsing to extract custom columns and rows selection
+	for _, cc := range c.tabCallbacks {
+		// var isRow, isSlice, isMixed bool
+		if strings.Contains(cc.Query, ",") && strings.Contains(cc.Query, ":") {
+			// isMixed = true
+			return ErrTabularMixedSelectionNotImplemented
+		}
+
+		if strings.Contains(cc.Query, ",") {
+			// rows, _ := ds.Rows(0, 1) // ([]map[string]interface{}, error) --> need to get Rows selection as a dataset struct
+			// isRow = true
+			return ErrTabularRowSelectionNotImplemented
+		}
+
+		var lowerRow, upperRow int
+		var errQuery error
+		if strings.Contains(cc.Query, ":") {
+			lowerRow, upperRow, errQuery = parseSliceQuery(cc.Query, ds)
+			// slice tabular dataset
+			if errQuery == nil {
+				ds, err = ds.Slice(lowerRow, upperRow)
+			}
+		}
+
+		e := NewTABElementFromTABSelector(resp, cc.Selectors, ds)
+
+		if c.debugger != nil {
+			c.debugger.Event(createEvent("tab", resp.Request.ID, c.ID, map[string]string{
+				"selector": cc.Query,
+				"url":      resp.Request.URL.String(),
+			}))
+		}
+		cc.Function(e)
+	}
+
+	return nil
 }
 
 /*

@@ -2,4 +2,24 @@
 - https://github.com/mtojek/oi
 - https://github.com/mtojek/go-url-fuzzer
 - https://github.com/libp2p/go-libp2p
-- 
+- https://github.com/mgechev/dots
+- https://github.com/ghetzel/pivot
+- https://github.com/dave/brenda
+- https://github.com/magiconair/properties
+- https://github.com/opennota/re2dfa
+
+- https://github.com/timtadh/lexmachine
+- https://github.com/mandolyte/csv-utils/blob/master/splitcsv/splitcsv.go
+- https://github.com/claudetech/dbpopulate
+- https://github.com/elgs/gosqljson/blob/master/gosqljson.go
+- https://github.com/caltechlibrary/dataset
+- https://github.com/yargevad/regexpx/blob/master/regexpx.go
+- https://github.com/davecb/jxpath/blob/master/src/json/lexer.go
+- https://github.com/bloglovin/obpath/blob/master/compile.go
+- https://github.com/bloglovin/obpath/blob/master/evaluate.go
+- https://github.com/bloglovin/obpath/blob/master/obpath_test.go
+- https://github.com/zyedidia/highlight/blob/master/syntax_files/cmake.yaml
+- https://github.com/lujiacn/csvutils/blob/master/csvutils.go
+- https://github.com/0xrawsec/golang-utils/blob/master/regexp/submatch/submatch.go
+- https://github.com/xyproto/rangetype
+- https://github.com/mostafa-asg/dag

@@ -97,6 +97,13 @@ func UserAgent(ua string) func(*Collector) {
 	}
 }
 
+// Selectors sets the user agent used by the Collector.
+func Selectors(selectors *TABSelectors) func(*Collector) {
+	return func(c *Collector) {
+		c.Selectors = selectors
+	}
+}
+
 // MaxDepth limits the recursion depth of visited URLs.
 func MaxDepth(depth int) func(*Collector) {
 	return func(c *Collector) {

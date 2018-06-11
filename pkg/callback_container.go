@@ -20,6 +20,7 @@ type jsonCallbackContainer struct {
 
 // tabCallbackContainer
 type tabCallbackContainer struct {
-	Query    string
-	Function TABCallback
+	Query     string
+	Selectors *TABSelectors
+	Function  TABCallback
 }
