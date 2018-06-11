@@ -1,4 +1,4 @@
-package tablib
+package colly
 
 import (
 	"github.com/sniperkit/textql/pkg/inputs"

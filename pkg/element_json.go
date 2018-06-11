@@ -17,6 +17,9 @@ package colly
 import (
 	"strings"
 
+	// external
+	jsonql_v1 "github.com/sniperkit/jsonql/pkg"
+
 	// internal
 	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 )
@@ -47,18 +50,26 @@ type JSONElement struct {
 	Name string
 	// Text is the content node
 	Text string
+
 	// Request is the request object of the element's HTML document
 	Request *Request
+
 	// Response is the Response object of the element's HTML document
 	Response *Response
+
 	// Extractor
 	Extractor *Extractor
+
 	// DOM is the DOM object of the page. DOM is relative
 	// to the current JSONElement and is either a html.Node or jsonquery.Node
 	// based on how the JSONElement was created.
 	DOM interface{}
 
 	////// not exported /////////////////////////////////////////////
+	// jsonql_v1 --> github.com/elgs/jsonql
+	jsonql_v1 *jsonql_v1.JSONQL
+
+	//-- End
 }
 
 // NewJSONElementFromJSONNode creates a JSONElement from a jsonquery.Node.

@@ -31,6 +31,8 @@ type TABSlicer = tabular.Slicer
 
 type TABSelector = tabular.Selector
 
+type TABWriter = tabular.Writer
+
 type TABSelectors struct {
 	Enabled   bool
 	Selectors map[string]*TABSelector

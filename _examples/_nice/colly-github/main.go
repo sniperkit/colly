@@ -205,35 +205,51 @@ func main() {
 		Selectors: make(map[string]*colly.TABSelector, 3),
 	}
 
-	tabSelector.Selectors["default"] = &colly.TABSelector{
-		PatternURL: `/(.*)$`,
+	// TABSelector - default
+	selectorDefault := &colly.TABSelector{
+		Writer: &colly.TABWriter{
+			Basename:   "default",
+			PrefixPath: "./shared/exports",
+			Concurrent: true,
+			Split:      true,
+			SplitAt:    2500,
+			Formats:    []string{"yaml", "json", "csv"},
+		},
 		Slicer: &colly.TABSlicer{
 			Cols: "[:]",
 			Rows: "[:]",
 		},
 	}
+	selectorDefault.PatternRegexp(`/(.*)$`)
+	tabSelector.Selectors[selectorDefault.ID()] = selectorDefault
 
-	tabSelector.Selectors["users"] = &colly.TABSelector{
-		// PatternURL: `/users/([^/]+)(?:/users)?$`,
-		PatternURL: `/users/([^/]+)$`,
+	// TABSelector - users
+	selectorUsers := &colly.TABSelector{
+		Id: "users",
 		Slicer: &colly.TABSlicer{
 			Cols: "[:]",
 			Rows: "[:]",
 		},
 		Headers: []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"},
 	}
+	selectorUsers.PatternRegexp(`/(.*)$`)
+	tabSelector.Selectors[selectorUsers.ID()] = selectorUsers
 
-	tabSelector.Selectors["repos"] = &colly.TABSelector{
-		// PatternURL: `/repos/([A-Za-z0-9-\_\./]+)/`,
-		PatternURL: `/repos/([^/]+)/([^/]+)$`,
+	// TABSelector - repos
+	selectorRepos := &colly.TABSelector{
+		Id: "repos",
 		Slicer: &colly.TABSlicer{
 			Cols: "[:]",
 			Rows: "[:]",
 		},
 		Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"},
 	}
+	selectorRepos.PatternRegexp(`/repos/([^/]+)/([^/]+)$`)
+	tabSelector.Selectors[selectorRepos.ID()] = selectorRepos
 
-	tabSelector.Selectors["starred"] = &colly.TABSelector{
+	// TABSelector - starred
+	selectorStarred := &colly.TABSelector{
+		Id:         "starred",
 		PatternURL: `/users/([^/]+)/starred$`,
 		Slicer: &colly.TABSlicer{
 			Cols: "[:]",
@@ -241,9 +257,13 @@ func main() {
 		},
 		Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id", "updated_at"},
 	}
+	selectorStarred.PatternRegexp(`/users/([^/]+)/starred$`)
+	tabSelector.Selectors[selectorStarred.ID()] = selectorStarred
 
+	// Hooks
 	c.Hooks(tabSelector)
 
+	// OnDATA
 	c.OnDATA(tabSelector, func(e *colly.TABElement) {
 
 		pp.Printf("TargetDataset: \n %s \n\n", e.Name)
