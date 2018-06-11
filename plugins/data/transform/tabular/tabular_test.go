@@ -5,8 +5,9 @@ import (
 	"encoding/base64"
 	"testing"
 
-	tablib "github.com/sniperkit/colly/plugins/data/transform/tabular"
 	. "gopkg.in/check.v1"
+
+	tablib "github.com/sniperkit/colly/plugins/data/transform/tabular"
 )
 
 func Test(t *testing.T) { TestingT(t) }

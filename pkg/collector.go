@@ -63,6 +63,8 @@ import (
 	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
 	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query/xml"
+	// debug - inspect
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 var (
@@ -88,7 +90,7 @@ type Collector struct {
 			XML  string        `json:"xml,omitempty" yaml:"xml,omitempty" xml:"xml,omitempty" xml:"xml,omitempty" ini:"xml,omitempty" csv:"XML"`
 		} `json:"selectors" yaml:"selectors" toml:"selectors" xml:"selectors" ini:"selectors" csv:"selectors"`
 	*/
-	Selectors *TABSelectors `json:"selectors" yaml:"selectors" toml:"selectors" xml:"selectors" ini:"selectors" csv:"selectors"`
+	Hooks *TABHooks `json:"hooks" yaml:"hooks" toml:"hooks" xml:"hooks" ini:"hooks" csv:"hooks"`
 
 	//////////////////////////////////////////////////
 	///// Collector - info
@@ -503,7 +505,7 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 	isTabularContent, format := isTabular(response.Headers.Get("Content-Type"), request.URL.String())
 
 	if c.AllowTabular && isTabularContent {
-		err = c.handleOnTAB(response)
+		err = c.handleOnDATA(response)
 		if err != nil {
 			c.handleOnError(response, err, request, ctx)
 		}
@@ -677,22 +679,23 @@ func (c *Collector) OnTAB(query string, f TABCallback) {
 }
 
 // Hooks are a set of selectors to trigger if matched a user-defined pattern on the Reuqest.URL
-func (c *Collector) Hooks(selectors *TABSelectors) {
+func (c *Collector) SetHooks(hooks *TABHooks) {
 	c.lock.Lock()
-	c.Selectors = selectors
+	c.Hooks = hooks
 	c.lock.Unlock()
 }
 
 // OnTAB registers a function. Function will be executed on every JSON
 // element matched by the xpath parameter.
-func (c *Collector) OnDATA(selectors *TABSelectors, f TABCallback) {
+func (c *Collector) OnDATA(hooks *TABHooks, f TABCallback) {
 	c.lock.Lock()
 	if c.tabCallbacks == nil {
 		c.tabCallbacks = make([]*tabCallbackContainer, 0, 4)
 	}
 	t := &tabCallbackContainer{
-		Selectors: selectors,
-		Function:  f,
+		// Hook:    hooks,
+		// Hooks:    hooks,
+		Function: f,
 	}
 	c.tabCallbacks = append(c.tabCallbacks, t)
 	c.lock.Unlock()
@@ -1031,21 +1034,54 @@ func parseSliceQuery(query string, ds *tabular.Dataset) (lower int, upper int, e
 }
 
 func (c *Collector) handleOnDATA(resp *Response) error {
+
 	// check if valid encoding format to load
 	isValid, format := isTabular(resp.Headers.Get("Content-Type"), resp.Request.URL.String())
 
 	if c.debugger != nil {
-		c.debugger.Event(createEvent("tabular.check", resp.Request.ID, c.ID, map[string]string{
-			"content-type":    resp.Headers.Get("Content-Type"),
-			"url":             resp.Request.URL.String(),
-			"is_valid":        fmt.Sprintf("%t", isValid),
-			"format_slug":     format,
-			"callbacks_count": fmt.Sprintf("%d", len(c.tabCallbacks)),
+		c.debugger.Event(createEvent("handleOnDATA.check", resp.Request.ID, c.ID, map[string]string{
+			"mime-type": resp.Headers.Get("Content-Type"),
+			"url":       resp.Request.URL.String(),
+			"valid":     fmt.Sprintf("%t", isValid),
+			"format":    format,
+			"callbacks": fmt.Sprintf("%d", len(c.tabCallbacks)),
 		}))
 	}
 
 	if len(c.tabCallbacks) == 0 || !isValid {
 		return ErrNotValidTabularFormat
+	}
+
+	var callbackHook *TABHook
+	if c.Hooks != nil {
+		for key, hook := range c.Hooks.Registry {
+			if hook != nil {
+				if hook.PatternRegex != nil {
+					cnt := hook.PatternRegex.FindStringSubmatch(resp.Request.URL.RequestURI())
+					if len(cnt) >= 2 {
+						if c.debugger != nil {
+							c.debugger.Event(
+								createEvent("handleOnDATA.checkKey", resp.Request.ID, c.ID,
+									map[string]string{
+										"Hook.key":   key,
+										"Hook.ID":    fmt.Sprintf("%s", hook.Id),
+										"matchCount": fmt.Sprintf("%d", len(cnt)),
+										"RequestURI": resp.Request.URL.RequestURI(),
+									},
+								),
+							)
+						}
+						// if hook.Printer.Format != "" {
+						//	format = hook.Printer.Format
+						// }
+						callbackHook = hook
+						break
+					} else {
+						continue
+					}
+				}
+			}
+		}
 	}
 
 	var err error
@@ -1070,8 +1106,8 @@ func (c *Collector) handleOnDATA(resp *Response) error {
 
 	if c.debugger != nil {
 		c.debugger.Event(
-			createEvent("tabular.dataset", resp.Request.ID, c.ID, map[string]string{
-				"valid": fmt.Sprintf("%d", ds.Valid()),
+			createEvent("handleOnDATA.dataset", resp.Request.ID, c.ID, map[string]string{
+				"valid": fmt.Sprintf("%t", ds.Valid()),
 				"cols":  fmt.Sprintf("%d", ds.Width()),
 				"rows":  fmt.Sprintf("%d", ds.Height()),
 			}))
@@ -1092,35 +1128,30 @@ func (c *Collector) handleOnDATA(resp *Response) error {
 
 	// Note: It requires better query parsing to extract custom columns and rows selection
 	for _, cc := range c.tabCallbacks {
-		// var isRow, isSlice, isMixed bool
-		if strings.Contains(cc.Query, ",") && strings.Contains(cc.Query, ":") {
-			// isMixed = true
-			return ErrTabularMixedSelectionNotImplemented
-		}
 
-		if strings.Contains(cc.Query, ",") {
-			// rows, _ := ds.Rows(0, 1) // ([]map[string]interface{}, error) --> need to get Rows selection as a dataset struct
-			// isRow = true
-			return ErrTabularRowSelectionNotImplemented
-		}
-
-		var lowerRow, upperRow int
-		var errQuery error
-		if strings.Contains(cc.Query, ":") {
-			lowerRow, upperRow, errQuery = parseSliceQuery(cc.Query, ds)
-			// slice tabular dataset
-			if errQuery == nil {
-				ds, err = ds.Slice(lowerRow, upperRow)
+		/*
+			var lowerRow, upperRow int
+			var errQuery error
+			if strings.Contains(cc.Query, ":") {
+				lowerRow, upperRow, errQuery = parseSliceQuery(cc.Query, ds)
+				// slice tabular dataset
+				if errQuery == nil {
+					ds, err = ds.Slice(lowerRow, upperRow)
+				}
 			}
-		}
+		*/
 
-		e := NewTABElementFromTABSelector(resp, cc.Selectors, ds)
-
+		// pp.Println("callbackHook=", callbackHook)
+		e := NewTABElementFromTABSelect(resp, callbackHook, ds)
 		if c.debugger != nil {
-			c.debugger.Event(createEvent("tab", resp.Request.ID, c.ID, map[string]string{
-				"selector": cc.Query,
-				"url":      resp.Request.URL.String(),
-			}))
+
+			msg := make(map[string]string, 2)
+			msg["Request.URL"] = resp.Request.URL.String()
+			if cc.Hook != nil {
+				msg["Hook"] = cc.Hook.Id
+			}
+			c.debugger.Event(createEvent("handleOnDATA.tab", resp.Request.ID, c.ID, msg))
+
 		}
 		cc.Function(e)
 	}
@@ -1142,7 +1173,7 @@ func (c *Collector) handleOnTAB(resp *Response) error {
 	isValid, format := isTabular(resp.Headers.Get("Content-Type"), resp.Request.URL.String())
 
 	if c.debugger != nil {
-		c.debugger.Event(createEvent("tabular.check", resp.Request.ID, c.ID, map[string]string{
+		c.debugger.Event(createEvent("handleOnTAB.check", resp.Request.ID, c.ID, map[string]string{
 			"content-type":    resp.Headers.Get("Content-Type"),
 			"url":             resp.Request.URL.String(),
 			"is_valid":        fmt.Sprintf("%t", isValid),
@@ -1223,7 +1254,7 @@ func (c *Collector) handleOnTAB(resp *Response) error {
 		e := NewTABElementFromTABNode(resp, cc.Query, ds)
 
 		if c.debugger != nil {
-			c.debugger.Event(createEvent("tab", resp.Request.ID, c.ID, map[string]string{
+			c.debugger.Event(createEvent("handleOnTAB.tab", resp.Request.ID, c.ID, map[string]string{
 				"selector": cc.Query,
 				"url":      resp.Request.URL.String(),
 			}))

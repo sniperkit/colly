@@ -85,23 +85,6 @@ type Dataset struct {
 // when exporting to a predefined format.
 type DynamicColumn func([]interface{}) interface{}
 
-// type MappingConf struct {
-//	Indices
-// }
-
-type RowConfig struct {
-	Enabled        bool
-	ParentIndex    int
-	ColumnHeaders  map[int]string
-	ColumnIndices  map[int]string
-	ExcludeIndices map[int]bool
-	ExcludeHeaders map[string]bool
-}
-
-// DynamicColumn represents a function that can be evaluated dynamically
-// when exporting to a predefined format.
-type DynamicColumnWithMap func(*RowConfig, []interface{}) interface{}
-
 // ColumnConstraint represents a function that is bound as a constraint to
 // the column so that it can validate its value
 type ColumnConstraint func(interface{}) bool
@@ -434,6 +417,21 @@ func (d *Dataset) AppendDynamicColumn(header string, fn DynamicColumn) {
 		d.data[i] = append(e, fn)
 	}
 }
+
+/*
+// AppendDynamicColumn appends a dynamic column to the Dataset.
+func (d *Dataset) AppendDynamicColumn2(header string, fn DynamicColumn) {
+	// d.lock.Lock()
+	// defer d.lock.Unlock()
+
+	d.headers = append(d.headers, header)
+	d.constraints = append(d.constraints, nil)
+	d.cols++
+	for i, e := range d.data {
+		d.data[i] = append(e, fn)
+	}
+}
+*/
 
 // ConstrainColumn adds a constraint to a column in the Dataset.
 func (d *Dataset) ConstrainColumn(header string, constraint ColumnConstraint) {

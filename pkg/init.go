@@ -97,10 +97,10 @@ func UserAgent(ua string) func(*Collector) {
 	}
 }
 
-// Selectors sets the user agent used by the Collector.
-func Selectors(selectors *TABSelectors) func(*Collector) {
+// Hooks sets some hooks to execute as a pre and post processing query by the Collector.
+func Hooks(hooks *TABHooks) func(*Collector) {
 	return func(c *Collector) {
-		c.Selectors = selectors
+		c.Hooks = hooks
 	}
 }
 

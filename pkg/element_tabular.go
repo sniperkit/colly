@@ -2,6 +2,7 @@ package colly
 
 import (
 	tabular "github.com/sniperkit/colly/plugins/data/transform/tabular"
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 /*
@@ -27,19 +28,30 @@ import (
 
 */
 
+type TABOutput = tabular.Printer
+
+type TABFormat = tabular.Format
+
 type TABSlicer = tabular.Slicer
 
-type TABSelector = tabular.Selector
+type TABHook = tabular.Hook
+
+type TABDynamicColumn = tabular.DynamicColumn
+
+// type TABSelector = tabular.Selector
 
 type TABWriter = tabular.Writer
 
-type TABSelectors struct {
-	Enabled   bool
-	Selectors map[string]*TABSelector
+type TABHooks struct {
+	Enabled  bool
+	Registry map[string]*TABHook
 }
 
 // TABElement is the representation of a TAB tag.
 type TABElement struct {
+
+	// Hooks represents...
+	Hook *TABHook
 
 	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
@@ -51,15 +63,15 @@ type TABElement struct {
 	// Datasets represents...
 	// Datasets []*tabular.Dataset
 
-	// Selectors represents...
-	Selectors *TABSelectors
-
 	// Extractor
 	Extractor *Extractor
+
 	// Text
 	Text string
+
 	// Request is the request object of the element's HTML document
 	Request *Request
+
 	// Response is the Response object of the element's HTML document
 	Response *Response
 
@@ -80,13 +92,14 @@ func NewTABElementFromTABNode(resp *Response, query string, ds *tabular.Dataset)
 	return t
 }
 
-func NewTABElementFromTABSelector(resp *Response, selectors *TABSelectors, ds *tabular.Dataset) *TABElement {
+func NewTABElementFromTABSelect(resp *Response, hook *TABHook, ds *tabular.Dataset) *TABElement {
+	// pp.Println("hook=", hook)
 	// new TABElement object
 	t := &TABElement{
-		Dataset:   ds,
-		Selectors: selectors,
-		Request:   resp.Request,
-		Response:  resp,
+		Dataset:  ds,
+		Hook:     hook,
+		Request:  resp.Request,
+		Response: resp,
 	}
 	return t
 }
