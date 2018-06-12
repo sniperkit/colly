@@ -45,44 +45,44 @@ type TABDynamicColumn = tabular.DynamicColumn
 type TABWriter = tabular.Writer
 
 type TABHooks struct {
-	Enabled  bool
-	Registry map[string]*TABHook
+	Enabled  bool                `default:"true" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
+	Registry map[string]*TABHook `json:"registry" yaml:"registry" toml:"registry" xml:"registry" ini:"registry" csv:"registry"`
 }
 
 // TABElement is the representation of a TAB tag.
 type TABElement struct {
 
 	// Hooks represents...
-	Hook *TABHook
+	Hook *TABHook `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
-	Name string
+	Name string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Event is the name of the pre-processing task to trigger
-	Query string
+	Query string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Dataset represents...
-	Dataset *tabular.Dataset
+	Dataset *tabular.Dataset `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Datasets represents...
 	// Datasets []*tabular.Dataset
 
 	// Extractor
-	Extractor *Extractor
+	Extractor *Extractor `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Text
-	Text string
+	Text string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Request is the request object of the element's HTML document
-	Request *Request
+	Request *Request `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Response is the Response object of the element's HTML document
-	Response *Response
+	Response *Response `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	////// not exported /////////////////////////////////////////////
 	// err stores the loading error
-	err error
+	err error `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 }
 
 // NewTABElementFromTABNode creates a TABElement from a jsonquery.Node.

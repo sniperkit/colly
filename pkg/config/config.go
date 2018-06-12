@@ -43,6 +43,18 @@ var (
 	collectorAppName string = DEFAULT_APP_NAME
 )
 
+var (
+	// TODO: Create a find function and a better list of possible config filenames per components
+	// DefaultConfigFilenames specifies...
+	DefaultConfigFilenames = []string{"colly", "app", "cache", "sitemap", "collection", "collector", "debug", "filters", "outputs", "proxy", "transport", "export"}
+
+	// DefaultConfigDirnames specifies...
+	DefaultConfigDirnames = []string{"conf", "../conf", "shared/config", "shared/conf", ".colly", ".colly/conf", ".colly/config"}
+
+	// DefaultConfigExtensions specifies...
+	DefaultConfigExtensions = []string{"yml", "yaml", "json", "toml", "xml"}
+)
+
 // init
 func init() {
 	if AutoLoad {

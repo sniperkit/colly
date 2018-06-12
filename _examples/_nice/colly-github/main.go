@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	// colly - core
 	colly "github.com/sniperkit/colly/pkg"
+	config "github.com/sniperkit/colly/pkg/config"
 	debug "github.com/sniperkit/colly/pkg/debug"
 
 	// colly - plugins
@@ -16,12 +18,40 @@ import (
 )
 
 /*
-	To do:
-	- Wednesday:
-		- Add Plucker units
-		- Add TextQL/JsonQL
-		- Add custom query lexer with lexmachine
+	To do asap:
+	- Tuesday:
+		- [x] Dump load config into different file formats
+		- [ ] Add ranger parser
+			- [ ] github.com/sniperkit/rangetype
+		- [ ] Add header link parser
+		- [ ] Add Plucker units
+		- [ ] Add yql for tab data query parser
+		- [ ] Add TextQL/JsonQL
+			- [ ] github.com/davecb/jxpath
+			- [ ] github.com/bloglovin/obpath
+		- [ ]Add custom query lexer with lexmachine
+	- Thrusday:
+		- [ ] Create data blocks templates
+		- [ ] Create databooks form nested json arrays
+			- [ ] Develop json pointers
+		- [ ] Create databooks form nested csv arrays
+			- [ ] Develop csv pointers
+	- Friday:
+		- [ ] Concurrent CSV writers
+		- [ ] HttpCache Transport
+		- [ ] HttpStats Transport
+	- Saturday:
+		- [ ] Extract meta
+		- [ ] Extract open graph metadata
+		- [ ] To do list manager
+			- [ ] https://github.com/jasoncodingnow/todos
+			- [ ] https://github.com/izqui/todos/blob/master/git.go
+			- [ ] https://github.com/gerad/release-notes
 */
+
+// collyVersion specifies the colly's version imported in the current executable.
+// If the executable is built with Makefile, the collyVersion will use the actual repo's short tag version
+var collyVersion = ""
 
 // app vars
 var (
@@ -29,8 +59,23 @@ var (
 	// appVersion specifies the version of the app. If the executable is built with Makefile, the appVersion will use the actual repo's short tag version
 	appVersion = "0.0.1-alpha"
 
+	// appCurrentDir specifies the directory of the currently file/binary is running
+	appCurrentDir = "."
+
+	// appXGDBDir specifies the XGDB directory of the local workstation
+	appXGDBDir = "~/.colly"
+
+	// appBaseDir specifies the directory name to set inside the appXGDBDir
+	appBaseDir = "github-collector"
+
 	// appDebug specifies if the app debug/verbose some development event logged
 	appDebug = false
+
+	// appConfigDump specifies whether the loaded configuration has to be dumped into various file formats.
+	appConfigDump = true
+
+	// appConfigDirDump specifies the prefix path for
+	appConfigDirDump = "./shared/config/dumps/"
 
 	//-- End
 )
@@ -132,6 +177,13 @@ func init() {
 	collectorDatasetOutputFormat = strings.ToLower(collectorDatasetOutputFormat)
 }
 
+func panic(err error) {
+	if err != nil {
+		fmt.Println("Could not get the directory of the file/binary currently running...")
+		os.Exit(1)
+	}
+}
+
 // https://github.com/sniperkit/xaggregate/blob/sniperkit/plugin/provider/github/utils.go
 func dateFormat(row []interface{}) interface{} {
 	if row == nil {
@@ -195,6 +247,19 @@ func prettyPrint(output ...interface{}) {
 
 func main() {
 
+	// appConfig stores a nested structure of settings for the collector and other components.
+	// Important!
+	// - You can define several configuration files and in different formats
+	// - Formats available: yaml, json, xml, toml
+	appConfig, err := config.NewFromFile(false, false, false, "./shared/config/global.yaml")
+	panic(err)
+	if appDebug {
+		prettyPrint(appConfig)
+	}
+
+	// TODO: create colly.NewCollectorWithConfig() method
+	// c := colly.NewCollectorWithConfig(appConfig)
+
 	// Instantiate default collector
 	c := colly.NewCollector(
 		// Visit only domains: api.github.com
@@ -220,6 +285,7 @@ func main() {
 	// c.OnTAB(`cols[0:5], rows[1:7]`, func(e *colly.TABElement) { }
 	// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) { }
 	// c.OnTAB(`rows=(1,10), cols=("id", "name", "full_name", "description", "language", "stargazers_count", "forks_count")`, func(e *colly.TABElement) { }
+	// params ... interface{}
 
 	// OnDATA
 	tabHooks := &colly.TABHooks{
@@ -318,14 +384,24 @@ func main() {
 	// selectorStarred.Valid()
 	tabHooks.Registry[selectorStarred.ID()] = selectorStarred
 
+	// dumpFormats specifies...
+	dumpFormats := []string{"json", "toml"} // []string{"yaml", "json", "toml", "xml"}
+
+	// dumpNodes specifies the config sections to dump
+	// - if empty; only a merged config file will be written.
+	// - if set to `all`; a global and a sub-set of config files per components will be written.
+	// - if set to `collector,export,dataset`; only config files for the defined components will be written.
+	// - to check the sections available; use the config.Sections() method.
+	dumpNodes := []string{"all"}
+
 	// TABHook - header-link
 	// selectorHeaderLink.PatternRegexp("<([^>]+)>;\\s+rel=\"([^i\"]+)\"")
 
-	// Hooks
+	// SetHooks
 	c.SetHooks(tabHooks)
 
-	// Dump loaded configs into several file formats
-	// c.DumpConfig()
+	// DumpConfig
+	c.DumpConfig(dumpFormats, dumpNodes, "./shared/config/schema") // use string slices
 
 	// OnDATA (either hooks matched by RequestURI() or )
 	c.OnDATA(tabHooks, func(e *colly.TABElement) {

@@ -14,11 +14,17 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 
+	// internal
 	// xdgbasedir
 	xdgbasedir "github.com/sniperkit/colly/plugins/system/xdgbasedir"
-	// helpers
-	// pp "github.com/sniperkit/xutil/plugin/debug/pp"
 )
+
+/*
+	TODO:
+	- test/implement these packages
+	  - github.com/sniperkit/gographer
+	  - github.com/sniperkit/struct2schema
+*/
 
 // public variables
 var (
@@ -119,19 +125,38 @@ func Dump(config interface{}, nodes []string, formats []string, prefixPath strin
 		config = &Config{}
 	}
 
+	if InspectMode {
+		inspectConfig := inspectStruct(config)
+	}
+
+	if nodes[0] == "all" {
+		nodes = []string{}
+	}
+
 	exportNodesCount := len(nodes)
 	for _, f := range formats {
 		switch {
 		case exportNodesCount == 0:
-			nodeName := "config"
-			data, err := encodeFile(config, "config", f)
+			nodeName := "global"
+			data, err := encodeFile(config, nodeName, f)
 			if err != nil {
 				return err
 			}
 			filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
-			// fmt.Printf("filePath: %s \n", filePath)
 			if err := writeFile(filePath, data); err != nil {
 				return err
+			}
+
+			if InspectMode {
+				nodeName := "inspect"
+				data, err := encodeFile(config, nodeName, f)
+				if err != nil {
+					return err
+				}
+				filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
+				if err := writeFile(filePath, data); err != nil {
+					return err
+				}
 			}
 
 		case exportNodesCount > 0:

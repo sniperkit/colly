@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	configor "github.com/sniperkit/colly/plugins/data/import/configor"
 )
@@ -23,7 +24,7 @@ func autoLoad() {
 // NewFromFile
 func NewFromFile(verbose, debug, esrrorOnUnmatchedKeys bool, files ...string) (*Config, error) {
 	globalConfig := &Config{}
-	xdgPath, err := getDefaultXDGBaseDirectory()
+	xdgPath, err := GetXDGBaseDirectory()
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +44,26 @@ func Dump(c interface{}, formats, nodes []string, prefixPath string) error {
 	return configor.Dump(c, nodes, formats, prefixPath)
 }
 
-func getDefaultXDGBaseDirectory() (string, error) {
+func GetXDGBaseDirectory() (string, error) {
 	xdgPath, err := configor.XDGBaseDir()
 	if err != nil {
 		return DEFAULT_BASE_DIR, err
 	}
 	return xdgPath, nil
+}
+
+func GetCurrentDir() (string, error) {
+	cdir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		return ".", err
+	}
+	return cdir, nil
+}
+
+func EnsureDir(path string) {
+	d, err := os.Open(path)
+	if err != nil {
+		os.MkdirAll(path, os.FileMode(0755))
+	}
+	d.Close()
 }

@@ -7,7 +7,6 @@
 - https://github.com/dave/brenda
 - https://github.com/magiconair/properties
 - https://github.com/opennota/re2dfa
-
 - https://github.com/timtadh/lexmachine
 - https://github.com/mandolyte/csv-utils/blob/master/splitcsv/splitcsv.go
 - https://github.com/claudetech/dbpopulate
@@ -23,3 +22,4 @@
 - https://github.com/0xrawsec/golang-utils/blob/master/regexp/submatch/submatch.go
 - https://github.com/xyproto/rangetype
 - https://github.com/mostafa-asg/dag
+- https://github.com/yargevad/regexpx/blob/master/regexpx.go

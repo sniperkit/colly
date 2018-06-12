@@ -14,11 +14,32 @@ import (
 
 	toml "github.com/BurntSushi/toml"
 	ini "github.com/go-ini/ini"
+
 	// yaml "gopkg.in/yaml.v2"
 	yaml "github.com/go-yaml/yaml"
 
 	pp "github.com/sniperkit/xutil/plugin/debug/pp"
 )
+
+/*
+	TODO:
+	- test/implement these packages
+	  - github.com/sniperkit/structs
+	  - github.com/sniperkit/gomodifytags
+	  - github.com/sniperkit/go-arg
+	  - github.com/sniperkit/structtag
+	  - github.com/sniperkit/structhash
+	  - github.com/sniperkit/metaflector
+	  - github.com/sniperkit/go-flagged
+*/
+
+func prettyPrinter(group string, parts ...interface{}) {
+	groupPrefix := fmt.Sprintf("DEBUG[%s], info=", group)
+	var debug []interface{}
+	debug = append(debug, groupPrefix)
+	debug = append(debug, parts...)
+	pp.Println(debug)
+}
 
 // UnmatchedTomlKeysError errors are returned by the Load function when
 // ErrorOnUnmatchedKeys is set to true and there are unmatched keys in the input
@@ -231,6 +252,15 @@ func (configor *Configor) processTags(config interface{}, prefixes ...string) er
 			}
 		}
 
+		/*
+			for field.Kind() == reflect.Func {
+				// prettyPrinter("processTags", )
+				os.Exit(1)
+				// return errors.New(fieldStruct.Name + " is required, but blank")
+				// field = field.Elem()
+			}
+		*/
+
 		for field.Kind() == reflect.Ptr {
 			field = field.Elem()
 		}
@@ -257,42 +287,13 @@ func (configor *Configor) processTags(config interface{}, prefixes ...string) er
 func encodeFile(config interface{}, node string, format string) ([]byte, error) {
 	switch format {
 	case "ini":
-
-		pp.Println("encodeInterfaceToINI=", config)
 		err := ini.MapTo(config, "./colly.ini")
 		if err != nil {
-			fmt.Println("error: ", err)
-			os.Exit(1)
+			// fmt.Println("error: ", err)
+			// os.Exit(1)
 			return nil, err
 		}
 
-		// cfg := ini.Empty()
-
-		// cfg.WriteToIndent(writer, "\t")
-		// err = cfg.SaveToIndent("my.ini", "\t")
-		/*
-			var dataBytes bytes.Buffer
-			// dataBytes := bytes.NewBuffer(nil)
-			// configValue := reflect.ValueOf(config)
-			outFile := ini.Empty()
-			configValue := reflect.Indirect(reflect.ValueOf(*config))
-			configValue2 := reflect.ValueOf(config)
-			pp.Println(config)
-			pp.Println(configValue)
-			pp.Println(configValue2)
-			err := ini.ReflectFrom(outFile, config)
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-			output, err := outFile.WriteTo(&dataBytes)
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-			fmt.Println(output)
-			return []byte(dataBytes.String()), nil
-		*/
 	case "json":
 		data, err := json.MarshalIndent(config, "", "\t")
 		if err != nil {
@@ -305,7 +306,6 @@ func encodeFile(config interface{}, node string, format string) ([]byte, error) 
 		if err := toml.NewEncoder(&dataBytes).Encode(config); err != nil {
 			return nil, err
 		}
-		// fmt.Println(dataBytes.String())
 		return []byte(dataBytes.String()), nil
 
 	case "xml":

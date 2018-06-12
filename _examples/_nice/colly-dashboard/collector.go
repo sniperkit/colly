@@ -27,6 +27,40 @@ var (
 	collectorDebug      *debug.LogDebugger = &debug.LogDebugger{}
 )
 
+var (
+	appConfigFiles []string = []string{
+		// ./colly.yml
+		"colly.yml",
+		"colly.yaml",
+		"colly.json",
+		"colly.toml",
+		// ../conf/app.yaml
+		parentDir + "/conf/colly.yaml",
+		parentDir + "/conf/app.yaml",
+		parentDir + "/conf/cache.yaml",
+		parentDir + "/conf/sitemap.yaml",
+		parentDir + "/conf/collection.yaml",
+		parentDir + "/conf/collector.yaml",
+		parentDir + "/conf/debug.yaml",
+		parentDir + "/conf/filters.yaml",
+		parentDir + "/conf/outputs.yaml",
+		parentDir + "/conf/proxy.yaml",
+		parentDir + "/conf/transport.yaml",
+		// ./conf/app.yaml
+		workDir + "/conf/colly.yaml",
+		workDir + "/conf/cache.yaml",
+		workDir + "/conf/app.yaml",
+		workDir + "/conf/sitemap.yaml",
+		workDir + "/conf/collection.yaml",
+		workDir + "/conf/collector.yaml",
+		workDir + "/conf/debug.yaml",
+		workDir + "/conf/filters.yaml",
+		workDir + "/conf/outputs.yaml",
+		workDir + "/conf/proxy.yaml",
+		workDir + "/conf/transport.yaml",
+	}
+)
+
 func initCollectorHelpers(c *colly.Collector) *colly.Collector {
 	helper.RandomUserAgent(c)
 	helper.Referrer(c)

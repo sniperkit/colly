@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 
 	// core
-	cfg "github.com/sniperkit/colly/pkg/config"
+	config "github.com/sniperkit/colly/pkg/config"
 	debug "github.com/sniperkit/colly/pkg/debug"
 	storage "github.com/sniperkit/colly/pkg/storage"
 
@@ -27,7 +27,7 @@ func NewCollector(options ...func(*Collector)) *Collector {
 }
 
 // NewCollector creates a new Collector instance with cfg.Default configuration
-func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
+func NewCollectorWithConfig(cfg *config.Config) (c *Collector) {
 	c = &Collector{}
 	if cfg != nil {
 
@@ -56,6 +56,14 @@ func NewCollectorWithConfig(cfg *cfg.Config) (c *Collector) {
 		c.AllowURLRevisit = cfg.Collector.AllowURLRevisit
 
 		c.CacheDir = cfg.Collector.Cache.Store.Directory
+
+		xgdb, err := config.GetXDGBaseDirectory()
+		c.checkError(err)
+		c.XGDBDir = xgdb
+
+		cdir, err := config.GetCurrentDir()
+		c.checkError(err)
+		c.cdir = cdir
 
 		// cfg.Blacklists.Domains
 
@@ -128,22 +136,60 @@ func AllowedDomains(domains ...string) func(*Collector) {
 // ParseHTTPErrorResponse allows parsing responses with HTTP errors
 func ParseHTTPErrorResponse() func(*Collector) {
 	return func(c *Collector) {
-		c.ParseHTTPErrorResponse = cfg.DefaultParseHTTPErrorResponse
+		c.ParseHTTPErrorResponse = config.DefaultParseHTTPErrorResponse
 		// c.Config.ParseHTTPErrorResponse = cfg.DefaultParseHTTPErrorResponse
 	}
 }
 
-// ForceDir specifies that the program will try to create missing storage directories.
-func ForceDir() func(*Collector) {
+// BaseDir specifies that the program will create all required directories with this prefix path.
+func BaseDir(dir string) func(*Collector) {
 	return func(c *Collector) {
-		c.ForceDir = cfg.DefaultForceDir
+		switch {
+		case dir != "":
+			c.BaseDir = dir
+		default:
+			currentDir, err := config.GetCurrentDir()
+			if err != nil {
+				c.checkError(err)
+				c.BaseDir = "."
+			} else {
+				c.BaseDir = currentDir
+			}
+		}
+	}
+}
+
+// BaseDir specifies that the program will create all required directories with this prefix path.
+func XGDBDir(dir string) func(*Collector) {
+	return func(c *Collector) {
+		switch {
+		case dir != "":
+			c.XGDBDir = dir
+		default:
+			xgdbDir, err := config.GetXDGBaseDirectory()
+			if err != nil {
+				c.checkError(err)
+				c.XGDBDir = "~/.colly"
+			} else {
+				c.XGDBDir = xgdbDir
+				// config.EnsureDir(c.XGDBDir)
+			}
+		}
+	}
+}
+
+// ForceDir specifies that the program will try to create missing storage directories.
+func ForceDir(recursive bool) func(*Collector) {
+	return func(c *Collector) {
+		c.ForceDir = config.DefaultForceDir
+		c.ForceDirRecursive = config.DefaultForceDirRecursive
 	}
 }
 
 // ForceDirRecursive specifies that the program will try to create missing storage directories recursively.
 func ForceDirRecursive() func(*Collector) {
 	return func(c *Collector) {
-		c.ForceDirRecursive = cfg.DefaultForceDirRecursive
+		c.ForceDirRecursive = config.DefaultForceDirRecursive
 	}
 }
 
@@ -174,7 +220,7 @@ func URLFilters(filters ...*regexp.Regexp) func(*Collector) {
 // AllowURLRevisit instructs the Collector to allow multiple downloads of the same URL
 func AllowURLRevisit() func(*Collector) {
 	return func(c *Collector) {
-		c.AllowURLRevisit = cfg.DefaultAllowURLRevisit
+		c.AllowURLRevisit = config.DefaultAllowURLRevisit
 	}
 }
 
@@ -196,14 +242,14 @@ func CacheDir(path string) func(*Collector) {
 // set by the target host's robots.txt file.
 func IgnoreRobotsTxt() func(*Collector) {
 	return func(c *Collector) {
-		c.IgnoreRobotsTxt = cfg.DefaultIgnoreRobotsTxt
+		c.IgnoreRobotsTxt = config.DefaultIgnoreRobotsTxt
 	}
 }
 
 // RandomUserAgent
 func RandomUserAgent() func(*Collector) {
 	return func(c *Collector) {
-		c.RandomUserAgent = cfg.DefaultRandomUserAgent
+		c.RandomUserAgent = config.DefaultRandomUserAgent
 	}
 }
 
@@ -225,35 +271,35 @@ func Async(a bool) func(*Collector) {
 // without explicit charset declaration. This feature uses https://github.com/saintfish/chardet
 func DetectCharset() func(*Collector) {
 	return func(c *Collector) {
-		c.DetectCharset = cfg.DefaultDetectCharset
+		c.DetectCharset = config.DefaultDetectCharset
 	}
 }
 
 // DetectMimeType enables mime type detection
 func DetectMimeType() func(*Collector) {
 	return func(c *Collector) {
-		c.DetectMimeType = cfg.DefaultDetectMimeType
+		c.DetectMimeType = config.DefaultDetectMimeType
 	}
 }
 
 // DetectTabular
 func DetectTabular() func(*Collector) {
 	return func(c *Collector) {
-		c.DetectTabular = cfg.DefaultDetectMimeType
+		c.DetectTabular = config.DefaultDetectMimeType
 	}
 }
 
 // DebugMode enables text-based content summarization.
 func DebugMode() func(*Collector) {
 	return func(c *Collector) {
-		c.DebugMode = cfg.DefaultDebugMode
+		c.DebugMode = config.DefaultDebugMode
 	}
 }
 
 // VerboseMode enables text-based content summarization.
 func VerboseMode() func(*Collector) {
 	return func(c *Collector) {
-		c.VerboseMode = cfg.DefaultVerboseMode
+		c.VerboseMode = config.DefaultVerboseMode
 	}
 }
 

@@ -37,11 +37,16 @@ import (
 	"sync/atomic"
 	"time"
 
+	// external
+	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 
-	"github.com/PuerkitoBio/goquery"
+	// encoding - iterators
+	jsoniter "github.com/json-iterator/go"
+
+	// internal
 
 	// collector - core
 	cfg "github.com/sniperkit/colly/pkg/config"
@@ -55,9 +60,6 @@ import (
 
 	// format
 	robotstxt "github.com/sniperkit/colly/plugins/data/format/robotstxt"
-
-	// encoding - iterators
-	jsoniter "github.com/json-iterator/go"
 
 	// format - operation
 	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
@@ -184,8 +186,8 @@ type Collector struct {
 	// DetectTabular
 	DetectTabular bool `default:"true" json:"detect_tabular_data" yaml:"detect_tabular_data" toml:"detect_tabular_data" xml:"detectTabularData" ini:"detectTabularData" csv:"DetectTabularData"`
 
-	// XDGBaseDir
-	XDGBaseDir string `json:"xdg_base_dir" yaml:"xdg_base_dir" toml:"xdg_base_dir" xml:"xdgBaseDir" ini:"xdgBaseDir" csv:"XDGBaseDir"`
+	// XGDBDir
+	XGDBDir string `json:"xdg_base_dir" yaml:"xdg_base_dir" toml:"xdg_base_dir" xml:"xdgBaseDir" ini:"xdgBaseDir" csv:"XDGBaseDir"`
 
 	// BaseDirectory
 	BaseDir string `json:"base_dir" yaml:"base_dir" toml:"base_dir" xml:"baseDir" ini:"baseDir" csv:"BaseDir"`
@@ -207,14 +209,17 @@ type Collector struct {
 	ForceDirRecursive bool `default:"true" json:"force_dir_recursive" yaml:"force_dir_recursive" toml:"force_dir_recursive" xml:"forceDirRecursive" ini:"forceDirRecursive" csv:"ForceDirRecursive"`
 
 	//////////////////////////////////////////////////
-	///// Debug mode
+	///// Running modes
 	//////////////////////////////////////////////////
 
-	// DebugMode
+	// DebugMode specifies...
 	DebugMode bool `default:"false" json:"debug_mode" yaml:"debug_mode" toml:"debug_mode" xml:"debugMode" ini:"debugMode" csv:"DebugMode"`
 
-	// VerboseMode
-	VerboseMode bool `default:"verbose_mode" json:"verbose_mode" yaml:"verbose_mode" toml:"verbose_mode" xml:"verboseMode" ini:"verboseMode" csv:"VerboseMode"`
+	// VerboseMode specifies...
+	VerboseMode bool `default:"false" json:"verbose_mode" yaml:"verbose_mode" toml:"verbose_mode" xml:"verboseMode" ini:"verboseMode" csv:"VerboseMode"`
+
+	// FaultTolerant specifies...
+	FaultTolerant bool `default:"true" json:"fault_tolerant" yaml:"fault_tolerant" toml:"fault_tolerant" xml:"faultTolerant" ini:"faultTolerant" csv:"FaultTolerant"`
 
 	//////////////////////////////////////////////////
 	///// Dashboard TUI (terminal ui only)
@@ -238,29 +243,31 @@ type Collector struct {
 	//////////////////////////////////////////////////
 
 	// RedirectHandler allows control on how a redirect will be managed
-	RedirectHandler func(req *http.Request, via []*http.Request) error
+	RedirectHandler func(req *http.Request, via []*http.Request) error `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// not exported attributes
-	store         storage.Storage
-	debugger      debug.Debugger
-	robotsMap     map[string]*robotstxt.RobotsData
-	requestCount  uint32
-	responseCount uint32
-	backend       *httpBackend
-	wg            *sync.WaitGroup
-	lock          *sync.RWMutex
+	store         storage.Storage                  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	debugger      debug.Debugger                   `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	robotsMap     map[string]*robotstxt.RobotsData `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	requestCount  uint32                           `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	responseCount uint32                           `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	backend       *httpBackend                     `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	wg            *sync.WaitGroup                  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	lock          *sync.RWMutex                    `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	cdir          string                           `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	errs          []string                         `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// content callbacks
-	htmlCallbacks []*htmlCallbackContainer
-	xmlCallbacks  []*xmlCallbackContainer
-	jsonCallbacks []*jsonCallbackContainer
-	tabCallbacks  []*tabCallbackContainer
+	htmlCallbacks []*htmlCallbackContainer `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	xmlCallbacks  []*xmlCallbackContainer  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	jsonCallbacks []*jsonCallbackContainer `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	tabCallbacks  []*tabCallbackContainer  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// collector callbacks
-	requestCallbacks  []RequestCallback
-	responseCallbacks []ResponseCallback
-	errorCallbacks    []ErrorCallback
-	scrapedCallbacks  []ScrapedCallback
+	requestCallbacks  []RequestCallback  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	responseCallbacks []ResponseCallback `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	errorCallbacks    []ErrorCallback    `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	scrapedCallbacks  []ScrapedCallback  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 }
 
 func prettyPrinter(group string, parts ...interface{}) {
@@ -292,6 +299,20 @@ func (c *Collector) Init() {
 
 func (c *Collector) IsDebug() bool {
 	if c.debugger != nil {
+		return true
+	}
+	return false
+}
+
+func (c *Collector) checkError(err error) bool {
+	if err != nil {
+		switch {
+		case c.FaultTolerant:
+			c.errs = append(c.errs, err.Error())
+		default:
+			fmt.Println("error occured: ", err)
+			os.Exit(1)
+		}
 		return true
 	}
 	return false
@@ -874,6 +895,14 @@ func (c *Collector) SetCookieJar(j *cookiejar.Jar) {
 // SetRequestTimeout overrides the default timeout (10 seconds) for this collector
 func (c *Collector) SetRequestTimeout(timeout time.Duration) {
 	c.backend.Client.Timeout = timeout
+}
+
+// DumpConfig allows to
+func (c *Collector) DumpConfig(formats, nodes []string, prefixPath string) error {
+	c.lock.Lock()
+	err := cfg.Dump(c, formats, nodes, prefixPath)
+	c.lock.Unlock()
+	return err
 }
 
 // SetStorage overrides the default in-memory storage.

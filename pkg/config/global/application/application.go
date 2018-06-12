@@ -18,5 +18,8 @@ type Config struct {
 	// IsDashboard
 	DashboardMode bool `default:"true" flag:"dashboard" yaml:"dashboard" toml:"dashboard" xml:"dashboard" ini:"dashboardMode" csv:"dashboardMode"`
 
+	// FaultTolerant specifies...
+	FaultTolerant bool `default:"true" json:"fault_tolerant" yaml:"fault_tolerant" toml:"fault_tolerant" xml:"faultTolerant" ini:"faultTolerant" csv:"FaultTolerant"`
+
 	//-- END
 }
