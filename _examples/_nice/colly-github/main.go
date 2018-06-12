@@ -15,6 +15,14 @@ import (
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
+/*
+	To do:
+	- Wednesday:
+		- Add Plucker units
+		- Add TextQL/JsonQL
+		- Add custom query lexer with lexmachine
+*/
+
 // app vars
 var (
 
@@ -288,7 +296,7 @@ func main() {
 	selectorStarred := &colly.TABHook{
 		Id: "starred",
 		Slicer: &colly.TABSlicer{
-			Headers: []string{"id", "full_name", "description", "language", "owner_login", "owner_id", "stargazers_count", "updated_at"},
+			Headers: []string{"id", "full_name", "description", "language", "owner_id", "stargazers_count", "updated_at"},
 			Cols: &colly.TABRanger{
 				Expr: "[::]",
 			},
