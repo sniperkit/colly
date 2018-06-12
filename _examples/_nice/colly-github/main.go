@@ -124,6 +124,22 @@ func init() {
 	collectorDatasetOutputFormat = strings.ToLower(collectorDatasetOutputFormat)
 }
 
+// https://github.com/sniperkit/xaggregate/blob/sniperkit/plugin/provider/github/utils.go
+func dateFormat(row []interface{}) interface{} {
+	if row == nil {
+		return 0
+	}
+	if len(row) < 7 {
+		return 0
+	}
+
+	date, err := time.Parse("2006-01-02", asString(row[7]))
+	if err != nil {
+		return "0000-00-00"
+	}
+	return date.Format("2006-01-02")
+}
+
 // descriptionLength function is a callback used to append dynamic column to a `OnTab` event dataset
 func descriptionLength(row []interface{}) interface{} {
 	if row == nil {
@@ -207,74 +223,91 @@ func main() {
 	// URL: https://api.github.com/
 	selectorDefault := &colly.TABHook{
 		Writer: &colly.TABWriter{
-			Basename:   "default",
+			Basename:   "colly",
 			PrefixPath: "./shared/exports",
 			Concurrent: true,
 			Split:      true,
 			SplitAt:    2500,
 			Formats:    []string{"yaml", "json", "csv"},
 		},
-		Slicer: &colly.TABSlicer{
-			Cols: "[:]",
-			Rows: "[:]",
-		},
 		Printer: &colly.TABOutput{
 			Format: "tabular-grid",
 		},
 	}
-	// selectorDefault.PatternRegexp(`/(.*)$`)
+	// selectorDefault.Valid()
 	tabHooks.Registry[selectorDefault.ID()] = selectorDefault
 
 	// TABHook - users
 	// URL: https://api.github.com/users/roscopecoltran
 	selectorUsers := &colly.TABHook{
-		Id:      "users",
-		Headers: []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"},
+		Id: "users",
 		Slicer: &colly.TABSlicer{
-			Cols: "[:]",
-			Rows: "[:]",
+			Headers: []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"},
+			Cols: &colly.TABRanger{
+				Expr: "[::]",
+			},
+			Rows: &colly.TABRanger{
+				Lower: 0,
+				Upper: 0,
+				Cap:   0,
+			},
 		},
 		Printer: &colly.TABOutput{
 			Format: "tabular-grid",
 		},
 	}
-	// ^http(?:s)?:\\/\\/github\\.com\\/([a-zA-Z0-9\\-_]+)$
 	selectorUsers.PatternRegexp("/users/([a-zA-Z0-9\\-_]+)$")
+	// selectorUsers.Valid()
 	tabHooks.Registry[selectorUsers.ID()] = selectorUsers
 
 	// TABHook - repos
 	// URL: https://api.github.com/repos/sniperkit/colly
 	selectorRepos := &colly.TABHook{
-		Id:      "repos",
-		Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"},
+		Id: "repos",
 		Slicer: &colly.TABSlicer{
-			Cols: "[:]",
-			Rows: "[:]",
+			Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"},
+			Cols: &colly.TABRanger{
+				Expr: "[::]",
+			},
+			Rows: &colly.TABRanger{
+				Lower: 0,
+				Upper: 0,
+				Cap:   0,
+			},
 		},
 		Printer: &colly.TABOutput{
 			Format: "tabular-grid",
 		},
 	}
-	// ([a-zA-Z0-9-:_+]+)$
 	selectorRepos.PatternRegexp("/repos/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)$")
+	// selectorRepos.Valid()
 	tabHooks.Registry[selectorRepos.ID()] = selectorRepos
 
 	// TABHook - starred
 	// URL: https://api.github.com/users/roscopecoltran/starred?page=1&per_page=10&direction=desc&sort=updated
 	selectorStarred := &colly.TABHook{
-		Id:      "starred",
-		Headers: []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id", "updated_at"},
+		Id: "starred",
 		Slicer: &colly.TABSlicer{
-			Cols: "[:]",
-			Rows: "[:]",
+			Headers: []string{"id", "full_name", "description", "language", "owner_login", "owner_id", "stargazers_count", "updated_at"},
+			Cols: &colly.TABRanger{
+				Expr: "[::]",
+			},
+			Rows: &colly.TABRanger{
+				Lower: 0,
+				Upper: 0,
+				Cap:   0,
+			},
 		},
 		Printer: &colly.TABOutput{
 			Format: "tabular-grid",
 		},
 	}
 
-	selectorStarred.AddDynamicColumn(descriptionLength, "description_length")
+	selectorStarred.AddDynamicColumn(descriptionLength, "desc_length", 2)
+	// selectorStarred.AddDynamicColumn(dateFormat, "updated_at", 7)
+
 	selectorStarred.PatternRegexp("/users/([a-zA-Z0-9\\-_]+)/starred")
+	// selectorStarred.Valid()
 	tabHooks.Registry[selectorStarred.ID()] = selectorStarred
 
 	// TABHook - header-link
@@ -283,12 +316,16 @@ func main() {
 	// Hooks
 	c.SetHooks(tabHooks)
 
-	// OnDATA
+	// Dump loaded configs into several file formats
+	// c.DumpConfig()
+
+	// OnDATA (either hooks matched by RequestURI() or )
 	c.OnDATA(tabHooks, func(e *colly.TABElement) {
 
 		// datasetGroup
-		var datasetGroup string = "default"
+		var datasetGroup string = "colly"
 
+		// outputFormat
 		outputFormat := collectorDatasetOutputFormat
 
 		// check if a hook is attached
@@ -325,42 +362,52 @@ func main() {
 
 		// Debug the dataset slice
 		if appDebug {
-			fmt.Println("Valid=", e.Dataset.Valid(), "Height=", e.Dataset.Height(), "Width=", e.Dataset.Width())
+			pp.Println("Dataset=", datasetGroup, "Format=", outputFormat, "Valid=", e.Dataset.Valid(), "Height=", e.Dataset.Height(), "Width=", e.Dataset.Width())
 			pp.Printf("Headers: \n %s \n\n", e.Dataset.Headers())
 		}
 
-		// checkHeader selection
-		var hdrSelect, hdrNotFound, hdrFound []string
+		// dataset pre-process
+		ds := e.Dataset
 
-		// Better url matching/pattern ?! ^^
-		switch datasetGroup {
-		case "starred":
-			fmt.Println("Starred dataset...")
-			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id", "updated_at"}
+		// dataset post-process
+		/*
+			// checkHeader selection
+			var hdrSelect, hdrNotFound, hdrFound []string
 
-		case "repos":
-			fmt.Println("Repositories dataset...")
-			hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"}
+			// datasetGroup (default: colly)
+			switch datasetGroup {
+			case "starred":
+				fmt.Println("Starred dataset...")
+				// hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "owner_login", "owner_id", "updated_at"}
 
-		case "users":
-			fmt.Println("Users dataset...")
-			hdrSelect = []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"}
+			case "repos":
+				fmt.Println("Repositories dataset...")
+				// hdrSelect = []string{"id", "full_name", "description", "language", "stargazers_count", "watchers_count", "owner_login", "owner_id"}
 
-		}
+			case "users":
+				fmt.Println("Users dataset...")
+				// hdrSelect = []string{"id", "login", "avatar_url", "blog", "created_at", "hireable", "following", "followers"}
 
-		hdrNotFound, hdrFound = e.Dataset.HeadersExists(hdrSelect...)
-		if len(hdrNotFound) > 0 {
-			pp.Printf("Headers - NotFound: \n %s \n\n", hdrNotFound)
-			pp.Printf("Headers - Found  \n %s \n\n", hdrFound)
-		}
+			}
 
-		ds, err := e.Dataset.Select(0, 0, hdrFound...)
-		if err != nil {
-			fmt.Println("error:", err)
-		}
+			// e.Hook.Headers
+			// Dataset.HeadersExists
+			hdrNotFound, hdrFound = e.Dataset.HeadersExists(hdrSelect...)
+			if len(hdrNotFound) > 0 {
+				pp.Printf("Headers - NotFound: \n %s \n\n", hdrNotFound)
+				pp.Printf("Headers - Found  \n %s \n\n", hdrFound)
+			}
 
-		for key, fn := range e.Hook.DynamicColumns {
-			ds.AppendDynamicColumn(key, fn)
+			// Dataset.Select
+			ds, err := e.Dataset.Select(0, 0, hdrFound...)
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+		*/
+
+		// Hook.DynamicColumns
+		for _, dc := range e.Hook.DynamicColumns {
+			ds.AppendDynamicColumn(dc.Header, dc.Func)
 		}
 
 		// Export dataset

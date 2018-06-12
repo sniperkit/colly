@@ -63,8 +63,9 @@ import (
 	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
 	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query/xml"
+
 	// debug - inspect
-	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
+	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 )
 
 var (
@@ -260,6 +261,14 @@ type Collector struct {
 	responseCallbacks []ResponseCallback
 	errorCallbacks    []ErrorCallback
 	scrapedCallbacks  []ScrapedCallback
+}
+
+func prettyPrinter(group string, parts ...interface{}) {
+	groupPrefix := fmt.Sprintf("DEBUG[%s], info=", group)
+	var debug []interface{}
+	debug = append(debug, groupPrefix)
+	debug = append(debug, parts...)
+	pp.Println(debug)
 }
 
 // Init initializes the Collector's private variables and sets default configuration for the Collector
@@ -1033,6 +1042,14 @@ func parseSliceQuery(query string, ds *tabular.Dataset) (lower int, upper int, e
 	return
 }
 
+func str2Int(input string) int {
+	output, err := strconv.Atoi(input)
+	if err != nil {
+		return 0
+	}
+	return output
+}
+
 func (c *Collector) handleOnDATA(resp *Response) error {
 
 	// check if valid encoding format to load
@@ -1054,6 +1071,7 @@ func (c *Collector) handleOnDATA(resp *Response) error {
 
 	var callbackHook *TABHook
 	if c.Hooks != nil {
+		// Check if we attach hook with a pattern match ?!
 		for key, hook := range c.Hooks.Registry {
 			if hook != nil {
 				if hook.PatternRegex != nil {
@@ -1071,9 +1089,6 @@ func (c *Collector) handleOnDATA(resp *Response) error {
 								),
 							)
 						}
-						// if hook.Printer.Format != "" {
-						//	format = hook.Printer.Format
-						// }
 						callbackHook = hook
 						break
 					} else {
@@ -1129,29 +1144,70 @@ func (c *Collector) handleOnDATA(resp *Response) error {
 	// Note: It requires better query parsing to extract custom columns and rows selection
 	for _, cc := range c.tabCallbacks {
 
-		/*
-			var lowerRow, upperRow int
-			var errQuery error
-			if strings.Contains(cc.Query, ":") {
-				lowerRow, upperRow, errQuery = parseSliceQuery(cc.Query, ds)
-				// slice tabular dataset
-				if errQuery == nil {
-					ds, err = ds.Slice(lowerRow, upperRow)
+		// SQL Query ?!
+
+		// Collector hook
+		if c.debugger != nil {
+			pp.Println("cc=", cc)
+		}
+
+		// checkHeader selection
+		var hdrNotFound, hdrFound []string // hdrSelect,
+
+		var slicerLowerRow, slicerUpperRow, slicerCapRow int
+		if callbackHook.Slicer != nil {
+
+			if len(callbackHook.Slicer.Headers) > 0 {
+				hdrNotFound, hdrFound = ds.HeadersExists(callbackHook.Slicer.Headers...)
+				if len(hdrNotFound) > 0 {
+					if c.debugger != nil {
+						pp.Printf("Headers - NotFound: \n %s \n\n", hdrNotFound)
+						pp.Printf("Headers - Found  \n %s \n\n", hdrFound)
+					}
 				}
 			}
-		*/
+
+			if callbackHook.Slicer.Rows != nil {
+				slicerRowParts := strings.Split(callbackHook.Slicer.Rows.Expr, ":")
+				switch {
+				case len(slicerRowParts) == 2:
+					slicerLowerRow = str2Int(slicerRowParts[0])
+					slicerUpperRow = str2Int(slicerRowParts[1])
+
+				case len(slicerRowParts) == 3:
+					slicerLowerRow = str2Int(slicerRowParts[0])
+					slicerUpperRow = str2Int(slicerRowParts[1])
+					slicerCapRow = str2Int(slicerRowParts[2])
+
+				}
+			}
+
+			if c.debugger != nil {
+				pp.Println("slicerLowerRow=", slicerLowerRow, "slicerUpperRow=", slicerUpperRow, "slicerCapRow=", slicerCapRow, "headers.Count", len(hdrFound))
+			}
+
+			// Dataset.Select
+			var err error
+			ds, err = ds.Select(slicerLowerRow, slicerUpperRow, hdrFound...) // if len(hdrFound) == 0, so we only slice rows
+			if err != nil {
+				fmt.Println("error, while trying to slice a sub-set of dataset, msg=", err)
+				return ErrNotValidTabularFormat // to change and create custom error
+			}
+
+			if c.debugger != nil {
+				pp.Println("ds.Width=", ds.Width(), "s.Height=", ds.Height(), "ds.Headers=", ds.Headers())
+			}
+		}
 
 		// pp.Println("callbackHook=", callbackHook)
 		e := NewTABElementFromTABSelect(resp, callbackHook, ds)
 		if c.debugger != nil {
-
 			msg := make(map[string]string, 2)
 			msg["Request.URL"] = resp.Request.URL.String()
 			if cc.Hook != nil {
 				msg["Hook"] = cc.Hook.Id
 			}
 			c.debugger.Event(createEvent("handleOnDATA.tab", resp.Request.ID, c.ID, msg))
-
 		}
 		cc.Function(e)
 	}

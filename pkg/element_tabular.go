@@ -34,6 +34,8 @@ type TABFormat = tabular.Format
 
 type TABSlicer = tabular.Slicer
 
+type TABRanger = tabular.Ranger
+
 type TABHook = tabular.Hook
 
 type TABDynamicColumn = tabular.DynamicColumn
@@ -56,6 +58,9 @@ type TABElement struct {
 	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
 	Name string
+
+	// Event is the name of the pre-processing task to trigger
+	Query string
 
 	// Dataset represents...
 	Dataset *tabular.Dataset
