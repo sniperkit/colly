@@ -114,6 +114,68 @@ func isEmptyStruct(object interface{}) bool {
 	return false
 }
 
+func (configor *Configor) Dump(config interface{}, nodes []string, formats []string, prefixPath string) error {
+	err := os.MkdirAll(prefixPath, 0700)
+	if err != nil {
+		return err
+	}
+	if config == nil {
+		config = &Config{}
+	}
+
+	// var inspectConfig *Debug
+	if InspectMode {
+		// configor.debug = &Debug{}
+		configor.debug = inspectStruct(config)
+	}
+
+	if nodes[0] == "all" {
+		nodes = []string{}
+	}
+
+	exportNodesCount := len(nodes)
+	for _, f := range formats {
+		switch {
+		case exportNodesCount == 0:
+			nodeName := "global"
+			data, err := encodeFile(config, nodeName, f)
+			if err != nil {
+				return err
+			}
+			filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
+			if err := writeFile(filePath, data); err != nil {
+				return err
+			}
+
+			if configor.Inspect {
+				nodeName := "inspect"
+				data, err := encodeFile(configor.debug, nodeName, f)
+				if err != nil {
+					return err
+				}
+				filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
+				if err := writeFile(filePath, data); err != nil {
+					return err
+				}
+			}
+
+		case exportNodesCount > 0:
+			for _, n := range nodes {
+				data, err := encodeFile(config, n, f)
+				if err != nil {
+					return err
+				}
+				filePath := getConfigDumpFilePath(prefixPath, n, f)
+				if err := writeFile(filePath, data); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+	//return errors.New("error occured while selecting the node to export")
+}
+
 // nodes := []string{"contacts", "db", "oauth2"}
 // configor.Dump(Config, "yaml", "contacts", "db", "oauth2")
 func Dump(config interface{}, nodes []string, formats []string, prefixPath string) error {
@@ -125,8 +187,10 @@ func Dump(config interface{}, nodes []string, formats []string, prefixPath strin
 		config = &Config{}
 	}
 
+	var inspectConfig *Debug
 	if InspectMode {
-		inspectConfig := inspectStruct(config)
+		inspectConfig = &Debug{}
+		inspectConfig = inspectStruct(config)
 	}
 
 	if nodes[0] == "all" {
@@ -149,7 +213,7 @@ func Dump(config interface{}, nodes []string, formats []string, prefixPath strin
 
 			if InspectMode {
 				nodeName := "inspect"
-				data, err := encodeFile(config, nodeName, f)
+				data, err := encodeFile(inspectConfig, nodeName, f)
 				if err != nil {
 					return err
 				}

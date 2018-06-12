@@ -12,6 +12,8 @@ type Configor struct {
 
 type Config struct {
 
+	// exported
+
 	// Environment specifies...
 	Environment string `json:"env" yaml:"env" toml:"env" xml:"env" ini:"env"`
 
@@ -56,6 +58,11 @@ type Config struct {
 	// json does not currently support this: https://github.com/golang/go/issues/15314
 	// This setting will be ignored for json files.
 	ErrorOnUnmatchedKeys bool `default:"true" json:"strict_mode" yaml:"strict_mode" toml:"strict_mode" xml:"strict_mode" ini:"strict_mode"`
+
+	// not exported
+
+	// debug
+	debug *Debug `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 
 	//-- End
 }

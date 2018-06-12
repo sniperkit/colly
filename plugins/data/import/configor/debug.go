@@ -4,6 +4,8 @@ import (
 	"github.com/sniperkit/structs"
 )
 
+var InspectMode bool = true
+
 type Debug struct {
 
 	// Inspect
