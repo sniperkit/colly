@@ -18,6 +18,7 @@ package colly
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hash/fnv"
@@ -44,7 +45,7 @@ import (
 	"google.golang.org/appengine/urlfetch"
 
 	// encoding - iterators
-	jsoniter "github.com/json-iterator/go"
+	// jsoniter "github.com/json-iterator/go"
 
 	// internal
 
@@ -76,13 +77,16 @@ var (
 	collectorMetrics *metric.Snapshot
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
+// var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // Collector provides the scraper instance for a scraping job
 type Collector struct {
 
 	// Collector's settings
 	cfg.Config
+
+	// Inspect stores...
+	Inspect *Debug `json:"inspect" yaml:"inspect" toml:"inspect" xml:"inspect" ini:"inspect" csv:"inspect"`
 
 	// Selectors (move to config pkg and use it as )
 	/*
@@ -233,10 +237,10 @@ type Collector struct {
 	//////////////////////////////////////////////////
 
 	// AllowExportConfigSchema
-	AllowExportConfigSchema bool `default:"true" json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	AllowExportConfigSchema bool `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// AllowExportConfigAll
-	AllowExportConfigAutoload bool `default:"false" json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	AllowExportConfigAutoload bool `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	//////////////////////////////////////////////////
 	///// Experimental stuff
@@ -898,9 +902,9 @@ func (c *Collector) SetRequestTimeout(timeout time.Duration) {
 }
 
 // DumpConfig allows to
-func (c *Collector) DumpConfig(formats, nodes []string, prefixPath string) error {
+func (c *Collector) DumpConfig(nodes, formats []string, prefixPath string) error {
 	c.lock.Lock()
-	err := cfg.Dump(c, formats, nodes, prefixPath)
+	err := dump(c, nodes, formats, prefixPath)
 	c.lock.Unlock()
 	return err
 }

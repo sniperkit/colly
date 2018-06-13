@@ -21,11 +21,11 @@ import (
 	To do asap:
 	- Tuesday:
 		- [x] Dump load config into different file formats
-		- [ ] Add ranger parser
-			- [ ] github.com/sniperkit/rangetype
 		- [ ] Add header link parser
 		- [ ] Add Plucker units
 		- [ ] Add yql for tab data query parser
+		- [ ] Add ranger parser
+			- [ ] github.com/sniperkit/rangetype
 		- [ ] Add TextQL/JsonQL
 			- [ ] github.com/davecb/jxpath
 			- [ ] github.com/bloglovin/obpath
@@ -385,14 +385,14 @@ func main() {
 	tabHooks.Registry[selectorStarred.ID()] = selectorStarred
 
 	// dumpFormats specifies...
-	dumpFormats := []string{"json", "toml"} // []string{"yaml", "json", "toml", "xml"}
+	dumpFormats := []string{"json", "yaml"}
 
 	// dumpNodes specifies the config sections to dump
 	// - if empty; only a merged config file will be written.
 	// - if set to `all`; a global and a sub-set of config files per components will be written.
 	// - if set to `collector,export,dataset`; only config files for the defined components will be written.
 	// - to check the sections available; use the config.Sections() method.
-	dumpNodes := []string{"all"}
+	dumpNodes := []string{"inspect", "collector", "app", "debug", "filters", "collection", "outputs", "hooks"}
 
 	// TABHook - header-link
 	// selectorHeaderLink.PatternRegexp("<([^>]+)>;\\s+rel=\"([^i\"]+)\"")
@@ -401,7 +401,7 @@ func main() {
 	c.SetHooks(tabHooks)
 
 	// DumpConfig
-	c.DumpConfig(dumpFormats, dumpNodes, "./shared/config/schema") // use string slices
+	c.DumpConfig(dumpNodes, dumpFormats, "./shared/config/schema") // use string slices
 
 	// OnDATA (either hooks matched by RequestURI() or )
 	c.OnDATA(tabHooks, func(e *colly.TABElement) {

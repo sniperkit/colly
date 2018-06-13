@@ -1,7 +1,7 @@
 package tablib
 
 import (
-	"github.com/ghodss/yaml"
+	"github.com/sniperkit/yaml"
 	// "github.com/go-yaml/yaml"
 )
 

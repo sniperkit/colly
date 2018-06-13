@@ -23,15 +23,19 @@ type Dataset struct {
 	////////////////////////////////////
 
 	// EmptyValue represents the string value to b output if a field cannot be formatted as a string during output of certain formats.
-	EmptyValue string
+	EmptyValue string `default:"" json:"empty_value" yaml:"empty_value" toml:"empty_value" xml:"emptyValue" ini:"emptyValue"`
+
 	// streamed allow the dataset to be streamed
-	Stream bool
+	Stream bool `default:"false" json:"stream" yaml:"stream" toml:"stream" xml:"stream" ini:"stream"`
+
 	// isPivotable enables the dataset to be imported with pivot package for more advanced operations on different type of store backends
-	Pivotable bool
+	Pivotable bool `default:"false" json:"pivotable" yaml:"pivotable" toml:"pivotable" xml:"pivotable" ini:"pivotable"`
+
 	// HeaderStyle specifies...
-	HeaderStyle KeyStyle
-	// errorOnUnmatchedKeys specifies
-	ErrorOnUnmatchedKeys bool
+	HeaderStyle KeyStyle `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
+
+	// ErrorOnUnmatchedKeys specifies
+	ErrorOnUnmatchedKeys bool `default:"false" json:"error_on_unmatched_keys" yaml:"error_on_unmatched_keys" toml:"error_on_unmatched_keys" xml:"errorOnUnmatchedKeys" ini:"errorOnUnmatchedKeys"`
 
 	////////////////////////////////////
 	//
@@ -40,43 +44,43 @@ type Dataset struct {
 	////////////////////////////////////
 
 	// compress sets...
-	compress *Compressable
+	compress *Compressable `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// Split dataset set the max number of rows before splitting an export or sharding the dataset.
-	splitAt int
+	splitAt int `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// OutputFile set the local path for exporting/writing the dataset content
-	outputFile string
+	outputFile string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// OutputFormats set all formats to export the dataset. It will rename the file extension automatically when processed
-	outputFormats []string
+	outputFormats []string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// scm sets...
-	scm *cmmap.ShardedConcurrentMap
+	scm *cmmap.ShardedConcurrentMap `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// scmm sets...
-	scmm *cmmap.ShardedConcurrentMultiMap
+	scmm *cmmap.ShardedConcurrentMultiMap `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// cmm sets...
-	cmm *cmmap.ConcurrentMultiMap
+	cmm *cmmap.ConcurrentMultiMap `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// cm sets...
-	cm *cmmap.ConcurrentMap
+	cm *cmmap.ConcurrentMap `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// headers sets...
-	headers []string
+	headers []string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// data sets...
-	data [][]interface{}
+	data [][]interface{} `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// tags sets...
-	tags [][]string
+	tags [][]string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// constraints sets...
-	constraints []ColumnConstraint
+	constraints []ColumnConstraint `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// rows sets...
-	rows int
+	rows int `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// cols sets...
-	cols int
+	cols int `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// isExport sets...
-	isExport bool
+	isExport bool `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// lock sets...
-	lock *sync.RWMutex
+	lock *sync.RWMutex `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// wg sets...
-	wg *sync.WaitGroup
+	wg *sync.WaitGroup `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// validationErrors stores an array of all validation errors that occured on this dataset
-	validationErrors []ValidationError
+	validationErrors []ValidationError `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	// errors stores internal process errors
-	errors []string
+	errors []string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 
 	//-- End
 }

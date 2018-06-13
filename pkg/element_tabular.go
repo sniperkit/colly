@@ -46,7 +46,7 @@ type TABWriter = tabular.Writer
 
 type TABHooks struct {
 	Enabled  bool                `default:"true" json:"enabled" yaml:"enabled" toml:"enabled" xml:"enabled" ini:"enabled" csv:"enabled"`
-	Registry map[string]*TABHook `json:"registry" yaml:"registry" toml:"registry" xml:"registry" ini:"registry" csv:"registry"`
+	Registry map[string]*TABHook `json:"registry" yaml:"registry" toml:"registry" xml:"-" ini:"registry" csv:"registry"`
 }
 
 // TABElement is the representation of a TAB tag.
@@ -64,9 +64,6 @@ type TABElement struct {
 
 	// Dataset represents...
 	Dataset *tabular.Dataset `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
-
-	// Datasets represents...
-	// Datasets []*tabular.Dataset
 
 	// Extractor
 	Extractor *Extractor `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`

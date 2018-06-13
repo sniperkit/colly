@@ -25,6 +25,9 @@ import (
 var (
 	// AutoLoad enables to load the default collector
 	AutoLoad = false
+
+	// InspectMode specifies...
+	InspectMode bool = false
 )
 
 // private vars

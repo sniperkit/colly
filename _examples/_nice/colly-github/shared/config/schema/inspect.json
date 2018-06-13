@@ -1,0 +1,263 @@
+{
+ 	"app": {
+ 		"ID": 0,
+ 		"Title": "",
+ 		"DebugMode": false,
+ 		"VerboseMode": false,
+ 		"DashboardMode": false,
+ 		"fault_tolerant": false
+ 	},
+ 	"debug": {
+ 		"config": {
+ 			"load_verbose": false,
+ 			"load_debug": false,
+ 			"load_error_on_unmatched_keys": false,
+ 			"export_enabled": false,
+ 			"export_sections": null,
+ 			"export_schema_only": false,
+ 			"export_prefix_path": "",
+ 			"export_formats": null
+ 		},
+ 		"tachymeter": {
+ 			"enabled": false,
+ 			"async": false,
+ 			"sample_size": 0,
+ 			"histogram_bins": 0,
+ 			"export": {
+ 				"enabled": false,
+ 				"backup_mode": false,
+ 				"backup_suffix": "",
+ 				"backup_prefix": "",
+ 				"overwrite": false,
+ 				"encoding": "",
+ 				"format": "",
+ 				"basename": "",
+ 				"split_at": 0,
+ 				"buffer_size": 0,
+ 				"prefix_path": "",
+ 				"export_dir": "",
+ 				"ensure_dir": false,
+ 				"ensure_dir_recursively": false
+ 			}
+ 		}
+ 	},
+ 	"collector": {
+ 		"root_url": "",
+ 		"user_agent": "",
+ 		"random_user_agent": false,
+ 		"max_depth": 0,
+ 		"allow_url_revisit": false,
+ 		"ignore_robots_txt": false,
+ 		"current_mode": "",
+ 		"modes": null,
+ 		"cache": null,
+ 		"transport": null,
+ 		"proxy": null,
+ 		"filters": null,
+ 		"collector": null
+ 	},
+ 	"filters": null,
+ 	"collection": null,
+ 	"outputs": {
+ 		"xdg_base_dir": "",
+ 		"base_dir": "",
+ 		"logs_dir": "",
+ 		"cache_dir": "",
+ 		"export_dir": "",
+ 		"force_dir": false,
+ 		"force_dir_recursive": false
+ 	},
+ 	"inspect": {
+ 		"inspect": {
+ 			"struct": {
+ 				"name": "",
+ 				"has_zero": false,
+ 				"is_zero": false,
+ 				"is_struct": false,
+ 				"details": {
+ 					"map": null,
+ 					"values": null,
+ 					"names": null
+ 				}
+ 			}
+ 		}
+ 	},
+ 	"hooks": {
+ 		"enabled": true,
+ 		"registry": {
+ 			"default": {
+ 				"identifier": "default",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": null,
+ 				"writer": {
+ 					"split": true,
+ 					"split_at": 2500,
+ 					"concurrent": true,
+ 					"prefix_path": "./shared/exports",
+ 					"basename": "colly",
+ 					"formats": [
+ 						"yaml",
+ 						"json",
+ 						"csv"
+ 					]
+ 				},
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			},
+ 			"repos": {
+ 				"identifier": "repos",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "/repos/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)$",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": {
+ 					"headers": [
+ 						"id",
+ 						"full_name",
+ 						"description",
+ 						"language",
+ 						"stargazers_count",
+ 						"watchers_count",
+ 						"owner_login",
+ 						"owner_id"
+ 					],
+ 					"columns": {
+ 						"expr": "[::]",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					},
+ 					"rows": {
+ 						"expr": "",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					}
+ 				},
+ 				"writer": null,
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			},
+ 			"starred": {
+ 				"identifier": "starred",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "/users/([a-zA-Z0-9\\-_]+)/starred",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": {
+ 					"headers": [
+ 						"id",
+ 						"full_name",
+ 						"description",
+ 						"language",
+ 						"owner_id",
+ 						"stargazers_count",
+ 						"updated_at"
+ 					],
+ 					"columns": {
+ 						"expr": "[::]",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					},
+ 					"rows": {
+ 						"expr": "",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					}
+ 				},
+ 				"writer": null,
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			},
+ 			"users": {
+ 				"identifier": "users",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "/users/([a-zA-Z0-9\\-_]+)$",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": {
+ 					"headers": [
+ 						"id",
+ 						"login",
+ 						"avatar_url",
+ 						"blog",
+ 						"created_at",
+ 						"hireable",
+ 						"following",
+ 						"followers"
+ 					],
+ 					"columns": {
+ 						"expr": "[::]",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					},
+ 					"rows": {
+ 						"expr": "",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					}
+ 				},
+ 				"writer": null,
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			}
+ 		}
+ 	},
+ 	"identifier": 1,
+ 	"title": "",
+ 	"user_agent": "colly - https://github.com/sniperkit/colly/pkg",
+ 	"random_user_agent": false,
+ 	"async": false,
+ 	"max_depth": 0,
+ 	"allow_url_revisit": false,
+ 	"ignore_robots_txt": true,
+ 	"allowed_domains": [
+ 		"api.github.com"
+ 	],
+ 	"disallowed_domains": null,
+ 	"max_body_size": 10485760,
+ 	"allow_tabular": true,
+ 	"useJsonParser": "json",
+ 	"parse_http_error_response": false,
+ 	"detect_charset": false,
+ 	"detect_mime_type": false,
+ 	"detect_tabular_data": false,
+ 	"xdg_base_dir": "",
+ 	"base_dir": "",
+ 	"logs_dir": "",
+ 	"cache_dir": "",
+ 	"export_dir": "",
+ 	"force_dir": false,
+ 	"force_dir_recursive": false,
+ 	"debug_mode": false,
+ 	"verbose_mode": false,
+ 	"fault_tolerant": false,
+ 	"dashboard_mode": false
+ }

@@ -187,10 +187,33 @@ func Dump(config interface{}, nodes []string, formats []string, prefixPath strin
 		config = &Config{}
 	}
 
+	fmt.Printf("InspectMode: %t, prefixPath=%s \n", InspectMode, prefixPath)
+
+	// TODO: create a method for dumping the config struct inspection
 	var inspectConfig *Debug
 	if InspectMode {
 		inspectConfig = &Debug{}
+
+		// Load(config, []string{})
 		inspectConfig = inspectStruct(config)
+		// prettyPrinter("inspect", inspectConfig)
+		for _, f := range formats {
+			nodeName := "inspect"
+			fmt.Println("format=", f, "nodeName=", nodeName)
+			data, err := encodeFile(inspectConfig, nodeName, f)
+			if err != nil {
+				fmt.Println("error, msg=", err)
+				os.Exit(1)
+				return err
+			}
+			filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
+			if err := writeFile(filePath, data); err != nil {
+				fmt.Println("error, msg=", err)
+				os.Exit(1)
+				return err
+			}
+		}
+
 	}
 
 	if nodes[0] == "all" {
@@ -201,36 +224,32 @@ func Dump(config interface{}, nodes []string, formats []string, prefixPath strin
 	for _, f := range formats {
 		switch {
 		case exportNodesCount == 0:
-			nodeName := "global"
+			nodeName := "config"
 			data, err := encodeFile(config, nodeName, f)
 			if err != nil {
+				fmt.Println("error, msg=", err)
+				os.Exit(1)
 				return err
 			}
 			filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
 			if err := writeFile(filePath, data); err != nil {
+				fmt.Println("error, msg=", err)
+				os.Exit(1)
 				return err
-			}
-
-			if InspectMode {
-				nodeName := "inspect"
-				data, err := encodeFile(inspectConfig, nodeName, f)
-				if err != nil {
-					return err
-				}
-				filePath := getConfigDumpFilePath(prefixPath, nodeName, f)
-				if err := writeFile(filePath, data); err != nil {
-					return err
-				}
 			}
 
 		case exportNodesCount > 0:
 			for _, n := range nodes {
 				data, err := encodeFile(config, n, f)
 				if err != nil {
+					fmt.Println("error, msg=", err)
+					os.Exit(1)
 					return err
 				}
 				filePath := getConfigDumpFilePath(prefixPath, n, f)
 				if err := writeFile(filePath, data); err != nil {
+					fmt.Println("error, msg=", err)
+					os.Exit(1)
 					return err
 				}
 			}

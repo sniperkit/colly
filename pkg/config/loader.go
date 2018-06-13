@@ -36,11 +36,15 @@ func NewFromFile(verbose, debug, esrrorOnUnmatchedKeys bool, files ...string) (*
 
 // Dump
 func (c *Config) Dump(formats, nodes []string, prefixPath string) error {
+	// TODO: fix the inspect mode flag
+	configor.InspectMode = false
 	return configor.Dump(c, nodes, formats, prefixPath)
 }
 
 // Dump
 func Dump(c interface{}, formats, nodes []string, prefixPath string) error {
+	// TODO: fix the inspect mode flag
+	configor.InspectMode = false
 	return configor.Dump(c, nodes, formats, prefixPath)
 }
 

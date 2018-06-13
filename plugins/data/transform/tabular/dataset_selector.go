@@ -17,7 +17,7 @@ type Hook struct {
 	HasSuffix      string                 `json:"has_suffixslug" yaml:"has_suffix" toml:"has_suffix" xml:"hasSuffix" ini:"hasSuffix"`
 	PatternURL     string                 `json:"pattern_url" yaml:"pattern_url" toml:"pattern_url" xml:"patternURL" ini:"patternURL"`
 	PatternRegex   *regexp.Regexp         `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
-	DynamicColumns map[string]DynamicFunc `json:"dynamic_columns" yaml:"dynamic_columns" toml:"dynamic_columns" xml:"dynamicColumns" ini:"dynamicColumns"`
+	DynamicColumns map[string]DynamicFunc `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-"`
 	Headers        []string               `required:"true" json:"headers" yaml:"headers" toml:"headers" xml:"headers" ini:"headers"`
 	Mixed          []interface{}          `json:"mixed" yaml:"mixed" toml:"mixed" xml:"mixed" ini:"mixed"`
 	DataQL         *DataQL                `json:"data_ql" yaml:"data_ql" toml:"data_ql" xml:"dataQL" ini:"dataQL"`
