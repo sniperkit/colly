@@ -7,7 +7,6 @@ import (
 
 /*
 	Notes:
-
 	- Export formats supported:
 	  - JSON (Sets + Books)
 	  - YAML (Sets + Books)
@@ -105,6 +104,8 @@ func NewTABElementFromTABSelect(resp *Response, hook *TABHook, ds *tabular.Datas
 	}
 	return t
 }
+
+// DATA: Slice, Select
 
 // Slice
 func (h *TABElement) Slice(pluckerConfig map[string]interface{}) string {

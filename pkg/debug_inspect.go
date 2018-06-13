@@ -1,15 +1,21 @@
 package colly
 
 import (
-	// "fmt"
-	// "reflect"
-
 	// "github.com/sniperkit/metaflector"
 	"github.com/sniperkit/structs"
 )
 
+/*
+	Dev-Only:
+	- Used to debug the collector and config struct
+	  - Check if to IsStruct(), IsZero(), HasZero()
+	  - Convert to Map(), Values(), Names(), Fields()
+*/
+
+// InspectMode specifies if the inspector is enabled by default
 var InspectMode bool = false
 
+// Debug represents...
 type Debug struct {
 
 	// Inspect
@@ -56,6 +62,7 @@ type Debug struct {
 	//-- End
 }
 
+// inspectStruct function extract from the collector object some infos
 func inspectStruct(c *Collector) *Debug {
 	debug := &Debug{}
 	return debug

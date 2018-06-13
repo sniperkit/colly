@@ -5,22 +5,24 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	// internal
-	model "github.com/sniperkit/colly/pkg/model"
 )
 
 // elements represents a map of all available interface per element type
 var elements = make(map[string]Extractor)
 
-// Extractor represents a content extraction iterator
+// Quick notes:
+// HTML: Attr, ChildText, ChildAttr, ChildAttrs, ForEach
+// JSON: Find, FindOne, Extract, Header, Headers, Keys, Values, Map,
+// XML: Attr, ChildText, ChildAttr, ChildAttrs
+// TAB: Slice, Select (Not ready yet...)
+// CSV:  (Not ready yet...)
+// HEADER: (Not ready yet...)
+
+// Element represents a content extraction iterator
 type Element interface {
 
 	// Info represents...
 	Info(ctx context.Context) (string, error)
-
-	// Event represents...
-	// Event(ctx context.Context, eventChan chan<- *model.EventResult, pattern string)
 
 	//-- End
 }
@@ -38,10 +40,10 @@ func Name(element Element) string {
 
 // ForName returns the service for a given name, or an error if it doesn't exist
 func ForName(name string) (Element, error) {
-	if element, ok := extractors[strings.ToLower(name)]; ok {
+	if element, ok := elements[strings.ToLower(name)]; ok {
 		return element, nil
 	}
-	return &ElementNotFound{}, fmt.Errorf("service '%s' not found", name)
+	return &ElementNotFound{}, fmt.Errorf("element type '%s' not found", name)
 }
 
 // NotFound is used when the specified service is not found

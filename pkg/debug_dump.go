@@ -9,8 +9,6 @@ import (
 	"reflect"
 	"strings"
 
-	// "github.com/sniperkit/structs"
-
 	// iterators
 	json "encoding/json"
 	xml "encoding/xml"
@@ -19,6 +17,12 @@ import (
 	yaml "github.com/sniperkit/yaml"
 )
 
+/*
+	Dev-Only:
+	- Used to dump the collector loaded configuration
+	- Export by section/attributes
+	- Export to formats: json, yaml, toml, xml and ini
+*/
 func inArray(e string, s []string) bool {
 	for _, a := range s {
 		fmt.Println("inArray.match=", e, "val", a)
@@ -38,8 +42,6 @@ func field(t interface{}, key string) reflect.Value {
 	return v
 }
 
-// nodes := []string{"contacts", "db", "oauth2"}
-// configor.Dump(Config, "yaml", "contacts", "db", "oauth2")
 func dump(c *Collector, nodes []string, formats []string, prefixPath string) error {
 	err := os.MkdirAll(prefixPath, 0700)
 	if err != nil {
@@ -49,8 +51,6 @@ func dump(c *Collector, nodes []string, formats []string, prefixPath string) err
 		c = &Collector{}
 	}
 
-	// fmt.Println("nodes=", nodes)
-	// fmt.Println("formats=", formats)
 	fmt.Printf("dump.InspectMode: %t \n", inArray("inspect", nodes))
 
 	// TODO: create a method for dumping the config struct inspection
@@ -81,26 +81,7 @@ func dump(c *Collector, nodes []string, formats []string, prefixPath string) err
 			}
 
 		case exportNodesCount > 0:
-
-			// s := reflect.ValueOf(c).Elem()
-			// v := reflect.ValueOf(c)
-
-			// s := structs.New(c)
-
 			for _, n := range nodes {
-
-				// fn := s.FieldByName(n).Interface()
-				// fmt.Println(fn)
-				// fn := v.FieldByName(n)
-
-				// fn := s.Field(n)
-
-				// Get the value for addr
-				// a := addrField.Value().(string)
-
-				// Or get all fields
-				// fn := s.Field(c).Fields()
-
 				data, err := encodeFile(c, f, n)
 				if err != nil {
 					fmt.Println("error, msg=", err)
@@ -120,8 +101,6 @@ func dump(c *Collector, nodes []string, formats []string, prefixPath string) err
 }
 
 func encodeFile(c interface{}, format, node string) ([]byte, error) {
-
-	// fmt.Println("node=", node, ", format=", format)
 	switch format {
 	case "ini":
 		err := ini.MapTo(c, "./colly.ini")
@@ -161,7 +140,6 @@ func encodeFile(c interface{}, format, node string) ([]byte, error) {
 	}
 
 	return nil, errors.New("Unkown format to export")
-
 }
 
 func getConfigDumpFilePath(prefixPath, format, nodeName string) string {

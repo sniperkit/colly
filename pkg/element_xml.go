@@ -77,6 +77,8 @@ func NewXMLElementFromXMLNode(resp *Response, s *xmlquery.Node) *XMLElement {
 	}
 }
 
+// XML: Attr, ChildText, ChildAttr, ChildAttrs
+
 // Attr returns the selected attribute of a HTMLElement or empty string
 // if no attribute found
 func (h *XMLElement) Attr(k string) string {

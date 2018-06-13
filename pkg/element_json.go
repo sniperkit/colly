@@ -82,6 +82,8 @@ func NewJSONElementFromJSONNode(resp *Response, s *jsonquery.Node) *JSONElement 
 	}
 }
 
+// JSON: Find, FindOne, Extract, Header, Headers, Keys, Values, Map,
+
 // Extract
 func (h *JSONElement) Extract(pluckerConfig map[string]interface{}) string {
 	return ""

@@ -76,6 +76,8 @@ func (h *HTMLElement) Attr(k string) string {
 	return ""
 }
 
+// HTML: Attr, ChildText, ChildAttr, ChildAttrs, ForEach
+
 // ChildText returns the concatenated and stripped text content of the matching
 // elements.
 func (h *HTMLElement) ChildText(goquerySelector string) string {
