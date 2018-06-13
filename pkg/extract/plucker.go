@@ -1,4 +1,4 @@
-package colly
+package extract
 
 import (
 	plucker "github.com/sniperkit/colly/plugins/data/extract/text/pluck"
