@@ -1,0 +1,11 @@
+{
+ 	"dirs": {
+ 		"xdg_base_dir": "",
+ 		"base_dir": "",
+ 		"logs_dir": "",
+ 		"cache_dir": "",
+ 		"export_dir": "",
+ 		"force_dir": false,
+ 		"force_dir_recursive": false
+ 	}
+ }

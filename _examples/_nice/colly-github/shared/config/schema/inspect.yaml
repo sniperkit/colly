@@ -1,0 +1,11 @@
+inspect:
+  inspect:
+    struct:
+      details:
+        map: null
+        names: null
+        values: null
+      has_zero: false
+      is_struct: false
+      is_zero: false
+      name: ""

@@ -1,0 +1,30 @@
+debug:
+  config:
+    export_enabled: false
+    export_formats: null
+    export_prefix_path: ""
+    export_schema_only: false
+    export_sections: null
+    load_debug: false
+    load_error_on_unmatched_keys: false
+    load_verbose: false
+  tachymeter:
+    async: false
+    enabled: false
+    export:
+      backup_mode: false
+      backup_prefix: ""
+      backup_suffix: ""
+      basename: ""
+      buffer_size: 0
+      enabled: false
+      encoding: ""
+      ensure_dir: false
+      ensure_dir_recursively: false
+      export_dir: ""
+      format: ""
+      overwrite: false
+      prefix_path: ""
+      split_at: 0
+    histogram_bins: 0
+    sample_size: 0

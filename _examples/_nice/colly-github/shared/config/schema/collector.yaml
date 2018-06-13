@@ -1,0 +1,14 @@
+collector:
+  allow_url_revisit: false
+  cache: null
+  collector: null
+  current_mode: ""
+  filters: null
+  ignore_robots_txt: false
+  max_depth: 0
+  modes: null
+  proxy: null
+  random_user_agent: false
+  root_url: ""
+  transport: null
+  user_agent: ""

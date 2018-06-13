@@ -1,0 +1,36 @@
+{
+ 	"debug": {
+ 		"config": {
+ 			"load_verbose": false,
+ 			"load_debug": false,
+ 			"load_error_on_unmatched_keys": false,
+ 			"export_enabled": false,
+ 			"export_sections": null,
+ 			"export_schema_only": false,
+ 			"export_prefix_path": "",
+ 			"export_formats": null
+ 		},
+ 		"tachymeter": {
+ 			"enabled": false,
+ 			"async": false,
+ 			"sample_size": 0,
+ 			"histogram_bins": 0,
+ 			"export": {
+ 				"enabled": false,
+ 				"backup_mode": false,
+ 				"backup_suffix": "",
+ 				"backup_prefix": "",
+ 				"overwrite": false,
+ 				"encoding": "",
+ 				"format": "",
+ 				"basename": "",
+ 				"split_at": 0,
+ 				"buffer_size": 0,
+ 				"prefix_path": "",
+ 				"export_dir": "",
+ 				"ensure_dir": false,
+ 				"ensure_dir_recursively": false
+ 			}
+ 		}
+ 	}
+ }

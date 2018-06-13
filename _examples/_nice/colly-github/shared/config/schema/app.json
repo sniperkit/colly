@@ -1,0 +1,10 @@
+{
+ 	"app": {
+ 		"ID": 0,
+ 		"Title": "",
+ 		"DebugMode": false,
+ 		"VerboseMode": false,
+ 		"DashboardMode": false,
+ 		"fault_tolerant": false
+ 	}
+ }

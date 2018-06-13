@@ -39,6 +39,29 @@ func inArray(e string, s []string) bool {
 	return false
 }
 
+// ucFirst function
+func ucFirst(str string) string {
+	for i, v := range str {
+		return string(unicode.ToUpper(v)) + str[i+1:]
+	}
+	return ""
+}
+
+// properTitle function
+func properTitle(input string) string {
+	words := strings.Fields(input)
+	smallwords := " a an on the to "
+	for index, word := range words {
+		if strings.Contains(smallwords, " "+word+" ") {
+			words[index] = word
+		} else {
+			words[index] = strings.Title(word)
+		}
+	}
+	return strings.Join(words, " ")
+}
+
+// field function
 func field(t interface{}, key string) reflect.Value {
 	strs := strings.Split(key, ".")
 	v := reflect.ValueOf(t)
@@ -48,6 +71,7 @@ func field(t interface{}, key string) reflect.Value {
 	return v
 }
 
+// dump function
 func dump(c *Collector, nodes []string, formats []string, prefixPath string) error {
 	err := os.MkdirAll(prefixPath, 0700)
 	if err != nil {
@@ -119,13 +143,7 @@ func dump(c *Collector, nodes []string, formats []string, prefixPath string) err
 	return nil
 }
 
-func ucFirst(str string) string {
-	for i, v := range str {
-		return string(unicode.ToUpper(v)) + str[i+1:]
-	}
-	return ""
-}
-
+// encodeFile function
 func encodeFile(c interface{}, format, node string) ([]byte, error) {
 	switch format {
 	case "ini":

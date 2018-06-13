@@ -1,0 +1,17 @@
+{
+ 	"inspect": {
+ 		"inspect": {
+ 			"struct": {
+ 				"name": "",
+ 				"has_zero": false,
+ 				"is_zero": false,
+ 				"is_struct": false,
+ 				"details": {
+ 					"map": null,
+ 					"values": null,
+ 					"names": null
+ 				}
+ 			}
+ 		}
+ 	}
+ }

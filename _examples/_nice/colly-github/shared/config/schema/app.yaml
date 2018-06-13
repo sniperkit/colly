@@ -1,0 +1,7 @@
+app:
+  DashboardMode: false
+  DebugMode: false
+  ID: 0
+  Title: ""
+  VerboseMode: false
+  fault_tolerant: false

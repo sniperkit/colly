@@ -1,0 +1,124 @@
+hooks:
+  enabled: true
+  registry:
+    default:
+      data_ql: null
+      has_prefix: ""
+      has_suffixslug: ""
+      headers: null
+      identifier: default
+      mixed: null
+      pattern_url: ""
+      printer:
+        colorize: false
+        format: tabular-grid
+      slicer: null
+      slug: ""
+      writer:
+        basename: colly
+        concurrent: true
+        formats:
+        - yaml
+        - json
+        - csv
+        prefix_path: ./shared/exports
+        split: true
+        split_at: 2500
+    repos:
+      data_ql: null
+      has_prefix: ""
+      has_suffixslug: ""
+      headers: null
+      identifier: repos
+      mixed: null
+      pattern_url: /repos/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)$
+      printer:
+        colorize: false
+        format: tabular-grid
+      slicer:
+        columns:
+          cap: 0
+          expr: '[::]'
+          lower: 0
+          upper: 0
+        headers:
+        - id
+        - full_name
+        - description
+        - language
+        - stargazers_count
+        - watchers_count
+        - owner_login
+        - owner_id
+        rows:
+          cap: 0
+          expr: ""
+          lower: 0
+          upper: 0
+      slug: ""
+      writer: null
+    starred:
+      data_ql: null
+      has_prefix: ""
+      has_suffixslug: ""
+      headers: null
+      identifier: starred
+      mixed: null
+      pattern_url: /users/([a-zA-Z0-9\-_]+)/starred
+      printer:
+        colorize: false
+        format: tabular-grid
+      slicer:
+        columns:
+          cap: 0
+          expr: '[::]'
+          lower: 0
+          upper: 0
+        headers:
+        - id
+        - full_name
+        - description
+        - language
+        - owner_id
+        - stargazers_count
+        - updated_at
+        rows:
+          cap: 0
+          expr: ""
+          lower: 0
+          upper: 0
+      slug: ""
+      writer: null
+    users:
+      data_ql: null
+      has_prefix: ""
+      has_suffixslug: ""
+      headers: null
+      identifier: users
+      mixed: null
+      pattern_url: /users/([a-zA-Z0-9\-_]+)$
+      printer:
+        colorize: false
+        format: tabular-grid
+      slicer:
+        columns:
+          cap: 0
+          expr: '[::]'
+          lower: 0
+          upper: 0
+        headers:
+        - id
+        - login
+        - avatar_url
+        - blog
+        - created_at
+        - hireable
+        - following
+        - followers
+        rows:
+          cap: 0
+          expr: ""
+          lower: 0
+          upper: 0
+      slug: ""
+      writer: null

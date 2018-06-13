@@ -1,0 +1,8 @@
+dirs:
+  base_dir: ""
+  cache_dir: ""
+  export_dir: ""
+  force_dir: false
+  force_dir_recursive: false
+  logs_dir: ""
+  xdg_base_dir: ""

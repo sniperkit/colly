@@ -1,0 +1,17 @@
+{
+ 	"collector": {
+ 		"root_url": "",
+ 		"user_agent": "",
+ 		"random_user_agent": false,
+ 		"max_depth": 0,
+ 		"allow_url_revisit": false,
+ 		"ignore_robots_txt": false,
+ 		"current_mode": "",
+ 		"modes": null,
+ 		"cache": null,
+ 		"transport": null,
+ 		"proxy": null,
+ 		"filters": null,
+ 		"collector": null
+ 	}
+ }

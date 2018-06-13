@@ -1,0 +1,150 @@
+{
+ 	"hooks": {
+ 		"enabled": true,
+ 		"registry": {
+ 			"default": {
+ 				"identifier": "default",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": null,
+ 				"writer": {
+ 					"split": true,
+ 					"split_at": 2500,
+ 					"concurrent": true,
+ 					"prefix_path": "./shared/exports",
+ 					"basename": "colly",
+ 					"formats": [
+ 						"yaml",
+ 						"json",
+ 						"csv"
+ 					]
+ 				},
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			},
+ 			"repos": {
+ 				"identifier": "repos",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "/repos/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)$",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": {
+ 					"headers": [
+ 						"id",
+ 						"full_name",
+ 						"description",
+ 						"language",
+ 						"stargazers_count",
+ 						"watchers_count",
+ 						"owner_login",
+ 						"owner_id"
+ 					],
+ 					"columns": {
+ 						"expr": "[::]",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					},
+ 					"rows": {
+ 						"expr": "",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					}
+ 				},
+ 				"writer": null,
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			},
+ 			"starred": {
+ 				"identifier": "starred",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "/users/([a-zA-Z0-9\\-_]+)/starred",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": {
+ 					"headers": [
+ 						"id",
+ 						"full_name",
+ 						"description",
+ 						"language",
+ 						"owner_id",
+ 						"stargazers_count",
+ 						"updated_at"
+ 					],
+ 					"columns": {
+ 						"expr": "[::]",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					},
+ 					"rows": {
+ 						"expr": "",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					}
+ 				},
+ 				"writer": null,
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			},
+ 			"users": {
+ 				"identifier": "users",
+ 				"slug": "",
+ 				"has_prefix": "",
+ 				"has_suffixslug": "",
+ 				"pattern_url": "/users/([a-zA-Z0-9\\-_]+)$",
+ 				"headers": null,
+ 				"mixed": null,
+ 				"data_ql": null,
+ 				"slicer": {
+ 					"headers": [
+ 						"id",
+ 						"login",
+ 						"avatar_url",
+ 						"blog",
+ 						"created_at",
+ 						"hireable",
+ 						"following",
+ 						"followers"
+ 					],
+ 					"columns": {
+ 						"expr": "[::]",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					},
+ 					"rows": {
+ 						"expr": "",
+ 						"lower": 0,
+ 						"upper": 0,
+ 						"cap": 0
+ 					}
+ 				},
+ 				"writer": null,
+ 				"printer": {
+ 					"colorize": false,
+ 					"format": "tabular-grid"
+ 				}
+ 			}
+ 		}
+ 	}
+ }
