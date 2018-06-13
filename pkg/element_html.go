@@ -28,8 +28,10 @@ type HTMLElement struct {
 	Name string
 	// Text is...
 	Text string
+
 	// Extractor
-	Extractor *Extractor
+	// Extractor *Extractor
+
 	// Request is the request object of the element's HTML document
 	Request *Request
 	// Response is the Response object of the element's HTML document

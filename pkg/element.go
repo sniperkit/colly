@@ -2,13 +2,19 @@ package colly
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 )
 
+/*
+	Experimental:
+	- Create a registry of element to parse and chain with processing callbacks
+*/
+
 // elements represents a map of all available interface per element type
-var elements = make(map[string]Extractor)
+var elements = make(map[string]Element)
 
 // Quick notes:
 // HTML: Attr, ChildText, ChildAttr, ChildAttrs, ForEach

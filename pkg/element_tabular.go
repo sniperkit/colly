@@ -65,7 +65,7 @@ type TABElement struct {
 	Dataset *tabular.Dataset `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Extractor
-	Extractor *Extractor `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	// Extractor *Extractor `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// Text
 	Text string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`

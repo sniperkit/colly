@@ -57,7 +57,7 @@ type JSONElement struct {
 	Response *Response
 
 	// Extractor
-	Extractor *Extractor
+	// Extractor *Extractor
 
 	// DOM is the DOM object of the page. DOM is relative
 	// to the current JSONElement and is either a html.Node or jsonquery.Node

@@ -8,6 +8,12 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"unicode"
+
+	"github.com/oleiade/reflections"
+
+	// debug - inspect
+	// pp "github.com/sniperkit/colly/plugins/app/debug/pp"
 
 	// iterators
 	json "encoding/json"
@@ -82,7 +88,20 @@ func dump(c *Collector, nodes []string, formats []string, prefixPath string) err
 
 		case exportNodesCount > 0:
 			for _, n := range nodes {
-				data, err := encodeFile(c, f, n)
+
+				// encodeFile
+				// fieldsToExtract := []string{"FirstField", "ThirdField"}
+				value, err := reflections.GetField(c, ucFirst(n))
+				if err != nil {
+					fmt.Println("error, msg=", err)
+					os.Exit(1)
+				}
+
+				// pp.Println(value)
+				configNode := make(map[string]interface{}, 1)
+				configNode[strings.ToLower(n)] = value
+
+				data, err := encodeFile(configNode, f, n)
 				if err != nil {
 					fmt.Println("error, msg=", err)
 					os.Exit(1)
@@ -98,6 +117,13 @@ func dump(c *Collector, nodes []string, formats []string, prefixPath string) err
 		}
 	}
 	return nil
+}
+
+func ucFirst(str string) string {
+	for i, v := range str {
+		return string(unicode.ToUpper(v)) + str[i+1:]
+	}
+	return ""
 }
 
 func encodeFile(c interface{}, format, node string) ([]byte, error) {

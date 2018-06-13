@@ -392,13 +392,31 @@ func main() {
 	// - if set to `all`; a global and a sub-set of config files per components will be written.
 	// - if set to `collector,export,dataset`; only config files for the defined components will be written.
 	// - to check the sections available; use the config.Sections() method.
-	dumpNodes := []string{"inspect", "collector", "app", "debug", "filters", "collection", "outputs", "hooks"}
+	dumpNodes := []string{"inspect", "collector", "app", "debug", "filters", "collection", "hooks", "dirs"}
 
 	// TABHook - header-link
 	// selectorHeaderLink.PatternRegexp("<([^>]+)>;\\s+rel=\"([^i\"]+)\"")
 
 	// SetHooks
 	c.SetHooks(tabHooks)
+
+	// pluckers defines
+	pluckers := []*colly.Pluck{
+		{
+			Activators:  []string{"a", "b"},
+			Deactivator: "f",
+		},
+		{
+			Activators:  []string{"a", "c", "d"},
+			Deactivator: "z",
+		},
+	}
+
+	// SetPlucks
+	c.SetPluckers(pluckers)
+
+	// SetExtractors (not implemented yet...)
+	// c.SetExtractors(extractors)
 
 	// DumpConfig
 	c.DumpConfig(dumpNodes, dumpFormats, "./shared/config/schema") // use string slices
@@ -576,6 +594,15 @@ func main() {
 		if appDebug {
 			fmt.Printf("Values found: %s\n", e.Text)
 		}
+	})
+
+	// OnResponse
+	c.OnResponse(func(r *colly.Response) {
+
+		// Pluck content ?!
+
+		// Parse headers ?!
+
 	})
 
 	// Before making a request print "Visiting ..."

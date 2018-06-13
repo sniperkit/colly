@@ -31,12 +31,19 @@ type XMLElement struct {
 	////// exported //////////////////////////////////////////////////
 	// Name is the name of the tag
 	Name string
+
 	// Text stores...
 	Text string
+
 	// Request is the request object of the element's HTML document
 	Request *Request
+
 	// Response is the Response object of the element's HTML document
 	Response *Response
+
+	// Extractor points to...
+	// Extractor *Extractor
+
 	// DOM is the DOM object of the page. DOM is relative
 	// to the current XMLElement and is either a html.Node or xmlquery.Node
 	// based on how the XMLElement was created.
