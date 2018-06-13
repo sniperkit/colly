@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# This hook is invoked after 'git commit' succeeds.
+
+"$(dirname "${0}")/scripts/create-tags-file" &

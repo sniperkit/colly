@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Attempts to append the JIRA ticket number generated from the branch to the
+# end of the commit message.
+
+
+FILEPATH="${1}"
+
+# Returns empty string on failure
+get_ticket_from_branch() {
+  local branch="${1}"
+  local branch_pattern='^([[:lower:]]{1,30}/)?([[:upper:]]{2,}-[[:digit:]]+)(-[[:alnum:]]+)+$'
+  local ticket_dest='\2'
+  printf '%s' "${branch}" |\
+    sed --regexp-extended --quiet "s:${branch_pattern}:${ticket_dest}:p"
+}
+
+insert_ticket() {
+  local filepath="${1}"
+  local branch
+  local ticket
+
+  branch="$(git symbolic-ref --short HEAD)"
+  ticket="$(get_ticket_from_branch "${branch}")"
+  if [ -n "${ticket}" ]; then
+    local pattern='# Please enter the commit message for your changes.'
+    local message="References ${ticket}"
+    sed --in-place "/${pattern}/i${message}\n" "${filepath}"
+  fi
+}
+
+insert_ticket "${FILEPATH}"
