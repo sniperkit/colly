@@ -1,7 +1,7 @@
 package colly
 
 import (
-	rss "github.com/sniperkit/gofeed/pkg"
+	rssquery "github.com/sniperkit/gofeed/pkg"
 )
 
 // RSSElement is the representation of a RSS tag.
@@ -27,7 +27,7 @@ type RSSElement struct {
 	// Extractor *Extractor
 
 	// DOM is the DOM object of the page. DOM is relative
-	// to the current RSSElement and is either a html.Node or rss.Node
+	// to the current RSSElement and is either a html.Node or rssquery.Node
 	// based on how the RSSElement was created.
 	DOM interface{}
 
@@ -56,8 +56,8 @@ type rssCallbackContainer struct {
 	//-- End
 }
 
-// NewRSSElementFromRSSNode creates a RSSElement from a rss.Feed.
-func NewRSSElementFromRSSNode(resp *Response, fp *rss.Feed) *RSSElement {
+// NewRSSElementFromRSSFeed creates a RSSElement from a rssquery.Feed.
+func NewRSSElementFromRSSFeed(resp *Response, fp *rssquery.Feed) *RSSElement {
 
 	return &RSSElement{
 		Request:  resp.Request,

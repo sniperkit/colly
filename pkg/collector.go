@@ -66,6 +66,7 @@ import (
 	htmlquery "github.com/sniperkit/colly/plugins/data/extract/query/html"
 	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 	xmlquery "github.com/sniperkit/colly/plugins/data/extract/query/xml"
+	rssquery "github.com/sniperkit/gofeed/pkg"
 
 	// debug - inspect
 	pp "github.com/sniperkit/colly/plugins/app/debug/pp"
@@ -1469,34 +1470,61 @@ func (c *Collector) handleOnRSS(resp *Response) error {
 		return nil
 	}
 
-	fp := gofeed.NewParser()
+	fp := rssquery.NewParser()
 	doc, err := fp.Parse(bytes.NewBuffer(resp.Body))
 	if err != nil {
 		return err
 	}
 
+	feed := map[string]interface{}{
+		"items":       doc.Items,
+		"author":      doc.Author,
+		"categories":  doc.Categories,
+		"custom":      doc.Custom,
+		"copyright":   doc.Copyright,
+		"description": doc.Description,
+		"type":        doc.FeedType,
+		"language":    doc.Language,
+		"title":       doc.Title,
+		"published":   doc.Published,
+		"updated":     doc.Updated,
+	}
+
+	if doc.Image != nil {
+		feed["img_url"] = doc.Image.URL
+	}
+
+	if c.debugger != nil {
+		c.debugger.Event(createEvent("rss", resp.Request.ID, c.ID, map[string]string{
+			"type":     doc.FeedType,
+			"language": doc.Language,
+			"url":      resp.Request.URL.String(),
+		}))
+	}
+
 	/*
 		*(v) = map[string]interface{}{
-			"items":       feed.Items,
-			"author":      feed.Author,
-			"categories":  feed.Categories,
-			"custom":      feed.Custom,
-			"copyright":   feed.Copyright,
-			"description": feed.Description,
-			"type":        feed.FeedType,
-			"language":    feed.Language,
-			"title":       feed.Title,
-			"published":   feed.Published,
-			"updated":     feed.Updated,
+			"items":       doc.Items,
+			"author":      doc.Author,
+			"categories":  doc.Categories,
+			"custom":      doc.Custom,
+			"copyright":   doc.Copyright,
+			"description": doc.Description,
+			"type":        doc.FeedType,
+			"language":    doc.Language,
+			"title":       doc.Title,
+			"published":   doc.Published,
+			"updated":     doc.Updated,
 		}
 		if feed.Image != nil {
 			(*v)["img_url"] = feed.Image.URL
 		}
 	*/
 
-	for _, cc := range c.rssCallbacks {
-		rssquery.FindEach(doc, cc.Query, func(i int, n *xmlquery.Node) {
-			e := NewRSSLElementFromRSSNode(resp, n)
+	// for _, cc := range c.rssCallbacks {
+	/*
+		rssquery.FindEach(doc, cc.Query, func(i int, n *rssquery.Feed) {
+			e := NewRSSElementFromRSSFeed(resp, n)
 			if c.debugger != nil {
 				c.debugger.Event(createEvent("rss", resp.Request.ID, c.ID, map[string]string{
 					"attrs": cc.Attr,
@@ -1505,7 +1533,8 @@ func (c *Collector) handleOnRSS(resp *Response) error {
 			}
 			cc.Function(e)
 		})
-	}
+	*/
+	// }
 
 	return nil
 }

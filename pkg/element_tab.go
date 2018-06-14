@@ -27,9 +27,6 @@ const (
 	// TAB_XLSX is the key for `XLSX` encoding. (Microsoft Excel)
 	TAB_XLSX FORMAT_TAB = "xlsx"
 
-	// TAB_TSV is the key for `TSV` encoding (tab separated columns).
-	TAB_TSV FORMAT_TAB = "tsv"
-
 	// TAB_ASCII is the key for `ASCII` encoding
 	TAB_ASCII FORMAT_TAB = "ascii"
 
@@ -47,13 +44,13 @@ const (
 
 var (
 
-	// TAB_FORMATS_IMPORT is the slice strings indexing all formats supported for tabular data import.
-	TAB_FORMATS_IMPORT = []string{TAB_JSON, TAB_YAML, TAB_XML, TAB_CSV, TAB_TSV}
+// TAB_FORMATS_IMPORT is the slice strings indexing all formats supported for tabular data import.
+// TAB_FORMATS_IMPORT = []string{TAB_JSON, TAB_YAML, TAB_XML, TAB_CSV, TAB_TSV}
 
-	// TAB_FORMATS_EXPORT is the slice strings indexing all export formats supported for tabular data.
-	TAB_FORMATS_EXPORT = []string{TAB_JSON, TAB_YAML, TAB_XML, TAB_CSV, TAB_TSV, TAB_XLSX, TAB_MD, TAB_MYSQL, TAB_POSTGRES}
+// TAB_FORMATS_EXPORT is the slice strings indexing all export formats supported for tabular data.
+// TAB_FORMATS_EXPORT = []string{TAB_JSON, TAB_YAML, TAB_XML, TAB_CSV, TAB_TSV, TAB_XLSX, TAB_MD, TAB_MYSQL, TAB_POSTGRES}
 
-	//-- End
+//-- End
 )
 
 // Create aliases with struct defined in tabular pkg

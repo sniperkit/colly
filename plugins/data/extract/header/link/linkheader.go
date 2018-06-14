@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	// "sync"
 )
 
 // LINK_INDEX defines...
@@ -93,7 +94,7 @@ func (l Links) ToString() string {
 	return strings.Join(strs, ", ")
 }
 
-func (l links) getLink(key string) string {
+func (l Links) getLink(key string) string {
 	for _, link := range l {
 		key := strings.ToLower(link.Rel)
 		switch key {
@@ -108,17 +109,17 @@ func (l links) getLink(key string) string {
 
 // String returns the string representation of the next link
 func (l Links) Last() string {
-	return getLink("last")
+	return l.getLink("last")
 }
 
 // String returns the string representation of the next link
 func (l Links) Next() string {
-	return getLink("next")
+	return l.getLink("next")
 }
 
 // ToMap returns the map[string]string representation of multiple links
 func (l Links) ToMap() map[string]string {
-	output := make(map[string]interface{}, len(l))
+	output := make(map[string]string, len(l))
 	for _, link := range l {
 		key := link.Rel
 		output[key] = link.String()

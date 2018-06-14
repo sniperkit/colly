@@ -4,78 +4,74 @@ import (
 	linkheader "github.com/sniperkit/colly/plugins/data/extract/header/link"
 )
 
-// eg. `<https://api.github.com/user/58276/repos?page=2>; rel="next", <https://api.github.com/user/58276/repos?page=2>; rel="last"`
+/*
+	Input example:
+	- `<https://api.github.com/user/58276/repos?page=2>; rel="next", <https://api.github.com/user/58276/repos?page=2>; rel="last"`
+*/
 
-func (c *Collector) linkHeaders(input interface{}) []string {
-	return nil
-}
-
-func (c *Collector) linkHeaderFromString(header string) (output []string){
-	// header := "<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"," +
-	// 	"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\""
+func (c *Collector) linkHeaderFromString(header, reqUrl string, reqId uint32) map[string]string {
 	links := linkheader.Parse(header)
-
+	output := make(map[string]string, len(links))
 	for _, link := range links {
-		fmt.Printf("URL: %s; Rel: %s\n", link.URL, link.Rel)
+		if c.debugger != nil {
+			c.debugger.Event(createEvent("header-link", reqId, c.ID, map[string]string{
+				"link": link.String(),
+				"url":  reqUrl,
+			}))
+		}
+		output[link.Rel] = link.URL
 	}
-
-	// Output:
-	// URL: https://api.github.com/user/58276/repos?page=2; Rel: next
-	// URL: https://api.github.com/user/58276/repos?page=2; Rel: last
+	return output
 }
 
-func (c *Collector) linkHeaderFromSlice() {
-	headers := []string{
-		"<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"",
-		"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\"",
-	}
+func (c *Collector) linkHeaderFromSlice(headers []string, reqUrl string, reqId uint32) map[string]string {
 	links := linkheader.ParseMultiple(headers)
-
+	output := make(map[string]string, len(links))
 	for _, link := range links {
-		fmt.Printf("URL: %s; Rel: %s\n", link.URL, link.Rel)
+		if c.debugger != nil {
+			c.debugger.Event(createEvent("header-link", reqId, c.ID, map[string]string{
+				"link": link.String(),
+				"url":  reqUrl,
+			}))
+		}
+		output[link.Rel] = link.URL
 	}
-
-	// Output:
-	// URL: https://api.github.com/user/58276/repos?page=2; Rel: next
-	// URL: https://api.github.com/user/58276/repos?page=2; Rel: last
+	return output
 }
 
-func (c *Collector) linkHeaderFilterByRel() {
-func ExampleLinks_FilterByRel() {
-	header := "<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"," +
-		"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\""
+func (c *Collector) linkHeaderFilterByRel(header, reqUrl string, reqId uint32) map[string]string {
 	links := linkheader.Parse(header)
-
+	output := make(map[string]string, len(links))
 	for _, link := range links.FilterByRel("last") {
-		fmt.Printf("URL: %s; Rel: %s\n", link.URL, link.Rel)
+		if c.debugger != nil {
+			c.debugger.Event(createEvent("header-link", reqId, c.ID, map[string]string{
+				"link": link.String(),
+				"url":  reqUrl,
+			}))
+		}
+		output[link.Rel] = link.URL
 	}
-
-	// Output:
-	// URL: https://api.github.com/user/58276/repos?page=2; Rel: last
-
+	return output
 }
 
-func ExampleLink_String() {
-	link := linkheader.Link{
-		URL: "http://example.com/page/2",
-		Rel: "next",
+func (c *Collector) linkHeaderString(link *linkheader.Link, reqUrl string, reqId uint32) string {
+	if c.debugger != nil {
+		c.debugger.Event(createEvent("header-link", reqId, c.ID, map[string]string{
+			"link": link.String(),
+			"url":  reqUrl,
+		}))
 	}
-
-	fmt.Printf("Link: %s\n", link.String())
-
-	// Output:
-	// Link: <http://example.com/page/2>; rel="next"
+	return link.String()
 }
 
-func ExampleLinks_String() {
-
-	links := linkheader.Links{
-		{URL: "http://example.com/page/3", Rel: "next"},
-		{URL: "http://example.com/page/1", Rel: "last"},
+/*
+func (c *Collector) linkHeaderJoin(links *linkheader.Links, reqUrl string, reqId uint32) string {
+	if c.debugger != nil {
+		c.debugger.Event(createEvent("header-link", reqId, c.ID, map[string]string{
+			"links": links.String(),
+			"url":   reqUrl,
+		}))
 	}
-
-	fmt.Printf("Link: %s\n", links.String())
-
-	// Output:
-	// Link: <http://example.com/page/3>; rel="next", <http://example.com/page/1>; rel="last"
+	return links.String()
 }
+*/
