@@ -266,6 +266,7 @@ type Collector struct {
 
 	// content callbacks
 	htmlCallbacks []*htmlCallbackContainer `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	rssCallbacks  []*rssCallbackContainer  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 	xmlCallbacks  []*xmlCallbackContainer  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 	jsonCallbacks []*jsonCallbackContainer `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 	tabCallbacks  []*tabCallbackContainer  `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
@@ -489,22 +490,26 @@ func setRequestBody(req *http.Request, body io.Reader) {
 	}
 }
 
+// fetch method processes
+// Refs:
+// - https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
 func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ctx *Context, hdr http.Header, req *http.Request) error {
 	defer c.wg.Done()
+
 	if ctx == nil {
 		ctx = NewContext()
 	}
+
 	request := &Request{
+		collector: c,
+		ID:        atomic.AddUint32(&c.requestCount, 1),
 		URL:       req.URL,
 		Headers:   &req.Header,
 		Ctx:       ctx,
 		Depth:     depth,
 		Method:    method,
 		Body:      requestData,
-		collector: c,
-		ID:        atomic.AddUint32(&c.requestCount, 1),
 	}
-
 	c.handleOnRequest(request)
 
 	if request.abort {
@@ -524,14 +529,15 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 	if err := c.handleOnError(response, err, request, ctx); err != nil {
 		return err
 	}
+
 	if req.URL != origURL {
 		request.URL = req.URL
 		request.Headers = &req.Header
 	}
+
 	atomic.AddUint32(&c.responseCount, 1)
 	response.Ctx = ctx
 	response.Request = request
-
 	err = response.fixCharset(c.DetectCharset, request.ResponseCharacterEncoding)
 	if err != nil {
 		return err
@@ -539,9 +545,18 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 
 	c.handleOnResponse(response)
 
+	// improve mime-type management
 	isTabularContent, format := isTabular(response.Headers.Get("Content-Type"), request.URL.String())
 
 	if c.AllowTabular && isTabularContent {
+		/*
+			Loading formats supported:
+			- JSON (Sets + Books)
+			- YAML (Sets + Books)
+			- XML (Sets)
+			- CSV (Sets)
+			- TSV (Sets)
+		*/
 		err = c.handleOnDATA(response)
 		if err != nil {
 			c.handleOnError(response, err, request, ctx)
@@ -551,7 +566,33 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 
 		switch format {
 		case "json":
+			/*
+				First characters:
+				- [
+				- {
+			*/
 			err = c.handleOnJSON(response)
+			if err != nil {
+				c.handleOnError(response, err, request, ctx)
+			}
+
+		case "rss":
+			/*
+				First character:
+				- <
+				Supported feed types:
+				RSS 0.90
+				Netscape RSS 0.91
+				Userland RSS 0.91
+				RSS 0.92
+				RSS 0.93
+				RSS 0.94
+				RSS 1.0
+				RSS 2.0
+				Atom 0.3
+				Atom 1.0
+			*/
+			err = c.handleOnRSS(response)
 			if err != nil {
 				c.handleOnError(response, err, request, ctx)
 			}
@@ -1415,6 +1456,57 @@ func (c *Collector) handleOnHTML(resp *Response) error {
 			}
 		})
 	}
+	return nil
+}
+
+func (c *Collector) handleOnRSS(resp *Response) error {
+	if len(c.rssCallbacks) == 0 {
+		return nil
+	}
+
+	contentType := strings.ToLower(resp.Headers.Get("Content-Type"))
+	if !strings.Contains(contentType, "rss+xml") {
+		return nil
+	}
+
+	fp := gofeed.NewParser()
+	doc, err := fp.Parse(bytes.NewBuffer(resp.Body))
+	if err != nil {
+		return err
+	}
+
+	/*
+		*(v) = map[string]interface{}{
+			"items":       feed.Items,
+			"author":      feed.Author,
+			"categories":  feed.Categories,
+			"custom":      feed.Custom,
+			"copyright":   feed.Copyright,
+			"description": feed.Description,
+			"type":        feed.FeedType,
+			"language":    feed.Language,
+			"title":       feed.Title,
+			"published":   feed.Published,
+			"updated":     feed.Updated,
+		}
+		if feed.Image != nil {
+			(*v)["img_url"] = feed.Image.URL
+		}
+	*/
+
+	for _, cc := range c.rssCallbacks {
+		rssquery.FindEach(doc, cc.Query, func(i int, n *xmlquery.Node) {
+			e := NewRSSLElementFromRSSNode(resp, n)
+			if c.debugger != nil {
+				c.debugger.Event(createEvent("rss", resp.Request.ID, c.ID, map[string]string{
+					"attrs": cc.Attr,
+					"url":   resp.Request.URL.String(),
+				}))
+			}
+			cc.Function(e)
+		})
+	}
+
 	return nil
 }
 

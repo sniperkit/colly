@@ -20,3 +20,6 @@ type ErrorCallback func(*Response, error)
 
 // ScrapedCallback is a type alias for OnScraped callback functions
 type ScrapedCallback func(*Response)
+
+// HookCallback is a type alias for OnHook callback functions
+type HookCallback func(*Collector)

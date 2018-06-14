@@ -1,16 +1,3 @@
-// Copyright 2018 Adam Tauber
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 package colly
 
 import (
@@ -23,28 +10,60 @@ import (
 	jsonquery "github.com/sniperkit/colly/plugins/data/extract/query/json"
 )
 
+// JsonParser defines
 type JsonParser string
 
 const (
-	MXJ        JsonParser = "mxj"        // https://github.com/clbanning/mxj
-	GABS       JsonParser = "gabs"       // https://github.com/Jeffail/gabs
-	GJSON      JsonParser = "gjson"      // https://github.com/tidwall/gjson
-	LAZYJSON   JsonParser = "lazyjson"   // https://github.com/qw4990/lazyjson
-	FASTJSON   JsonParser = "fastjson"   // https://github.com/valyala/fastjson
-	FFJSON     JsonParser = "ffjson"     // https://github.com/pquerna/ffjson
-	EASYJSON   JsonParser = "easyjson"   // https://github.com/mailru/easyjson
+
+	// MXJ is the key for...
+	MXJ JsonParser = "mxj" // https://github.com/clbanning/mxj
+
+	// GABS is the key for...
+	GABS JsonParser = "gabs" // https://github.com/Jeffail/gabs
+
+	// GJSON is the key for...
+	GJSON JsonParser = "gjson" // https://github.com/tidwall/gjson
+
+	// LAZYJSON is the key for...
+	LAZYJSON JsonParser = "lazyjson" // https://github.com/qw4990/lazyjson
+
+	// FASTJSON is the key for...
+	FASTJSON JsonParser = "fastjson" // https://github.com/valyala/fastjson
+
+	// FFJSON is the key for...
+	FFJSON JsonParser = "ffjson" // https://github.com/pquerna/ffjson
+
+	// EASYJSON is the key for...
+	EASYJSON JsonParser = "easyjson" // https://github.com/mailru/easyjson
+
+	// JSONPARSER is the key for...
 	JSONPARSER JsonParser = "jsonparser" // https://github.com/buger/jsonparser
-	DJSON      JsonParser = "djson"      // https://github.com/a8m/djson
-	JSNM       JsonParser = "jsnm"       // https://github.com/toukii/jsnm
+
+	// DJSON is the key for...
+	DJSON JsonParser = "djson" // https://github.com/a8m/djson
+
+	// JSNM is the key for...
+	JSNM JsonParser = "jsnm" // https://github.com/toukii/jsnm
+
+	// JSONSTREAM is the key for...
 	JSONSTREAM JsonParser = "jsonstream" // https://github.com/pb-/jsonstream
-	JSONEZ     JsonParser = "jsonez"     // https://github.com/srikanth2212/jsonez
-	JSON       JsonParser = "json"       // encoding/json
+
+	// JSONEZ is the key for...
+	JSONEZ JsonParser = "jsonez" // https://github.com/srikanth2212/jsonez
+
+	// JSON is the key for...
+	JSON JsonParser = "json" // encoding/json
+
+	//-- End
 )
 
 // JSONElement is the representation of a JSON tag.
 type JSONElement struct {
 
-	////// exported //////////////////////////////////////////////////
+	////
+	////// exported /////////////////////////////////////////////
+	////
+
 	// Name is the name of the tag
 	Name string
 	// Text is the content node
@@ -64,9 +83,27 @@ type JSONElement struct {
 	// based on how the JSONElement was created.
 	DOM interface{}
 
+	////
 	////// not exported /////////////////////////////////////////////
+	////
+
 	// jsonql_v1 --> github.com/elgs/jsonql
 	jsonql_v1 *jsonql_v1.JSONQL
+
+	//-- End
+}
+
+// JSONCallback is a type alias for OnJSON callback functions
+type JSONCallback func(*JSONElement)
+
+// jsonCallbackContainer
+type jsonCallbackContainer struct {
+
+	// Query specifies
+	Query string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+
+	// Function specifies
+	Function JSONCallback `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	//-- End
 }

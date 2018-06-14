@@ -1,14 +1,18 @@
-package linkheader_test
+package colly
 
 import (
-	"fmt"
-
-	"github.com/sniperkit/colly/plugins/data/extract/header/link"
+	linkheader "github.com/sniperkit/colly/plugins/data/extract/header/link"
 )
 
-func ExampleParse() {
-	header := "<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"," +
-		"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\""
+// eg. `<https://api.github.com/user/58276/repos?page=2>; rel="next", <https://api.github.com/user/58276/repos?page=2>; rel="last"`
+
+func (c *Collector) linkHeaders(input interface{}) []string {
+	return nil
+}
+
+func (c *Collector) linkHeaderFromString(header string) (output []string){
+	// header := "<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"," +
+	// 	"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\""
 	links := linkheader.Parse(header)
 
 	for _, link := range links {
@@ -20,7 +24,7 @@ func ExampleParse() {
 	// URL: https://api.github.com/user/58276/repos?page=2; Rel: last
 }
 
-func ExampleParseMultiple() {
+func (c *Collector) linkHeaderFromSlice() {
 	headers := []string{
 		"<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"",
 		"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\"",
@@ -36,6 +40,7 @@ func ExampleParseMultiple() {
 	// URL: https://api.github.com/user/58276/repos?page=2; Rel: last
 }
 
+func (c *Collector) linkHeaderFilterByRel() {
 func ExampleLinks_FilterByRel() {
 	header := "<https://api.github.com/user/58276/repos?page=2>; rel=\"next\"," +
 		"<https://api.github.com/user/58276/repos?page=2>; rel=\"last\""

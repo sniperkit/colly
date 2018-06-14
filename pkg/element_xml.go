@@ -28,7 +28,10 @@ import (
 // XMLElement is the representation of a XML tag.
 type XMLElement struct {
 
-	////// exported //////////////////////////////////////////////////
+	////
+	////// exported /////////////////////////////////////////////
+	////
+
 	// Name is the name of the tag
 	Name string
 
@@ -49,13 +52,30 @@ type XMLElement struct {
 	// based on how the XMLElement was created.
 	DOM interface{}
 
+	////
 	////// not exported /////////////////////////////////////////////
+	////
+
 	// attributes
 	attributes interface{}
 	// isHTML specifies...
 	isHTML bool
 
 	//--- End
+}
+
+// XMLCallback is a type alias for OnXML callback functions
+type XMLCallback func(*XMLElement)
+
+// xmlCallbackContainer specifies...
+type xmlCallbackContainer struct {
+	// Query specifies...
+	Query string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+
+	// Function specifies...
+	Function XMLCallback `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+
+	//-- End
 }
 
 // NewXMLElementFromHTMLNode creates a XMLElement from a html.Node.

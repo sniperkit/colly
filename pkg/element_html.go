@@ -20,10 +20,16 @@ import (
 	"golang.org/x/net/html"
 )
 
+// HTML is the key for the html encoding
+const HTML = "html"
+
 // HTMLElement is the representation of a HTML tag.
 type HTMLElement struct {
 
-	////// exported //////////////////////////////////////////////////
+	////
+	////// exported /////////////////////////////////////////////
+	////
+
 	// Name is the name of the tag
 	Name string
 	// Text is...
@@ -34,15 +40,35 @@ type HTMLElement struct {
 
 	// Request is the request object of the element's HTML document
 	Request *Request
+
 	// Response is the Response object of the element's HTML document
 	Response *Response
+
 	// DOM is the goquery parsed DOM object of the page. DOM is relative
 	// to the current HTMLElement
 	DOM *goquery.Selection
 
+	////
 	////// not exported /////////////////////////////////////////////
+	////
+
 	// attributes is a list of html attrs
 	attributes []html.Attribute
+}
+
+// HTMLCallback is a type alias for OnHTML callback functions
+type HTMLCallback func(*HTMLElement)
+
+// htmlCallbackContainer
+type htmlCallbackContainer struct {
+
+	// Selector specifies...
+	Selector string `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+
+	// Function specifies...
+	Function HTMLCallback `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+
+	//-- End
 }
 
 // NewHTMLElementFromSelectionNode creates a HTMLElement from a goquery.Selection Node.
@@ -80,14 +106,12 @@ func (h *HTMLElement) Attr(k string) string {
 
 // HTML: Attr, ChildText, ChildAttr, ChildAttrs, ForEach
 
-// ChildText returns the concatenated and stripped text content of the matching
-// elements.
+// ChildText returns the concatenated and stripped text content of the matching elements.
 func (h *HTMLElement) ChildText(goquerySelector string) string {
 	return strings.TrimSpace(h.DOM.Find(goquerySelector).Text())
 }
 
-// ChildAttr returns the stripped text content of the first matching
-// element's attribute.
+// ChildAttr returns the stripped text content of the first matching element's attribute.
 func (h *HTMLElement) ChildAttr(goquerySelector, attrName string) string {
 	if attr, ok := h.DOM.Find(goquerySelector).Attr(attrName); ok {
 		return strings.TrimSpace(attr)
@@ -95,8 +119,7 @@ func (h *HTMLElement) ChildAttr(goquerySelector, attrName string) string {
 	return ""
 }
 
-// ChildAttrs returns the stripped text content of all the matching
-// element's attributes.
+// ChildAttrs returns the stripped text content of all the matching element's attributes.
 func (h *HTMLElement) ChildAttrs(goquerySelector, attrName string) []string {
 	var res []string
 	h.DOM.Find(goquerySelector).Each(func(_ int, s *goquery.Selection) {
@@ -107,8 +130,7 @@ func (h *HTMLElement) ChildAttrs(goquerySelector, attrName string) []string {
 	return res
 }
 
-// ForEach iterates over the elements matched by the first argument
-// and calls the callback function on every HTMLElement match.
+// ForEach iterates over the elements matched by the first argument and calls the callback function on every HTMLElement match.
 func (h *HTMLElement) ForEach(goquerySelector string, callback func(int, *HTMLElement)) {
 	i := 0
 	h.DOM.Find(goquerySelector).Each(func(_ int, s *goquery.Selection) {

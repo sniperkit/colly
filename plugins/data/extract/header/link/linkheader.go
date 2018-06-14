@@ -7,6 +7,24 @@ import (
 	"strings"
 )
 
+// LINK_INDEX defines...
+type LINK_INDEX string
+
+const (
+
+	// LINK_NEXT is the key for the next page
+	LINK_NEXT LINK_INDEX = "next"
+
+	// LINK_PREV is the key for the previous page
+	LINK_PREV LINK_INDEX = "prev"
+
+	// LINK_PREV is the key for the last page
+	LINK_LAST LINK_INDEX = "last"
+
+	//-- End
+)
+
+// linkRex sets...
 var linkRex = regexp.MustCompile(`^.*<([^>]+)>; rel="next".*`)
 
 // A Link is a single URL and related parameters
@@ -62,9 +80,8 @@ func (l Links) FilterByRel(r string) Links {
 	return links
 }
 
-// String returns the string representation of multiple Links
-// for use in HTTP responses etc
-func (l Links) String() string {
+// ToString returns the string representation of multiple Links for use in HTTP responses etc
+func (l Links) ToString() string {
 	if l == nil {
 		return fmt.Sprint(nil)
 	}
@@ -74,6 +91,39 @@ func (l Links) String() string {
 		strs = append(strs, link.String())
 	}
 	return strings.Join(strs, ", ")
+}
+
+func (l links) getLink(key string) string {
+	for _, link := range l {
+		key := strings.ToLower(link.Rel)
+		switch key {
+		case "last":
+			return link.String()
+		case "next":
+			return link.String()
+		}
+	}
+	return ""
+}
+
+// String returns the string representation of the next link
+func (l Links) Last() string {
+	return getLink("last")
+}
+
+// String returns the string representation of the next link
+func (l Links) Next() string {
+	return getLink("next")
+}
+
+// ToMap returns the map[string]string representation of multiple links
+func (l Links) ToMap() map[string]string {
+	output := make(map[string]interface{}, len(l))
+	for _, link := range l {
+		key := link.Rel
+		output[key] = link.String()
+	}
+	return output
 }
 
 // Parse parses a raw Link header in the form:
