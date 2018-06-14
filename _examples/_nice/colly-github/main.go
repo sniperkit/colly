@@ -400,20 +400,22 @@ func main() {
 	// SetHooks
 	c.SetHooks(tabHooks)
 
-	// pluckers defines
-	pluckers := []*colly.Pluck{
-		{
-			Activators:  []string{"a", "b"},
-			Deactivator: "f",
-		},
-		{
-			Activators:  []string{"a", "c", "d"},
-			Deactivator: "z",
-		},
-	}
+	/*
+		// pluckers defines
+		pluckers := []*colly.Pluck{
+			{
+				Activators:  []string{"a", "b"},
+				Deactivator: "f",
+			},
+			{
+				Activators:  []string{"a", "c", "d"},
+				Deactivator: "z",
+			},
+		}
 
-	// SetPlucks
-	c.SetPluckers(pluckers)
+		// SetPlucks
+		c.SetPluckers(pluckers)
+	*/
 
 	// SetExtractors (not implemented yet...)
 	// c.SetExtractors(extractors)

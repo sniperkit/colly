@@ -262,8 +262,8 @@ type Collector struct {
 	cdir          string                           `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 	errs          []string                         `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
-	// content extractors (not really happy with the naming)
-	pluckers []*Pluck `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
+	// content processors (not really happy with the naming)
+	// processors map[string]*Processor `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
 
 	// content callbacks
 	htmlCallbacks []*htmlCallbackContainer `json:"-" yaml:"-" toml:"-" xml:"-" ini:"-" csv:"-"`
@@ -761,13 +761,6 @@ func (c *Collector) OnTAB(query string, f TABCallback) {
 func (c *Collector) SetHooks(hooks *TABHooks) { // stores TABHooks in map[string]*TABHook
 	c.lock.Lock()
 	c.Hooks = hooks
-	c.lock.Unlock()
-}
-
-// Plucks are a set of list of text pluckers parsing the http response (body/headers)
-func (c *Collector) SetPluckers(pluckers []*Pluck) {
-	c.lock.Lock()
-	c.pluckers = pluckers
 	c.lock.Unlock()
 }
 
