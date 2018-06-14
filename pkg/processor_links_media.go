@@ -34,12 +34,12 @@ const (
 	initZingMp3     string = "zing"
 )
 
-type ContentTypeMediaProvider struct {
+type ProcessorLinkMedia struct {
 	resp *Response
 	err  error
 }
 
-func (c *ContentTypeMediaProvider) Check(resp *Response) error { return ErrNotImplementedYet }
+func (c *ProcessorLinkMedia) Check(resp *Response) error { return ErrNotImplementedYet }
 
 func getGlod(link string) glod.Source {
 	switch {

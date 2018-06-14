@@ -4,6 +4,9 @@ import (
 	tabular "github.com/sniperkit/colly/plugins/data/transform/tabular"
 )
 
+//go:generate go-enum -f=element_tab.go --marshal --lower
+// FORMAT_TAB x ENUM(JSON,YAML,XML,CSV,TSV,XLSX,ASCII,MARKDOWN,MYSQL,POSTGRES)
+
 // FORMAT_TAB defines
 type FORMAT_TAB string
 

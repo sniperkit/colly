@@ -129,64 +129,79 @@ clear: ## clear terminal screen
 	@clear
 
 build: ## build the executable for the current workstation
-	${GO_EXECUTABLE} build -o bin/$(APP_DIRNAME) -ldflags "-X main.version=${VERSION}" main.go
+	@${GO_EXECUTABLE} build -o bin/$(APP_DIRNAME) -ldflags "-X main.version=${VERSION}" main.go
 
 install-local: ## local install the executable in /usr/local/bin
-	${GO_EXECUTABLE} install -ldflags "-X main.version=${VERSION}" main.go
+	@${GO_EXECUTABLE} install -ldflags "-X main.version=${VERSION}" main.go
 
 install: build ## install the executable in /usr/local/bin and ./bin directories
-	install -d ${DESTDIR}$(INSTALL_DIR)
-	install -m 755 ./bin/$(APP_DIRNAME) ${DESTDIR}$(INSTALL_DIR)$(APP_DIRNAME)
+	@install -d ${DESTDIR}$(INSTALL_DIR)
+	@install -m 755 ./bin/$(APP_DIRNAME) ${DESTDIR}$(INSTALL_DIR)$(APP_DIRNAME)
+
+generate:
+	@go generate ./...
 
 test: ## start tests available for this program
-	${GO_EXECUTABLE} test . ./gb ./path ./action ./tree ./util ./godep ./godep/strip ./gpm ./cfg ./dependency ./importer ./msg ./repo ./mirrors
+	@${GO_EXECUTABLE} test . ./gb ./path ./action ./tree ./util ./godep ./godep/strip ./gpm ./cfg ./dependency ./importer ./msg ./repo ./mirrors
 
 integration-test: ## start integration test
-	${GO_EXECUTABLE} build
+	@${GO_EXECUTABLE} build
 
 fmt: ## format code in source code files recursively.
-	gofmt -s -l -w $(APP_SRCS)
+	@gofmt -s -l -w $(APP_SRCS)
 
 dep-ensure: ## ensure/install program dependencies
-	dep ensure -v
+	@dep ensure -v
+
+deps: deps-ci deps-gen
+	@glide install --strip-vendor
+
+deps-gen:
+	@go get -v -u github.com/abice/go-enum
+
+deps-ci:
+	@go get -v -u github.com/go-playground/overalls
+	@go get -v -u github.com/mattn/goveralls
+	@go get -v -u golang.org/x/tools/cmd/cover
+
 
 clean: ## clean all build files
-	rm -rf ./dist
-	rm -rf ./bin
+	@rm -rf ./dist
+	@rm -rf ./bin
 
 bootstrap-dist:
 	${GO_EXECUTABLE} get -u github.com/Masterminds/gox
 
 build-darwin: bootstrap-dist ## cross-compile the program for apple/darwin based operating systems.
-	$(GOX_EXECUTABLE) -verbose \
+	@$(GOX_EXECUTABLE) -verbose \
 	-ldflags "-X main.version=${VERSION}" \
 	-os="darwin" \
 	-arch="amd64 386" \
 	-output="$(DIST_DIR)/{{.OS}}-{{.Arch}}/{{.Dir}}" .
 
 build-linux: bootstrap-dist ## cross-compile the program for linux based operating systems.
-	$(GOX_EXECUTABLE) -verbose \
+	@$(GOX_EXECUTABLE) -verbose \
 	-ldflags "-X main.version=${VERSION}" \
 	-os="linux" \
 	-arch="amd64 386" \
 	-output="$(DIST_DIR)/{{.OS}}-{{.Arch}}/{{.Dir}}" .
 
 build-win: bootstrap-dist ## cross-compile the program for windows based operating systems.
-	$(GOX_EXECUTABLE) -verbose \
+	@$(GOX_EXECUTABLE) -verbose \
 	-ldflags "-X main.version=${VERSION}" \
 	-os="windows" \
 	-arch="amd64 386" \
 	-output="$(DIST_DIR)/{{.OS}}-{{.Arch}}/{{.Dir}}" .
 
 build-all: bootstrap-dist ## cross-compile the program for linux, darwin, windows, freebsd, openbsd, netbsd operating systems.
-	$(GOX_EXECUTABLE) -verbose \
+	@$(GOX_EXECUTABLE) -verbose \
 	-ldflags "-X main.version=${VERSION}" \
 	-os="linux darwin windows freebsd openbsd netbsd" \
 	-arch="amd64 386 armv5 armv6 armv7 arm64 s390x" \
 	-output="$(DIST_DIR)/{{.OS}}-{{.Arch}}/{{.Dir}}" .
 
 dist: build-all ## build all dist version of the program and archive it
-	cd dist && \
+	@cd dist && \
 	$(DIST_DIRS) cp ../LICENSE {} \; && \
 	$(DIST_DIRS) cp ../README.md {} \; && \
 	$(DIST_DIRS) tar -zcf $(APP_NAME)-${VERSION}-{}.tar.gz {} \; && \
