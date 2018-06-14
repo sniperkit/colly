@@ -20,9 +20,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// HTML is the key for the html encoding
-const HTML = "html"
-
 // HTMLElement is the representation of a HTML tag.
 type HTMLElement struct {
 

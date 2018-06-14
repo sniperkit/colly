@@ -52,7 +52,7 @@ const (
 	JSONEZ JsonParser = "jsonez" // https://github.com/srikanth2212/jsonez
 
 	// JSON is the key for...
-	JSON JsonParser = "json" // encoding/json
+	JSON_DEFAULT JsonParser = "json" // encoding/json
 
 	//-- End
 )
