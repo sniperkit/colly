@@ -1,0 +1,10 @@
+.dockerignore
+.glide-ignore.yaml
+.glide-pinned.yaml
+_examples/_nice/
+_staging/
+dist/
+pkg/
+plugins/
+scripts/
+shared/
